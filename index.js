@@ -52,7 +52,7 @@ sendImageAsSticker2,
  downloadContentFromMessage,
  prepareWAMessageMedia,
  jidNormalizedUser
-} = require("./consts");
+} = require("./System-Kay-main/consts");
 
 module.exports = async function (conn, upsert) {
   try {
