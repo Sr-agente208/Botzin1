@@ -6,7 +6,7 @@ const {
     fetchLatestWaWebVersion,
     jidDecode,
     Browsers
-} = require("@systemzero/baileys");
+} = require("@whiskeysockets/baileys");
 const pino = require("pino");
 const { Boom } = require("@hapi/boom");
 const fs = require("fs-extra");

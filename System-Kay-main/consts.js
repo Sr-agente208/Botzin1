@@ -1,4 +1,4 @@
-const { downloadContentFromMessage, prepareWAMessageMedia, jidNormalizedUser } = require("@systemzero/baileys");
+const { downloadContentFromMessage, prepareWAMessageMedia, jidNormalizedUser } = require("@whiskeysockets/baileys");
 
 const fetch = require("node-fetch");
 const colors = require('colors');

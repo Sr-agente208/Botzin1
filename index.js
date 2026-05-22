@@ -1,4 +1,4 @@
-const baileys = require("@systemzero/baileys");
+const baileys = require("@whiskeysockets/baileys");
 const { NumberDono, prefix, NickDono, NomeBot, SHIZUKU_KEY, SHIZUKU_SITE, sysite, syskey } = require("./dono/dono");
 const ytSearch = require('yt-search');
 const chalk = require('chalk');
@@ -1189,7 +1189,7 @@ case '8d': {
 const fs = require('fs')
 const path = require('path')
 const { exec } = require('child_process')
-const { downloadContentFromMessage } = require('@systemzero/baileys')
+const { downloadContentFromMessage } = require('@whiskeysockets/baileys')
 
 try {
 
@@ -1441,7 +1441,7 @@ if (!results.length) {
 }
 
 // 📦 BAILEYS IMPORTS
-const { generateWAMessageFromContent, prepareWAMessageMedia } = require("@systemzero/baileys");
+const { generateWAMessageFromContent, prepareWAMessageMedia } = require("@whiskeysockets/baileys");
 
 const cards = [];
 
@@ -2972,7 +2972,7 @@ break
 
 case 'casev': {
 try {
-const { prepareWAMessageMedia, generateWAMessageFromContent } = require('@systemzero/baileys')
+const { prepareWAMessageMedia, generateWAMessageFromContent } = require('@whiskeysockets/baileys')
 const idLcn = `120363427096286754@newsletter`
 let texto = (body || '')
 .replace(new RegExp(`^\\${prefix}${command}\\s*`, 'i'), '')
