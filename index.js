@@ -1,5 +1,5 @@
 const baileys = require("@whiskeysockets/baileys");
-const { NumberDono, prefix, NickDono, NomeBot, SHIZUKU_KEY, SHIZUKU_SITE, sysite, syskey } = require("./dono/dono");
+const { NumberDono, prefix, NickDono, NomeBot, SHIZUKU_KEY, SHIZUKU_SITE, sysite, syskey } = require("./dono/dono.json");
 const ytSearch = require('yt-search');
 const chalk = require('chalk');
 const { version } = require("./package");
