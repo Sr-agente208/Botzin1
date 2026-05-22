@@ -1,3 +1,7 @@
+"engines": {
+  "node": "20.x"
+}
+
 {
   "name": "Kay system",
   "version": "1.0.0",
