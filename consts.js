@@ -1,18 +1,17 @@
 const { downloadContentFromMessage, prepareWAMessageMedia, jidNormalizedUser } = require("@whiskeysockets/baileys");
 
 const fetch = require("node-fetch");
-const colors = require('colors/index.js');
+const colors = require("colors");
 const moment = require("moment-timezone");
-const { Boom } = require('@hapi/boom');
-const fs = require('fs-extra');
-const axios = require('axios');
-const infoSystem = require('os');
-const os = require('os')
-const linkfy = require("linkifyjs")
-const util = require('util');
-const { exec, spawn, execSync } = require('child_process');
-const { ytSearch } = require("yt-search");
-const ms = require('ms')
+const { Boom } = require("@hapi/boom");
+const fs = require("fs-extra");
+const axios = require("axios");
+const os = require("os");
+const linkify = require("linkifyjs");
+const util = require("util");
+const { exec, spawn, execSync } = require("child_process");
+const ytSearch = require("yt-search");
+const ms = require("ms");
 
 
 const { banner2, banner3, getBuffer, fetchJson, getGroupAdmins, getMembros, jpzinhhomi, Shizukuu, ShizukuStile} = require("./DATABASE2/secreto/funcoes.js");
