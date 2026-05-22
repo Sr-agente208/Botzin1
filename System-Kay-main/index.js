@@ -1,4 +1,4 @@
-npconst baileys = require("@systemzero/baileys");
+const baileys = require("@systemzero/baileys");
 const { NumberDono, prefix, NickDono, NomeBot, SHIZUKU_KEY, SHIZUKU_SITE, sysite, syskey } = require("./dono/dono");
 const ytSearch = require('yt-search');
 const chalk = require('chalk');
