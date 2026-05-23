@@ -6,7 +6,7 @@ const {
     fetchLatestWaWebVersion,
     jidDecode,
     Browsers
-} = require("@whiskeysockets/baileys");
+} = require("@systemzero/baileys");
 const pino = require("pino");
 const { Boom } = require("@hapi/boom");
 const fs = require("fs-extra");
@@ -15,14 +15,55 @@ const figlet = require("figlet");
 const path = require("path");
 const readline = require("readline");
 
+// ─── RAILWAY: Restaurar sessão do env var ─────────────────────────────────────
+const SESSION_PATH = path.resolve(__dirname, "session");
+
+function restaurarSessao() {
+    const sessionData = process.env.SESSION_DATA;
+    if (!sessionData) return false;
+    try {
+        fs.ensureDirSync(SESSION_PATH);
+        const decoded = Buffer.from(sessionData, "base64").toString("utf-8");
+        const creds = JSON.parse(decoded);
+        const credsPath = path.join(SESSION_PATH, "creds.json");
+        if (!fs.existsSync(credsPath)) {
+            fs.writeFileSync(credsPath, JSON.stringify(creds, null, 2));
+            console.log(chalk.green("[RAILWAY] Sessao restaurada do SESSION_DATA!"));
+        }
+        return true;
+    } catch (e) {
+        console.log(chalk.yellow("[RAILWAY] Erro ao restaurar sessao: " + e.message));
+        return false;
+    }
+}
+
+function gerarSessionData() {
+    try {
+        const credsPath = path.join(SESSION_PATH, "creds.json");
+        if (!fs.existsSync(credsPath)) return;
+        const creds = fs.readFileSync(credsPath, "utf-8");
+        const encoded = Buffer.from(creds).toString("base64");
+        console.log(chalk.cyan("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+        console.log(chalk.cyan("  ATUALIZE A VAR SESSION_DATA NO RAILWAY COM:"));
+        console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+        console.log(chalk.white(encoded.substring(0, 80) + "..."));
+        console.log(chalk.cyan("  (valor completo salvo em session_data.txt)"));
+        console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
+        fs.writeFileSync(path.resolve(__dirname, "session_data.txt"), encoded);
+    } catch (e) {}
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
 const _NOISE = /Closing open session|closing session|closed session|SessionEntry|chainKey|registrationId|currentRatchet|ephemeralKeyPair|lastRemoteEphemeralKey|rootKey|indexInfo|baseKey|remoteIdentityKey|pendingPreKey|Bad MAC|Retry count|retrying/i;
 const _w = process.stdout.write.bind(process.stdout);
 const _e = process.stderr.write.bind(process.stderr);
 process.stdout.write = (c, enc, cb) => { if (_NOISE.test(c)) { if (typeof cb === 'function') cb(); return true; } return _w(c, enc, cb); };
 process.stderr.write = (c, enc, cb) => { if (_NOISE.test(c)) { if (typeof cb === 'function') cb(); return true; } return _e(c, enc, cb); };
+
 let isReconnecting = false;
 let currentSocket = null;
 let handler = null;
+
 function getHandler() {
     if (!handler) {
         handler = require("./index");
@@ -95,7 +136,11 @@ async function startSystemZR() {
     }
     isReconnecting = true;
 
-    const sessionPath = path.resolve(__dirname, "session");
+    // Restaurar sessão do Railway antes de tudo
+    restaurarSessao();
+
+    const sessionPath = SESSION_PATH;
+    fs.ensureDirSync(sessionPath);
 
     const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
 
@@ -103,7 +148,6 @@ async function startSystemZR() {
     state.keys.set = async (data) => {
         let totalKeys = 0;
         for (const cat in data) totalKeys += Object.keys(data[cat]).length;
-
         if (totalKeys > 10) {
             process.stdout.write(chalk.cyan(`\nSalvando chaves de sessao (${totalKeys} chaves)...\n`));
             let saved = 0;
@@ -213,16 +257,23 @@ async function startSystemZR() {
     setInterval(() => clearOldSessionFiles(sessionPath), 3600000);
 
     if (!systemZR.authState.creds.registered) {
-        console.log(chalk.yellow("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-        console.log(chalk.yellow("  CONEXAO VIA CODIGO DE PAREAMENTO"));
-        console.log(chalk.yellow("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-        console.log(chalk.white("Siga os passos abaixo para conectar o bot:\n"));
-        console.log(chalk.white("1. Abra o WhatsApp no seu celular"));
-        console.log(chalk.white("2. Va em: Aparelhos Conectados > Conectar com numero de telefone"));
-        console.log(chalk.white("3. Digite o codigo que sera gerado aqui\n"));
-        console.log(chalk.yellow("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
+        // Suporte Railway: usa PHONE_NUMBER do env se disponível
+        let phoneNumber = process.env.PHONE_NUMBER || "";
 
-        let phoneNumber = await question(chalk.cyan("Digite o numero do WhatsApp (ex: 5511999999999): "));
+        if (!phoneNumber) {
+            console.log(chalk.yellow("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+            console.log(chalk.yellow("  CONEXAO VIA CODIGO DE PAREAMENTO"));
+            console.log(chalk.yellow("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+            console.log(chalk.white("Siga os passos abaixo para conectar o bot:\n"));
+            console.log(chalk.white("1. Abra o WhatsApp no seu celular"));
+            console.log(chalk.white("2. Va em: Aparelhos Conectados > Conectar com numero de telefone"));
+            console.log(chalk.white("3. Digite o codigo que sera gerado aqui\n"));
+            console.log(chalk.yellow("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
+            phoneNumber = await question(chalk.cyan("Digite o numero do WhatsApp (ex: 5511999999999): "));
+        } else {
+            console.log(chalk.cyan(`[RAILWAY] Usando PHONE_NUMBER do env: +${phoneNumber}`));
+        }
+
         phoneNumber = phoneNumber.replace(/[^0-9]/g, "");
 
         if (!phoneNumber || phoneNumber.length < 10) {
@@ -231,7 +282,6 @@ async function startSystemZR() {
         }
 
         console.log(chalk.yellow(`\nGerando codigo de pareamento para: +${phoneNumber}...`));
-
         await new Promise(resolve => setTimeout(resolve, 3000));
 
         try {
@@ -265,9 +315,7 @@ async function startSystemZR() {
         if (connection === "close") {
             const statusCode = new Boom(lastDisconnect?.error)?.output.statusCode;
             const reason = lastDisconnect?.error?.message || statusCode || "Motivo desconhecido";
-
             console.log(chalk.red(`\nConexao fechada: ${reason}`));
-
             if (statusCode === DisconnectReason.loggedOut) {
                 console.log(chalk.red("Dispositivo desconectado. Delete a pasta 'session' e reinicie.\n"));
                 process.exit(1);
@@ -285,6 +333,8 @@ async function startSystemZR() {
         } else if (connection === "open") {
             console.log(chalk.green("\nSystem Zero & Kay System conectado com sucesso!\n"));
             isReconnecting = false;
+            // Gera SESSION_DATA atualizado quando conectar
+            gerarSessionData();
         }
     });
 

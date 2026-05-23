@@ -1,7 +1,7 @@
 const fs = require('fs')
 const { tmpdir } = require("os")
 const Crypto = require("crypto")
-const ff = require('fluent-ffmpeg')
+const ffmpegPath = require("ffmpeg-static");
 const webp = require("node-webpmux")
 const path = require("path")
 

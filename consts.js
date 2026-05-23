@@ -1,31 +1,32 @@
-const { downloadContentFromMessage, prepareWAMessageMedia, jidNormalizedUser } = require("@whiskeysockets/baileys");
+const { downloadContentFromMessage, prepareWAMessageMedia, jidNormalizedUser } = require("@systemzero/baileys");
 
 const fetch = require("node-fetch");
-const colors = require("colors");
+const colors = require('colors');
 const moment = require("moment-timezone");
-const { Boom } = require("@hapi/boom");
-const fs = require("fs-extra");
-const axios = require("axios");
-const os = require("os");
-const linkify = require("linkifyjs");
-const util = require("util");
-const { exec, spawn, execSync } = require("child_process");
-const ytSearch = require("yt-search");
-const ms = require("ms");
+const { Boom } = require('@hapi/boom');
+const fs = require('fs-extra');
+const axios = require('axios');
+const infoSystem = require('os');
+const os = require('os')
+const linkfy = require("linkifyjs")
+const util = require('util');
+const { exec, spawn, execSync } = require('child_process');
+const { ytSearch } = require("yt-search");
+const ms = require('ms')
 
 
 const { banner2, banner3, getBuffer, fetchJson, getGroupAdmins, getMembros, jpzinhhomi, Shizukuu, ShizukuStile} = require("./DATABASE2/secreto/funcoes.js");
-const { msg, Cmd} = require("./dono/mensagens/mensagens.js");
+const { msg, Cmd} = require("./dono/mensagens/mensagens");
 const hora = moment.tz('America/Sao_Paulo').format('HH:mm:ss');
 const data = moment.tz('America/Sao_Paulo').format('DD/MM/YYYY');
 
 const { sendVideoAsSticker2, sendImageAsSticker2 } = require('./DATABASE2/sticker/rename.js');
 
-const { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS } = require("./DATABASE2/SCRAPERS/scrapers.js");
+const { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS } = require("./DATABASE2/SCRAPERS/scrapers");
 //EXPORTAÇÃO 
-const { menu } = require("./dono/menus/menu.js")
-const { menus } = require("./dono/menus/Shizuku.js")
-const { dono1, dono2, dono3, dono4, dono5, dono6 } = require("./dono/dados-donos.js");
+const { menu } = require("./dono/menus/menu")
+const { menus } = require("./dono/menus/Shizuku")
+const { dono1, dono2, dono3, dono4, dono5, dono6 } = require("./dono/dados-donos");
 const Config2 = JSON.parse(fs.readFileSync("./dono/dados-donos.json"));
 const Config = JSON.parse(fs.readFileSync("./dono/dono.json"));
 const FotoMenu = fs.readFileSync("./dono/menus/Foto-menu/img-menu.jpg");
