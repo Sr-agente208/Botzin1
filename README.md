@@ -1,99 +1,141 @@
 <div align="center">
-<img src="https://readme-typing-svg.herokuapp.com/?font=mono&size=30&duration=4000&color=00008b&center=true&vCenter=true&lines=🜛+SYSTEM-KAY+V1.0.0+🜛;۞+CRIADO+POR+JOSU%C3%89+%3C%2F%3E+%26+LOPES+%26+DARK+۞">      
+
+<img src="./img-menu2.png" width="250px" alt="Black Lotus Bot"/>
+
+# 🪷 BLACK LOTUS BOT 🪷
+### *O bot que floresceu nas sombras*
+
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/5511986059638)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Sr-agente208/Botzin1)
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
+
 </div>
-
-<h1 align="center">
-<p>
-<img src="dono/menus/Foto-menu/img-menu.jpg" alt="SYSTEM-KAY" width="1080">
-</p>
-</h1>
-
-<p align="center">
-<a href="#"><img title="BOT-MULTI-DEVICE" src="https://img.shields.io/badge/BOT•MULTI•DEVICE-blue?&style=for-the-badge"></a>
-</p>
-
-<p align="center">
-<img title="Autor" src="https://img.shields.io/badge/Autor-Josu%C3%A9_%3C%2F%3E-orange.svg?style=for-the-badge&logo=github"></a>
-<img title="Versão" src="https://img.shields.io/badge/Versão-1.0.0-orange.svg?style=for-the-badge&logo=github"></a>
-</p>
 
 ---
 
-## 🚀 INSTALAÇÃO E START (RÁPIDO)
+## 🌑 Sobre o Black Lotus
 
-Siga os passos abaixo para instalar e ligar o bot no Termux:
+> *"Como a lótus negra que emerge das águas escuras, este bot nasceu para dominar grupos com poder, elegância e precisão."*
 
-### 1. Instalar Pacotes Necessários
-```bash
-apt-get update -y && pkg upgrade -y && pkg update -y && pkg install nodejs -y && pkg install nodejs-lts -y && pkg install ffmpeg -y && pkg install wget -y && pkg install tesseract -y && pkg install git -y
+O **Black Lotus Bot** é um bot de WhatsApp completo, desenvolvido com a biblioteca **Baileys**, repleto de comandos exclusivos para gerenciamento de grupos, diversão e utilidades. Rápido, otimizado e sempre online.
 
-```
-*Atenção: Digite y sempre que for solicitado.*
-### 2. Configurar Armazenamento
-```bash
-termux-setup-storage
+---
+
+## ✨ Recursos Principais
 
 ```
-### 3. Baixar o Bot (Clone)
-```bash
-cd /sdcard/Download && git clone [https://github.com/Blackhzx/system-kay.git](https://github.com/Blackhzx/system-kay.git) && cd system-kay
-
+🛡️  Proteção total de grupos    →  antilink, antiimg, antivideo e mais
+👋  Boas-vindas automáticas     →  mensagens e fotos personalizadas  
+🎮  Modo brincadeira            →  abraço, shippo, bruxo e outros
+🎵  Música do YouTube           →  baixe áudios direto no grupo
+🖼️  Criador de figurinhas       →  converta imagens e vídeos
+📅  Utilitários                 →  clima, calculadora, calendário
+⚙️  Administração               →  ban, promote, marcar, limpar
+🔐  Sistema de senha            →  proteção contra uso indevido
 ```
-### 4. Instalar Dependências
-```bash
-npm install --force --no-bin-links
 
-```
-### 5. Ligar o Bot
-```bash
-npm start
+---
 
+## 🚀 Como Usar
+
+### Pré-requisitos
+- Node.js 18+
+- Git
+
+### Instalação
+
+```bash
+# Clone o repositório
+git clone https://github.com/Sr-agente208/Botzin1.git
+
+# Entre na pasta
+cd Botzin1
+
+# Instale as dependências
+npm install
+
+# Inicie o bot
+node index.js
 ```
-# 📖 INFORMAÇÕES DETALHADAS
-Abaixo você encontra tudo sobre como o bot funciona, como configurar e personalizar.
-## 1. Visão Geral do Bot
-O **System-Kay** é um bot para WhatsApp desenvolvido em Node.js. Ele oferece diversas funcionalidades de entretenimento, utilitários, moderação e automação para os seus grupos.
-## 2. Configuração e Personalização
-Para mudar o nome do bot, o prefixo ou o dono, edite o arquivo de configuração principal (geralmente config.json ou o seu arquivo central):
+
+### Vinculação
+Ao iniciar pela primeira vez, digite seu número com DDI e aguarde o **código de vinculação** aparecer no terminal. Insira o código no WhatsApp em:
+
+> **WhatsApp → Aparelhos conectados → Conectar aparelho → Código de 8 dígitos**
+
+---
+
+## 📋 Comandos
+
+| Categoria | Comando | Descrição |
+|-----------|---------|-----------|
+| 📋 Geral | `™menu` | Abre o menu principal |
+| 📋 Geral | `™ping` | Verifica velocidade do bot |
+| 📋 Geral | `™s` | Cria figurinha |
+| 🛡️ Grupo | `™antilink 1` | Ativa anti-link |
+| 🛡️ Grupo | `™ban @user` | Remove membro |
+| 🛡️ Grupo | `™marcar` | Marca todos |
+| 🛡️ Grupo | `™limpar` | Limpa o chat |
+| 🎮 Fun | `™abraço @` | Dá um abraço |
+| 🎮 Fun | `™bruxo @` | Lança maldição |
+| 🎮 Fun | `™shippo @` | Mede compatibilidade |
+| 🎵 Música | `™play nome` | Baixa música |
+
+> Use `™menu` no grupo para ver todos os comandos disponíveis.
+
+---
+
+## ⚙️ Configuração
+
+Edite o arquivo `./arquivo/settings/setting.json`:
+
 ```json
 {
-    "NumberDono": "558892659041",
-    "prefix": "™",
-    "NickDono": "Lopes' 🇪🇸",
-    "NomeBot": "Kay system",
-    "SHIZUKU_SITE": "https://shizuku-apis.shop",
-    "SHIZUKU_KEY": "key-free",
-    "sysite": "https://systemzone.store",
-    "syskey": "freekey"
+  "nomeBot": "Black Lotus",
+  "NickDono": "Sr.Agente208",
+  "numero": "5511986059638",
+  "prefix": "™",
+  "jpgBot": "URL_DA_SUA_IMAGEM"
 }
 ```
- * **prefix**: O símbolo para usar comandos (ex: #).
- * **NomeDoBot**: O nome que o bot terá nas respostas.
- * **NickDono**: Seu nome de autor.
- * **numerodono**: **Seu número de WhatsApp** (DDI+DDD+Número) para ter acesso aos comandos de dono.
-## 3. Como Dar Dono ao Bot
-Basta colocar o seu número no campo numerodono dentro das configurações. Assim, você poderá usar os comandos restritos de administrador.
-## 4. Conexão e QR Code
-Ao ligar o bot pela primeira vez:
- 1. Digite seu número no terminal quando solicitado (ex: 5511999999999).
- 2. O bot vai gerar um **Código de 8 dígitos**.
- 3. No seu WhatsApp, vá em Aparelhos Conectados > Conectar com número de telefone e digite o código que apareceu no terminal.
-## 5. Menus de Comandos
- * **#menu**: Menu principal com todas as categorias.
- * **#menuadm**: Comandos para administradores de grupo.
- * **#menudono**: Comandos exclusivos para **Dono**
-## 📢 Aviso
-Este projeto é destinado para fins de estudo, automação e uso pessoal. Use com responsabilidade e respeite as regras do WhatsApp e dos grupos onde o bot for utilizado.
+
+---
+
+## 🌐 Deploy no Railway
+
+1. Faça fork/clone deste repositório
+2. Gere a sessão **localmente** com `node index.js`
+3. Faça commit da pasta `conexão` gerada
+4. Conecte o repositório ao Railway
+5. O bot vai subir automaticamente
+
+---
+
+## 📞 Contato & Suporte
+
 <div align="center">
-<img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&weight=700&size=28&duration=3500&pause=700&color=0066FF&center=true&vCenter=true&width=850&lines=%E2%95%B0%E2%80%A2%E2%98%85+SYSTEM-KAY+V1.0.0+%E2%98%85%E2%80%A2%E2%95%AF;%F0%9F%9A%80+Obrigado+por+usar+o+projeto;%F0%9F%91%91+Criado+por+Josu%C3%A9+%3C%2F%3E" alt="Footer Typing SVG" />
-<br>
-    
-### 👑 Autor
 
-**@Josué </>**
+**Desenvolvido por Sr.Agente208**
 
-<br>
-<img src="https://img.shields.io/badge/Status-Online-00C853?style=for-the-badge&logo=whatsapp&logoColor=white" />
-<img src="https://img.shields.io/badge/Feito%20com-Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white" />
-<img src="https://img.shields.io/badge/Projeto-System--Kay-0066FF?style=for-the-badge&logo=github&logoColor=white" />
+[![WhatsApp](https://img.shields.io/badge/Suporte-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/5511986059638)
+
+*Entre em contato para suporte, sugestões ou aluguel do bot.*
+
+</div>
+
+---
+
+## ⚠️ Avisos
+
+- Este bot é para uso **educacional e pessoal**
+- Não nos responsabilizamos pelo uso indevido
+- Respeite os **Termos de Serviço** do WhatsApp
+- Não use para spam ou atividades ilegais
+
+---
+
+<div align="center">
+
+🪷 **BLACK LOTUS BOT** — *Poder nas sombras, elegância na luz* 🪷
+
 </div>
