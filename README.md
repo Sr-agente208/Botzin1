@@ -1,141 +1,213 @@
 <div align="center">
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=BLACK%20LOTUS&fontSize=70&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=◆%20BOT%20◆&descAlignY=60&descSize=25" width="100%"/>
+</div>
 
-<img src="./img-menu2.png" width="250px" alt="Black Lotus Bot"/>
+<div align="center">
+  <img src="./img-menu2.png" width="220px" style="border-radius:50%;border:3px solid #6b21a8;" alt="Black Lotus Bot"/>
+  
+  <br/>
 
-# 🪷 BLACK LOTUS BOT 🪷
-### *O bot que floresceu nas sombras*
+  ![Typing SVG](https://readme-typing-svg.demolab.com?font=Cinzel+Decorative&size=22&duration=3000&pause=1000&color=9333EA&center=true&vCenter=true&width=600&lines=🪷+Bem-vindo+ao+Black+Lotus+Bot;⚡+Poder+nas+Sombras%2C+Elegância+na+Luz;🌑+O+Bot+que+Floresceu+nas+Trevas)
 
-[![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/5511986059638)
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Sr-agente208/Botzin1)
-[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
+  <br/>
+
+  [![WhatsApp](https://img.shields.io/badge/📞_Suporte-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/5511986059638)
+  [![GitHub](https://img.shields.io/badge/GitHub-0d1117?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Sr-agente208/Botzin1)
+  [![Node.js](https://img.shields.io/badge/Node.js_18+-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
+  [![Baileys](https://img.shields.io/badge/Baileys-6b21a8?style=for-the-badge&logo=whatsapp&logoColor=white)](https://github.com/WhiskeySockets/Baileys)
+
+  <br/>
+
+  ![Stars](https://img.shields.io/github/stars/Sr-agente208/Botzin1?style=social)
+  ![Forks](https://img.shields.io/github/forks/Sr-agente208/Botzin1?style=social)
 
 </div>
 
 ---
 
-## 🌑 Sobre o Black Lotus
-
-> *"Como a lótus negra que emerge das águas escuras, este bot nasceu para dominar grupos com poder, elegância e precisão."*
-
-O **Black Lotus Bot** é um bot de WhatsApp completo, desenvolvido com a biblioteca **Baileys**, repleto de comandos exclusivos para gerenciamento de grupos, diversão e utilidades. Rápido, otimizado e sempre online.
-
----
-
-## ✨ Recursos Principais
+<div align="center">
 
 ```
-🛡️  Proteção total de grupos    →  antilink, antiimg, antivideo e mais
-👋  Boas-vindas automáticas     →  mensagens e fotos personalizadas  
-🎮  Modo brincadeira            →  abraço, shippo, bruxo e outros
-🎵  Música do YouTube           →  baixe áudios direto no grupo
-🖼️  Criador de figurinhas       →  converta imagens e vídeos
-📅  Utilitários                 →  clima, calculadora, calendário
-⚙️  Administração               →  ban, promote, marcar, limpar
-🔐  Sistema de senha            →  proteção contra uso indevido
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║   🪷  B L A C K   L O T U S   B O T  🪷                    ║
+║                                                              ║
+║   "Como a lótus negra que emerge das águas escuras,          ║
+║    este bot nasceu para dominar grupos com poder,            ║
+║    elegância e precisão absoluta."                           ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
 ```
 
----
-
-## 🚀 Como Usar
-
-### Pré-requisitos
-- Node.js 18+
-- Git
-
-### Instalação
-
-```bash
-# Clone o repositório
-git clone https://github.com/Sr-agente208/Botzin1.git
-
-# Entre na pasta
-cd Botzin1
-
-# Instale as dependências
-npm install
-
-# Inicie o bot
-node index.js
-```
-
-### Vinculação
-Ao iniciar pela primeira vez, digite seu número com DDI e aguarde o **código de vinculação** aparecer no terminal. Insira o código no WhatsApp em:
-
-> **WhatsApp → Aparelhos conectados → Conectar aparelho → Código de 8 dígitos**
+</div>
 
 ---
 
-## 📋 Comandos
+## 🌑 Visão Geral
 
-| Categoria | Comando | Descrição |
-|-----------|---------|-----------|
-| 📋 Geral | `™menu` | Abre o menu principal |
-| 📋 Geral | `™ping` | Verifica velocidade do bot |
-| 📋 Geral | `™s` | Cria figurinha |
-| 🛡️ Grupo | `™antilink 1` | Ativa anti-link |
-| 🛡️ Grupo | `™ban @user` | Remove membro |
-| 🛡️ Grupo | `™marcar` | Marca todos |
-| 🛡️ Grupo | `™limpar` | Limpa o chat |
-| 🎮 Fun | `™abraço @` | Dá um abraço |
-| 🎮 Fun | `™bruxo @` | Lança maldição |
-| 🎮 Fun | `™shippo @` | Mede compatibilidade |
-| 🎵 Música | `™play nome` | Baixa música |
+<div align="center">
 
-> Use `™menu` no grupo para ver todos os comandos disponíveis.
+| 🔥 Rápido | 🛡️ Seguro | ⚡ Estável | 🎨 Elegante |
+|:---------:|:---------:|:----------:|:-----------:|
+| Respostas instantâneas | Sistema de senha | Online 24/7 | Design único |
 
----
+</div>
 
-## ⚙️ Configuração
+<br/>
 
-Edite o arquivo `./arquivo/settings/setting.json`:
-
-```json
-{
-  "nomeBot": "Black Lotus",
-  "NickDono": "Sr.Agente208",
-  "numero": "5511986059638",
-  "prefix": "™",
-  "jpgBot": "URL_DA_SUA_IMAGEM"
+```javascript
+// 🪷 Black Lotus Bot — Nascido nas sombras, feito para dominar.
+const BlackLotus = {
+  nome:     "Black Lotus Bot",
+  criador:  "Sr.Agente208",
+  contato:  "5511986059638",
+  prefixo:  "™",
+  versao:   "2.0.0",
+  status:   "🟢 Online",
+  poder:    "∞ ILIMITADO"
 }
 ```
 
 ---
 
-## 🌐 Deploy no Railway
-
-1. Faça fork/clone deste repositório
-2. Gere a sessão **localmente** com `node index.js`
-3. Faça commit da pasta `conexão` gerada
-4. Conecte o repositório ao Railway
-5. O bot vai subir automaticamente
-
----
-
-## 📞 Contato & Suporte
+## ✨ Recursos
 
 <div align="center">
 
-**Desenvolvido por Sr.Agente208**
-
-[![WhatsApp](https://img.shields.io/badge/Suporte-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/5511986059638)
-
-*Entre em contato para suporte, sugestões ou aluguel do bot.*
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   🛡️  PROTEÇÃO DE GRUPOS                                   │
+│   ├── Anti-Link          ├── Anti-Imagem                   │
+│   ├── Anti-Vídeo         ├── Anti-Áudio                    │
+│   ├── Anti-Sticker       ├── Anti-Documento                │
+│   ├── Anti-Palavrão      └── Anti-Emoji                    │
+│                                                             │
+│   🎮  MODO BRINCADEIRA                                      │
+│   ├── Abraço / Morder    ├── Shipômetro                    │
+│   ├── Bruxo / Maldição   ├── Namorar                       │
+│   └── Atropelar / Afogar └── Rank do Grupo                 │
+│                                                             │
+│   🎵  MULTIMÍDIA                                            │
+│   ├── Play YouTube       ├── Figurinhas                    │
+│   ├── Figurinha Animada  └── Converter Sticker             │
+│                                                             │
+│   ⚙️  ADMINISTRAÇÃO                                         │
+│   ├── Ban / Kick         ├── Promote / Demote              │
+│   ├── Marcar Todos       ├── Limpar Chat                   │
+│   ├── Fechar / Abrir GP  └── Link do Grupo                 │
+│                                                             │
+│   🌐  UTILITÁRIOS                                           │
+│   ├── Clima              ├── Calculadora                   │
+│   ├── Calendário         ├── IP Lookup                     │
+│   └── Encurtar Link      └── Gerador de Nick               │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
 </div>
 
 ---
 
-## ⚠️ Avisos
+## 📋 Comandos Principais
 
-- Este bot é para uso **educacional e pessoal**
-- Não nos responsabilizamos pelo uso indevido
-- Respeite os **Termos de Serviço** do WhatsApp
-- Não use para spam ou atividades ilegais
+<div align="center">
+
+| Emoji | Comando | Descrição |
+|:-----:|---------|-----------|
+| 📋 | `™menu` | Abre o menu completo |
+| ⚡ | `™ping` | Velocidade do bot |
+| 🖼️ | `™s` | Criar figurinha |
+| 🎵 | `™play nome` | Baixar música |
+| 🛡️ | `™antilink 1` | Ativar anti-link |
+| 👋 | `™bemvindo1` | Ativar boas-vindas |
+| 🔨 | `™ban @user` | Banir membro |
+| 📢 | `™marcar` | Marcar todos |
+| 🧹 | `™limpar` | Limpar chat |
+| 💘 | `™shippo @` | Shipômetro |
+| 🧙 | `™bruxo @` | Lançar maldição |
+| 🤗 | `™abraço @` | Dar abraço |
+
+</div>
+
+---
+
+## 🚀 Instalação
+
+```bash
+# 1️⃣  Clone o repositório
+git clone https://github.com/Sr-agente208/Botzin1.git && cd Botzin1
+
+# 2️⃣  Instale as dependências
+npm install
+
+# 3️⃣  Inicie o bot
+node index.js
+
+# 4️⃣  Digite seu número quando solicitado
+# 5️⃣  Insira o código no WhatsApp → Aparelhos Conectados
+```
+
+---
+
+## ☁️ Deploy Railway
+
+```
+1. Gere a sessão localmente com: node index.js
+2. Vincule seu número e aguarde a pasta 'conexão' ser criada
+3. Faça commit: git add . && git commit -m "sessao" && git push
+4. Conecte o repositório ao Railway
+5. 🟢 Bot online automaticamente!
+```
+
+---
+
+## ⚙️ Configuração
+
+Edite `./arquivo/settings/setting.json`:
+
+```json
+{
+  "nomeBot":   "Black Lotus",
+  "NickDono":  "Sr.Agente208",
+  "numero":    "5511986059638",
+  "prefix":    "™",
+  "jpgBot":    "URL_DA_SUA_IMAGEM"
+}
+```
+
+---
+
+## 📞 Contato
+
+<div align="center">
+
+**👤 Criador: Sr.Agente208**
+
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/5511986059638)
+
+*📲 Suporte • Aluguel • Personalização*
+
+</div>
+
+---
+
+## ⚠️ Termos de Uso
+
+```
+• Este projeto é de uso educacional e pessoal
+• Não nos responsabilizamos pelo uso indevido  
+• Respeite os Termos de Serviço do WhatsApp
+• Proibido uso para spam ou atividades ilegais
+```
 
 ---
 
 <div align="center">
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer&animation=twinkling" width="100%"/>
 
-🪷 **BLACK LOTUS BOT** — *Poder nas sombras, elegância na luz* 🪷
+**🪷 BLACK LOTUS BOT © 2025 — Sr.Agente208 🪷**
+
+*Poder nas Sombras • Elegância na Luz • Domínio nos Grupos*
 
 </div>
