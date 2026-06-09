@@ -13,7 +13,71 @@ const fs = require("fs-extra");
 const chalk = require("chalk");
 const figlet = require("figlet");
 const path = require("path");
-const readline = require("readline");
+const express = require("express");
+const QRCode = require("qrcode");
+
+// ─── SERVIDOR WEB PARA QR CODE ────────────────────────────────────────────────
+const app = express();
+const PORT = process.env.PORT || 3000;
+let currentQR = null;
+let botStatus = "aguardando";
+
+app.get("/", async (req, res) => {
+    if (botStatus === "conectado") {
+        return res.send(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Kay System</title>
+<style>body{background:#111;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}
+h1{color:#25D366;} p{color:#aaa;}</style></head>
+<body><h1>✅ Bot Conectado!</h1><p>Kay System está online e funcionando.</p></body></html>`);
+    }
+
+    if (!currentQR) {
+        return res.send(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Kay System - QR Code</title>
+<meta http-equiv="refresh" content="5">
+<style>body{background:#111;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}
+h1{color:#25D366;} p{color:#aaa;} .spin{border:4px solid #333;border-top:4px solid #25D366;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style></head>
+<body><h1>Kay System</h1><div class="spin"></div><p>Gerando QR Code... aguarde.</p><p style="font-size:12px">A página atualiza automaticamente.</p></body></html>`);
+    }
+
+    try {
+        const qrImage = await QRCode.toDataURL(currentQR, {
+            width: 300,
+            margin: 2,
+            color: { dark: "#000000", light: "#ffffff" }
+        });
+
+        res.send(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Kay System - QR Code</title>
+<meta http-equiv="refresh" content="30">
+<style>
+body{background:#111;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;flex-direction:column;gap:16px;}
+h1{color:#25D366;margin:0;} 
+.box{background:#1a1a1a;border:2px solid #25D366;border-radius:16px;padding:24px;text-align:center;}
+img{border-radius:8px;display:block;}
+p{color:#aaa;margin:8px 0;font-size:14px;}
+.badge{background:#25D366;color:#000;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
+</style></head>
+<body>
+  <h1>Kay System 🤖</h1>
+  <div class="box">
+    <img src="${qrImage}" alt="QR Code WhatsApp" width="280" height="280"/>
+    <p>Escaneie com o WhatsApp</p>
+    <span class="badge">Abre o WhatsApp → Aparelhos conectados → Conectar aparelho</span>
+  </div>
+  <p style="font-size:12px;color:#555">QR atualiza a cada 30s automaticamente</p>
+</body></html>`);
+    } catch (e) {
+        res.send("Erro ao gerar QR. Veja os logs.");
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(chalk.green(`[WEB] Servidor rodando na porta ${PORT}`));
+    console.log(chalk.cyan(`[WEB] Acesse a URL do seu deploy no Railway para ver o QR Code`));
+});
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ─── SESSION DATA (Railway) ───────────────────────────────────────────────────
 const SESSION_PATH = path.resolve(__dirname, "session");
@@ -56,13 +120,12 @@ function gerarSessionData() {
 const _NOISE = /Closing open session|closing session|closed session|SessionEntry|chainKey|registrationId|currentRatchet|ephemeralKeyPair|lastRemoteEphemeralKey|rootKey|indexInfo|baseKey|remoteIdentityKey|pendingPreKey|Bad MAC|Retry count|retrying/i;
 const _w = process.stdout.write.bind(process.stdout);
 const _e = process.stderr.write.bind(process.stderr);
-process.stdout.write = (c, enc, cb) => { if (_NOISE.test(c)) { if (typeof cb === 'function') cb(); return true; } return _w(c, enc, cb); };
-process.stderr.write = (c, enc, cb) => { if (_NOISE.test(c)) { if (typeof cb === 'function') cb(); return true; } return _e(c, enc, cb); };
+process.stdout.write = (c, enc, cb) => { if (_NOISE.test(c)) { if (typeof cb === "function") cb(); return true; } return _w(c, enc, cb); };
+process.stderr.write = (c, enc, cb) => { if (_NOISE.test(c)) { if (typeof cb === "function") cb(); return true; } return _e(c, enc, cb); };
 
 let isReconnecting = false;
 let currentSocket = null;
 let handler = null;
-let pairingCodeRequested = false;
 
 function getHandler() {
     if (!handler) handler = require("./index");
@@ -74,11 +137,11 @@ const store = {
     messages: {},
     chats: { all: () => [], get: () => null },
     bind: (ev) => {
-        ev.on('contacts.update', (contacts) => {
+        ev.on("contacts.update", (contacts) => {
             for (const c of contacts)
                 store.contacts[c.id] = Object.assign(store.contacts[c.id] || {}, c);
         });
-        ev.on('messages.upsert', ({ messages }) => {
+        ev.on("messages.upsert", ({ messages }) => {
             for (const msg of messages) {
                 if (!msg.key?.remoteJid) continue;
                 if (!store.messages[msg.key.remoteJid]) store.messages[msg.key.remoteJid] = {};
@@ -89,12 +152,6 @@ const store = {
     loadMessage: async (jid, id) => store.messages[jid]?.[id] || null
 };
 
-const question = (text) => new Promise((resolve) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true });
-    process.stdout.write(text);
-    rl.once("line", (ans) => { rl.close(); resolve(ans); });
-});
-
 async function clearOldSessionFiles(sessionPath) {
     try {
         if (!fs.existsSync(sessionPath)) return;
@@ -102,8 +159,8 @@ async function clearOldSessionFiles(sessionPath) {
         const agora = Date.now();
         const umDia = 24 * 60 * 60 * 1000;
         for (const file of files) {
-            if (file === 'creds.json') continue;
-            if (file.startsWith('pre-key-') || file.startsWith('session-') || file.startsWith('sender-key-')) {
+            if (file === "creds.json") continue;
+            if (file.startsWith("pre-key-") || file.startsWith("session-") || file.startsWith("sender-key-")) {
                 const fp = path.join(sessionPath, file);
                 const stats = await fs.stat(fp);
                 if (agora - stats.mtimeMs > umDia) await fs.remove(fp);
@@ -112,46 +169,14 @@ async function clearOldSessionFiles(sessionPath) {
     } catch (e) {}
 }
 
-async function solicitarCodigo(socket, phoneNumber) {
-    if (pairingCodeRequested) return;
-    pairingCodeRequested = true;
-
-    phoneNumber = phoneNumber.replace(/[^0-9]/g, "");
-    if (!phoneNumber || phoneNumber.length < 10) {
-        console.log(chalk.red("[ERRO] PHONE_NUMBER invalido: " + phoneNumber));
-        return;
-    }
-
-    console.log(chalk.yellow(`\n[PAREAMENTO] Solicitando codigo para +${phoneNumber}...`));
-
-    // Tenta até 5 vezes com intervalo
-    for (let tentativa = 1; tentativa <= 5; tentativa++) {
-        try {
-            await new Promise(r => setTimeout(r, 2000 * tentativa));
-            const code = await socket.requestPairingCode(phoneNumber);
-            console.log(chalk.cyan("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-            console.log(chalk.white("  CODIGO DE PAREAMENTO:"));
-            console.log(chalk.bold.green(`\n        ${code}\n`));
-            console.log(chalk.white("  WhatsApp → Aparelhos conectados →"));
-            console.log(chalk.white("  Conectar com numero de telefone → Digite o codigo"));
-            console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
-            return;
-        } catch (e) {
-            console.log(chalk.yellow(`[PAREAMENTO] Tentativa ${tentativa}/5 falhou: ${e.message}`));
-            if (tentativa === 5) {
-                console.log(chalk.red("[PAREAMENTO] Nao foi possivel gerar o codigo. Verifique o PHONE_NUMBER e reinicie."));
-            }
-        }
-    }
-}
-
 async function startSystemZR() {
     if (isReconnecting) {
         console.log(chalk.yellow("Ja tentando reconectar, aguarde..."));
         return;
     }
     isReconnecting = true;
-    pairingCodeRequested = false;
+    currentQR = null;
+    botStatus = "aguardando";
 
     restaurarSessao();
     fs.ensureDirSync(SESSION_PATH);
@@ -161,14 +186,14 @@ async function startSystemZR() {
     const { version } = await (async () => {
         try {
             const live = await fetchLatestWaWebVersion();
-            if (live?.version) { console.log(chalk.cyan(`[WA] versao: ${live.version.join('.')}`)); return live; }
+            if (live?.version) { console.log(chalk.cyan(`[WA] versao: ${live.version.join(".")}`)); return live; }
         } catch (_) {}
         try {
             const github = await fetchLatestBaileysVersion();
-            if (github?.version) { console.log(chalk.cyan(`[WA] versao GitHub: ${github.version.join('.')}`)); return github; }
+            if (github?.version) { console.log(chalk.cyan(`[WA] versao GitHub: ${github.version.join(".")}`)); return github; }
         } catch (_) {}
         const fallback = [2, 3000, 1023141645];
-        console.log(chalk.yellow(`[WA] versao local: ${fallback.join('.')}`));
+        console.log(chalk.yellow(`[WA] versao local: ${fallback.join(".")}`));
         return { version: fallback };
     })();
 
@@ -178,7 +203,7 @@ async function startSystemZR() {
     const systemZR = makeWASocket({
         version,
         logger: pino({ level: "silent" }),
-        printQRInTerminal: false,
+        printQRInTerminal: true,   // também imprime no log do Railway
         auth: state,
         browser: Browsers.ubuntu("Chrome"),
         connectTimeoutMs: 60000,
@@ -197,22 +222,6 @@ async function startSystemZR() {
     currentSocket = systemZR;
     setInterval(() => clearOldSessionFiles(SESSION_PATH), 3600000);
 
-    // Pede o código assim que o socket for criado (se não registrado)
-    if (!systemZR.authState.creds.registered) {
-        const phoneEnv = process.env.PHONE_NUMBER;
-        if (phoneEnv) {
-            // Railway: aguarda um pouco para WS abrir e solicita automaticamente
-            setTimeout(() => solicitarCodigo(systemZR, phoneEnv), 5000);
-        } else {
-            // Local: pede o número via terminal
-            console.log(chalk.yellow("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-            console.log(chalk.white("  WhatsApp → Aparelhos conectados → Conectar com numero"));
-            console.log(chalk.yellow("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
-            const num = await question(chalk.cyan("Digite seu numero (ex: 5511999999999): "));
-            setTimeout(() => solicitarCodigo(systemZR, num), 5000);
-        }
-    }
-
     store.bind(systemZR.ev);
 
     systemZR.ev.on("messages.upsert", async (chatUpdate) => {
@@ -229,11 +238,20 @@ async function startSystemZR() {
     systemZR.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
+        // Atualiza o QR para a página web
+        if (qr) {
+            currentQR = qr;
+            botStatus = "aguardando_qr";
+            console.log(chalk.yellow("[QR] Novo QR gerado — acesse a URL do Railway para escanear"));
+        }
+
         if (connection === "connecting") {
             console.log(chalk.yellow("[WA] Conectando..."));
         }
 
         if (connection === "close") {
+            currentQR = null;
+            botStatus = "desconectado";
             const statusCode = new Boom(lastDisconnect?.error)?.output.statusCode;
             console.log(chalk.red(`\nConexao fechada (codigo: ${statusCode})`));
 
@@ -248,6 +266,8 @@ async function startSystemZR() {
                 }, 5000);
             }
         } else if (connection === "open") {
+            currentQR = null;
+            botStatus = "conectado";
             console.log(chalk.green("\n✅ Kay System conectado com sucesso!\n"));
             isReconnecting = false;
             gerarSessionData();
