@@ -947,7 +947,7 @@ try {
 
 // IMG
 const mediaMenu = await prepareWAMessageMedia(
-{ image: { url: "./dono/menus/Foto-menu/img-menu.jpg" } },
+{ image: { url: ".{ image: { url: "./dono/menus/Foto-menu/img-menu.png" } } } },
 upload ? { upload } : {}
 );
 

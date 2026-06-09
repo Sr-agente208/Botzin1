@@ -29,7 +29,7 @@ const { menus } = require("./dono/menus/Shizuku")
 const { dono1, dono2, dono3, dono4, dono5, dono6 } = require("./dono/dados-donos");
 const Config2 = JSON.parse(fs.readFileSync("./dono/dados-donos.json"));
 const Config = JSON.parse(fs.readFileSync("./dono/dono.json"));
-const FotoMenu = fs.readFileSync("./dono/menus/Foto-menu/img-menu.jpg");
+const FotoMenu = fs.readFileSync(".dono\menus\Foto-menu\img-menu.png");
 
 const sleep = async (ms) => {return new Promise(resolve => setTimeout(resolve, ms));
 };
