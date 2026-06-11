@@ -8,8 +8,7 @@ const path = require('path');
 
 const RPG_PATH = './SRC/rpg';
 const CHARS_PATH = `${RPG_PATH}/personagens.json`;
-const SALAS_PATH = `${RPG_PATH}/salas.json`;
-const CAMPANHAS_PATH = `${RPG_PATH}/campanhas.json`;
+const LOJA_PATH = `${RPG_PATH}/loja.json`;
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🗂️ INICIALIZAÇÃO DOS ARQUIVOS
@@ -17,8 +16,6 @@ const CAMPANHAS_PATH = `${RPG_PATH}/campanhas.json`;
 function initRPG() {
   if (!fs.existsSync(RPG_PATH)) fs.mkdirSync(RPG_PATH, { recursive: true });
   if (!fs.existsSync(CHARS_PATH)) fs.writeFileSync(CHARS_PATH, JSON.stringify({}));
-  if (!fs.existsSync(SALAS_PATH)) fs.writeFileSync(SALAS_PATH, JSON.stringify({}));
-  if (!fs.existsSync(CAMPANHAS_PATH)) fs.writeFileSync(CAMPANHAS_PATH, JSON.stringify({}));
 }
 
 function loadData(filePath) {
@@ -112,32 +109,16 @@ const CLASSES = {
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 👹 MONSTROS / INIMIGOS
+// 🛒 ITENS DA LOJA
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const MONSTROS = {
-  goblin: { nome: 'Goblin 👺', hp: 12, ataque: 4, defesa: 12, xp: 50, ouro: 10 },
-  zumbi: { nome: 'Zumbi 🧟', hp: 22, ataque: 5, defesa: 10, xp: 80, ouro: 5 },
-  esqueleto: { nome: 'Esqueleto 💀', hp: 18, ataque: 6, defesa: 13, xp: 100, ouro: 15 },
-  vampiro: { nome: 'Vampiro 🧛', hp: 45, ataque: 8, defesa: 15, xp: 250, ouro: 80 },
-  demonio: { nome: 'Demônio 😈', hp: 60, ataque: 10, defesa: 16, xp: 400, ouro: 120 },
-  dragao: { nome: 'Dragão 🐉', hp: 150, ataque: 15, defesa: 18, xp: 1000, ouro: 500 },
-  sombra: { nome: 'Sombra Paranormal 🌑', hp: 35, ataque: 9, defesa: 14, xp: 300, ouro: 60 },
-  cultista: { nome: 'Cultista das Trevas 🕯️', hp: 28, ataque: 7, defesa: 12, xp: 180, ouro: 40 }
+const ITENS = {
+  poçao_pequena: { nome: 'Poção Pequena 🧪', preco: 20, cura: 15, desc: 'Recupera 15 HP' },
+  poçao_media: { nome: 'Poção Média ⚗️', preco: 50, cura: 40, desc: 'Recupera 40 HP' },
+  espada_aço: { nome: 'Espada de Aço ⚔️', preco: 150, bonus: 2, tipo: 'forca', desc: '+2 Força' },
+  arco_longo: { nome: 'Arco Longo 🏹', preco: 150, bonus: 2, tipo: 'destreza', desc: '+2 Destreza' },
+  amuleto_arcano: { nome: 'Amuleto Arcano 🔮', preco: 200, bonus: 3, tipo: 'inteligencia', desc: '+3 Inteligência' },
+  armadura_leve: { nome: 'Armadura Leve 🛡️', preco: 100, bonus: 5, tipo: 'hp', desc: '+5 HP Max' }
 };
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🏰 LOCAIS / CENÁRIOS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const LOCAIS = [
-  '🏚️ Mansão Abandonada',
-  '⛪ Igreja Maldita',
-  '🌲 Floresta Sombria',
-  '🕳️ Caverna dos Perdidos',
-  '🏭 Fábrica Amaldiçoada',
-  '🌊 Porto das Almas',
-  '🔮 Torre do Mago Louco',
-  '🪦 Cemitério Eterno'
-];
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 📊 XP E NÍVEL
@@ -157,126 +138,80 @@ function calcularNivel(xp) {
 async function handleRPG(sock, from, info, command, args, sender, pushname, isGroup, prefix) {
   initRPG();
   const enviar = (texto) => sock.sendMessage(from, { text: texto }, { quoted: info });
+  const reagir = (emoji) => sock.sendMessage(from, { react: { text: emoji, key: info.key } });
   const q = args.join(' ');
 
   switch (command) {
 
-    // ════════════════════════════════════════
-    // 📖 CRIAR PERSONAGEM
-    // ════════════════════════════════════════
     case 'rpg':
     case 'rpgajuda': {
       const texto = `
 ╔══════════════════════════════╗
-║  🎲 BLACK LOTUS RPG SYSTEM  ║
+║  🌑 BLACK LOTUS RPG SYSTEM  ║
 ╚══════════════════════════════╝
-
-*📖 COMANDOS DISPONÍVEIS:*
 
 *🧙 PERSONAGEM*
 ▸ ${prefix}criarchar [classe] [nome]
 ▸ ${prefix}meuchar
+▸ ${prefix}inventario
 ▸ ${prefix}deletarchar
 
-*⚔️ COMBATE*
+*⚔️ AVENTURA*
 ▸ ${prefix}batalha [monstro]
 ▸ ${prefix}atacar
-▸ ${prefix}curar
 ▸ ${prefix}fugir
+▸ ${prefix}trabalhar (Ganha ouro)
 
-*🎲 DADOS*
-▸ ${prefix}rolar [NdN] — ex: rolar 2d6
-▸ ${prefix}dado [lados] — ex: dado 20
+*🛒 ECONOMIA*
+▸ ${prefix}loja (Ver itens)
+▸ ${prefix}comprar [item]
+▸ ${prefix}usar [item]
 
-*🏆 RANKING*
+*🏆 COMPETIÇÃO*
 ▸ ${prefix}rpgrank
 
-*📋 CLASSES DISPONÍVEIS:*
-⚔️ guerreiro | 🧙 mago | 🗡️ ladino
-✨ clerigo | 🏹 cacador | 👁️ paranormal
-
-*Exemplo: ${prefix}criarchar mago Merlin*`;
+*📋 CLASSES:*
+guerreiro, mago, ladino, clerigo, cacador, paranormal`;
       return enviar(texto);
     }
 
-    // ════════════════════════════════════════
-    // 🧙 CRIAR PERSONAGEM
-    // ════════════════════════════════════════
     case 'criarchar': {
       const personagens = loadData(CHARS_PATH);
-      if (personagens[sender]) {
-        return enviar(`❌ Você já tem um personagem!\nUse *${prefix}meuchar* para ver ou *${prefix}deletarchar* para deletar.`);
-      }
+      if (personagens[sender]) return enviar(`❌ Você já tem um personagem!`);
       const classeKey = args[0]?.toLowerCase();
       const nomeChar = args.slice(1).join(' ') || pushname;
-      if (!classeKey || !CLASSES[classeKey]) {
-        return enviar(`❌ Classe inválida!\n\nClasses: *guerreiro, mago, ladino, clerigo, cacador, paranormal*\n\nEx: *${prefix}criarchar mago Merlin*`);
-      }
+      if (!classeKey || !CLASSES[classeKey]) return enviar(`❌ Classe inválida!`);
+      
       const classe = CLASSES[classeKey];
-      const atb = classe.atributos;
-      const char = {
+      personagens[sender] = {
         nome: nomeChar,
         classe: classeKey,
         nivel: 1,
         xp: 0,
         hp: classe.hp_base,
         hp_max: classe.hp_base,
-        ouro: 50,
-        atributos: { ...atb },
-        habilidades: [...classe.habilidades],
+        ouro: 100,
+        atributos: { ...classe.atributos },
+        inventario: [],
         vitorias: 0,
         derrotas: 0,
-        em_batalha: false,
-        batalha_atual: null
+        ultima_vez: 0
       };
-      personagens[sender] = char;
       saveData(CHARS_PATH, personagens);
-
-      const texto = `
-╔══════════════════════════════╗
-║    ✨ PERSONAGEM CRIADO!     ║
-╚══════════════════════════════╝
-
-🎭 *Nome:* ${nomeChar}
-${classe.emoji} *Classe:* ${classe.nome}
-❤️ *HP:* ${char.hp_max}
-⭐ *Nível:* 1
-💰 *Ouro:* 50
-
-📊 *ATRIBUTOS:*
-💪 Força: ${atb.forca} (${formatarMod(modificador(atb.forca))})
-🏃 Destreza: ${atb.destreza} (${formatarMod(modificador(atb.destreza))})
-🛡️ Constituição: ${atb.constituicao} (${formatarMod(modificador(atb.constituicao))})
-🧠 Inteligência: ${atb.inteligencia} (${formatarMod(modificador(atb.inteligencia))})
-👁️ Sabedoria: ${atb.sabedoria} (${formatarMod(modificador(atb.sabedoria))})
-✨ Carisma: ${atb.carisma} (${formatarMod(modificador(atb.carisma))})
-
-🗡️ *Habilidades:* ${char.habilidades.join(' • ')}
-
-_Use ${prefix}batalha para começar a aventura!_`;
-      return enviar(texto);
+      await reagir("✨");
+      return enviar(`✨ *Personagem ${nomeChar} criado como ${classe.nome}!*`);
     }
 
-    // ════════════════════════════════════════
-    // 📋 VER PERSONAGEM
-    // ════════════════════════════════════════
     case 'meuchar': {
       const personagens = loadData(CHARS_PATH);
       const char = personagens[sender];
-      if (!char) return enviar(`❌ Você não tem personagem!\nUse *${prefix}criarchar [classe] [nome]*`);
-
-      const classe = CLASSES[char.classe];
+      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
       const nivel = calcularNivel(char.xp);
-      const xpProximo = NIVEIS_XP[nivel] || '∞';
       const barraHP = '█'.repeat(Math.floor((char.hp / char.hp_max) * 10)) + '░'.repeat(10 - Math.floor((char.hp / char.hp_max) * 10));
-
-      const texto = `
-╔══════════════════════════════╗
-║      📋 SEU PERSONAGEM      ║
-╚══════════════════════════════╝
-
-🎭 *${char.nome}* — ${classe.emoji} ${classe.nome}
-⭐ *Nível ${nivel}* | 📈 XP: ${char.xp}/${xpProximo}
+      
+      return enviar(`
+🎭 *${char.nome}* — ${CLASSES[char.classe].emoji} ${CLASSES[char.classe].nome}
+⭐ *Nível ${nivel}* | XP: ${char.xp}
 ❤️ HP: [${barraHP}] ${char.hp}/${char.hp_max}
 💰 *Ouro:* ${char.ouro}
 
@@ -285,262 +220,186 @@ _Use ${prefix}batalha para começar a aventura!_`;
 🛡️ CON: ${char.atributos.constituicao} | 🧠 INT: ${char.atributos.inteligencia}
 👁️ SAB: ${char.atributos.sabedoria} | ✨ CAR: ${char.atributos.carisma}
 
-🗡️ *Habilidades:* ${char.habilidades.join(' • ')}
-🏆 *Vitórias:* ${char.vitorias} | 💀 *Derrotas:* ${char.derrotas}`;
+🏆 Vitórias: ${char.vitorias} | 💀 Derrotas: ${char.derrotas}`);
+    }
+
+    case 'trabalhar': {
+      const personagens = loadData(CHARS_PATH);
+      const char = personagens[sender];
+      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
+      
+      const agora = Date.now();
+      const cooldown = 300000; // 5 minutos
+      if (agora - char.ultima_vez < cooldown) {
+        const resto = Math.ceil((cooldown - (agora - char.ultima_vez)) / 60000);
+        return enviar(`⏳ Você está exausto! Volte em ${resto} minutos.`);
+      }
+
+      const ganho = rolarDado(50) + (char.atributos.forca / 2);
+      char.ouro += Math.floor(ganho);
+      char.ultima_vez = agora;
+      saveData(CHARS_PATH, personagens);
+      await reagir("💰");
+      return enviar(`⚒️ *Você trabalhou duro e ganhou ${Math.floor(ganho)} moedas de ouro!*`);
+    }
+
+    case 'loja': {
+      let texto = `🛒 *LOJA DO BLACK LOTUS*\n\n`;
+      for (const [key, item] of Object.entries(ITENS)) {
+        texto += `▸ *${item.nome}* — 💰 ${item.preco}\n   _${item.desc}_\n   Comando: ${prefix}comprar ${key}\n\n`;
+      }
       return enviar(texto);
     }
 
-    // ════════════════════════════════════════
-    // ⚔️ INICIAR BATALHA
-    // ════════════════════════════════════════
+    case 'comprar': {
+      const personagens = loadData(CHARS_PATH);
+      const char = personagens[sender];
+      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
+      const itemKey = args[0]?.toLowerCase();
+      const item = ITENS[itemKey];
+      if (!item) return enviar(`❌ Item não encontrado na loja!`);
+      if (char.ouro < item.preco) return enviar(`❌ Ouro insuficiente!`);
+
+      char.ouro -= item.preco;
+      char.inventario.push(itemKey);
+      saveData(CHARS_PATH, personagens);
+      await reagir("🛍️");
+      return enviar(`✅ Você comprou *${item.nome}*!`);
+    }
+
+    case 'inventario': {
+      const personagens = loadData(CHARS_PATH);
+      const char = personagens[sender];
+      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
+      if (char.inventario.length === 0) return enviar(`🎒 Seu inventário está vazio.`);
+      
+      let texto = `🎒 *INVENTÁRIO DE ${char.nome}*\n\n`;
+      const contagem = {};
+      char.inventario.forEach(i => contagem[i] = (contagem[i] || 0) + 1);
+      
+      for (const [key, qtd] of Object.entries(contagem)) {
+        texto += `▸ ${ITENS[key].nome} (x${qtd})\n`;
+      }
+      texto += `\nUse *${prefix}usar [item]*`;
+      return enviar(texto);
+    }
+
+    case 'usar': {
+      const personagens = loadData(CHARS_PATH);
+      const char = personagens[sender];
+      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
+      const itemKey = args[0]?.toLowerCase();
+      const index = char.inventario.indexOf(itemKey);
+      if (index === -1) return enviar(`❌ Você não tem esse item!`);
+      
+      const item = ITENS[itemKey];
+      if (item.cura) {
+        char.hp = Math.min(char.hp_max, char.hp + item.cura);
+        enviar(`🧪 Você usou ${item.nome} e recuperou ${item.cura} HP!`);
+      } else if (item.bonus) {
+        if (item.tipo === 'hp') {
+          char.hp_max += item.bonus;
+          char.hp += item.bonus;
+        } else {
+          char.atributos[item.tipo] += item.bonus;
+        }
+        enviar(`⚔️ Você equipou ${item.nome}! Bonus: ${item.desc}`);
+      }
+      
+      char.inventario.splice(index, 1);
+      saveData(CHARS_PATH, personagens);
+      return await reagir("✨");
+    }
+
     case 'batalha': {
       const personagens = loadData(CHARS_PATH);
       const char = personagens[sender];
-      if (!char) return enviar(`❌ Crie um personagem primeiro!\nUse *${prefix}criarchar [classe] [nome]*`);
-      if (char.em_batalha) return enviar(`⚔️ Você já está em batalha!\nUse *${prefix}atacar*, *${prefix}curar* ou *${prefix}fugir*`);
-      if (char.hp <= 0) return enviar(`💀 Seu personagem está morto!\nDescanse e use *${prefix}curar* para recuperar HP.`);
+      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
+      if (char.hp <= 0) return enviar(`💀 Você está morto! Use poções.`);
 
-      const monstrKey = args[0]?.toLowerCase();
-      const monstro = monstrKey && MONSTROS[monstrKey] ? { ...MONSTROS[monstrKey] } : { ...MONSTROS[Object.keys(MONSTROS)[Math.floor(Math.random() * Object.keys(MONSTROS).length)]] };
-      const local = LOCAIS[Math.floor(Math.random() * LOCAIS.length)];
-
+      const monstros = [
+        { nome: 'Goblin 👺', hp: 20, atk: 5, xp: 50, ouro: 30 },
+        { nome: 'Zumbi 🧟', hp: 35, atk: 8, xp: 80, ouro: 50 },
+        { nome: 'Dragão 🐉', hp: 150, atk: 25, xp: 500, ouro: 300 }
+      ];
+      
+      const monstro = monstros[rolarDado(monstros.length) - 1];
       char.em_batalha = true;
-      char.batalha_atual = { monstro, hp_monstro: monstro.hp, local };
-      personagens[sender] = char;
+      char.batalha_atual = { ...monstro, hp_atual: monstro.hp };
       saveData(CHARS_PATH, personagens);
-
-      const texto = `
-╔══════════════════════════════╗
-║      ⚔️ BATALHA INICIADA!   ║
-╚══════════════════════════════╝
-
-📍 *Local:* ${local}
-
-👤 *${char.nome}* (Nível ${calcularNivel(char.xp)})
-❤️ HP: ${char.hp}/${char.hp_max}
-
-VS
-
-👹 *${monstro.nome}*
-❤️ HP: ${monstro.hp}
-⚔️ Ataque: ${monstro.ataque} | 🛡️ Defesa: ${monstro.defesa}
-
-_O inimigo aparece diante de você..._
-
-*AÇÕES:*
-▸ *${prefix}atacar* — Atacar o inimigo
-▸ *${prefix}curar* — Usar poção de cura
-▸ *${prefix}fugir* — Tentar fugir`;
-      return enviar(texto);
+      
+      return enviar(`⚔️ *BATALHA!* ⚔️\n\nVocê encontrou um *${monstro.nome}*!\n❤️ HP: ${monstro.hp}\n⚔️ ATK: ${monstro.atk}\n\nUse *${prefix}atacar* ou *${prefix}fugir*`);
     }
 
-    // ════════════════════════════════════════
-    // 🗡️ ATACAR
-    // ════════════════════════════════════════
     case 'atacar': {
       const personagens = loadData(CHARS_PATH);
       const char = personagens[sender];
-      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
-      if (!char.em_batalha) return enviar(`❌ Você não está em batalha!\nUse *${prefix}batalha* para encontrar inimigos.`);
-
+      if (!char || !char.em_batalha) return enviar(`❌ Você não está em batalha!`);
+      
       const batalha = char.batalha_atual;
-      const classe = CLASSES[char.classe];
-      const atb = char.atributos;
-
-      // Rolagem de ataque do jogador
-      const d20Ataque = rolarDado(20);
-      const modAtaque = modificador(atb.forca > atb.destreza ? atb.forca : atb.destreza);
-      const totalAtaque = d20Ataque + modAtaque;
-      let textoAcao = '';
-      let danoJogador = 0;
-      let danoMonstro = 0;
-
-      // Verifica acerto
-      if (d20Ataque === 20) {
-        // Acerto crítico!
-        const dados = rolarMultiplos(2, classe.dado_vida);
-        danoJogador = dados.reduce((a, b) => a + b, 0) + Math.max(0, modAtaque);
-        textoAcao += `🎯 *ACERTO CRÍTICO!*\nDado: [${dados.join(', ')}] = ${danoJogador} de dano!\n`;
-      } else if (totalAtaque >= batalha.monstro.defesa) {
-        // Acerto normal
-        const dado = rolarDado(classe.dado_vida);
-        danoJogador = Math.max(1, dado + modAtaque);
-        textoAcao += `✅ *Acertou!* (${d20Ataque}+${formatarMod(modAtaque)}=${totalAtaque} vs CA ${batalha.monstro.defesa})\nDano: ${danoJogador}\n`;
-      } else {
-        textoAcao += `❌ *Errou!* (${d20Ataque}+${formatarMod(modAtaque)}=${totalAtaque} vs CA ${batalha.monstro.defesa})\n`;
-      }
-
-      batalha.hp_monstro -= danoJogador;
-
-      // Contra-ataque do monstro (se ainda vivo)
-      if (batalha.hp_monstro > 0) {
-        const d20Monstro = rolarDado(20);
-        const defesaJogador = 10 + modificador(atb.destreza);
-        if (d20Monstro >= defesaJogador) {
-          danoMonstro = Math.max(1, batalha.monstro.ataque + rolarDado(4) - 2);
-          char.hp -= danoMonstro;
-          textoAcao += `\n👹 *${batalha.monstro.nome} contra-ataca!*\nDano recebido: ${danoMonstro} ❤️\n`;
-        } else {
-          textoAcao += `\n👹 *${batalha.monstro.nome} errou o ataque!*\n`;
-        }
-      }
-
-      let resultado = '';
-      // Monstro morreu
-      if (batalha.hp_monstro <= 0) {
+      const danoJ = rolarDado(10) + modificador(char.atributos.forca);
+      const danoM = rolarDado(batalha.atk);
+      
+      batalha.hp_atual -= danoJ;
+      char.hp -= danoM;
+      
+      let res = `⚔️ Você causou *${danoJ}* de dano!\n👹 O inimigo causou *${danoM}* de dano!\n\n❤️ Seu HP: ${char.hp}\n❤️ HP Inimigo: ${batalha.hp_atual}`;
+      
+      if (batalha.hp_atual <= 0) {
         char.em_batalha = false;
-        char.batalha_atual = null;
+        char.xp += batalha.xp;
+        char.ouro += batalha.ouro;
         char.vitorias++;
-        char.xp += batalha.monstro.xp;
-        char.ouro += batalha.monstro.ouro;
-        // Recupera um pouco de HP
-        char.hp = Math.min(char.hp_max, char.hp + 5);
-        const nivelAntes = calcularNivel(char.xp - batalha.monstro.xp);
-        const nivelDepois = calcularNivel(char.xp);
-        resultado = `\n╔══════════════════════════════╗\n║    🏆 VITÓRIA! INIMIGO DERROTADO!   ║\n╚══════════════════════════════╝\n\n💰 Ouro ganho: +${batalha.monstro.ouro}\n📈 XP ganho: +${batalha.monstro.xp}`;
-        if (nivelDepois > nivelAntes) {
-          resultado += `\n\n🌟 *LEVEL UP! Nível ${nivelDepois}!* 🌟`;
-          char.hp_max += 2;
-          char.hp = char.hp_max;
-        }
-      }
-      // Jogador morreu
-      else if (char.hp <= 0) {
-        char.hp = 0;
+        res += `\n\n🏆 *VITÓRIA!* Você ganhou ${batalha.xp} XP e ${batalha.ouro} ouro!`;
+      } else if (char.hp <= 0) {
         char.em_batalha = false;
-        char.batalha_atual = null;
         char.derrotas++;
-        resultado = `\n╔══════════════════════════════╗\n║       💀 VOCÊ FOI DERROTADO!       ║\n╚══════════════════════════════╝\n\nUse *${prefix}curar* para recuperar HP e tente novamente.`;
+        res += `\n\n💀 *DERROTA!* Você morreu e perdeu a batalha.`;
       }
-
-      personagens[sender] = char;
+      
       saveData(CHARS_PATH, personagens);
-
-      const barraHP = char.hp > 0 ? '█'.repeat(Math.floor((char.hp / char.hp_max) * 10)) + '░'.repeat(10 - Math.floor((char.hp / char.hp_max) * 10)) : '░░░░░░░░░░';
-      const baraMonstro = batalha.hp_monstro > 0 ? '█'.repeat(Math.floor((batalha.hp_monstro / batalha.monstro.hp) * 10)) + '░'.repeat(10 - Math.floor((batalha.hp_monstro / batalha.monstro.hp) * 10)) : '░░░░░░░░░░';
-
-      const texto = `
-⚔️ *TURNO DE BATALHA*\n
-${textoAcao}
-👤 ${char.nome}: [${barraHP}] ${Math.max(0, char.hp)}/${char.hp_max} HP
-👹 ${batalha.monstro.nome}: [${baraMonstro}] ${Math.max(0, batalha.hp_monstro)}/${batalha.monstro.hp} HP
-${resultado}`;
-      return enviar(texto);
+      return enviar(res);
     }
-
-    // ════════════════════════════════════════
-    // 💊 CURAR
-    // ════════════════════════════════════════
-    case 'curar': {
-      const personagens = loadData(CHARS_PATH);
-      const char = personagens[sender];
-      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
-
-      if (char.ouro < 15) return enviar(`❌ Ouro insuficiente!\nUma poção custa *15 ouros*.\nSeu ouro: ${char.ouro} 💰`);
-
-      const cura = rolarDado(8) + modificador(char.atributos.constituicao);
-      const curaReal = Math.min(cura, char.hp_max - char.hp);
-      char.hp = Math.min(char.hp_max, char.hp + Math.max(1, cura));
-      char.ouro -= 15;
-
-      personagens[sender] = char;
-      saveData(CHARS_PATH, personagens);
-
-      return enviar(`
-💊 *POÇÃO USADA!*
-
-❤️ HP recuperado: +${Math.max(1, curaReal)}
-❤️ HP atual: ${char.hp}/${char.hp_max}
-💰 Ouro restante: ${char.ouro}
-
-_"Você sente o líquido mágico percorrer seu corpo..."_`);
-    }
-
-    // ════════════════════════════════════════
-    // 🏃 FUGIR
-    // ════════════════════════════════════════
+    
     case 'fugir': {
       const personagens = loadData(CHARS_PATH);
       const char = personagens[sender];
       if (!char || !char.em_batalha) return enviar(`❌ Você não está em batalha!`);
-
-      const d20 = rolarDado(20);
-      const modFuga = modificador(char.atributos.destreza);
-
-      if (d20 + modFuga >= 12) {
+      
+      if (rolarDado(20) + modificador(char.atributos.destreza) > 12) {
         char.em_batalha = false;
         char.batalha_atual = null;
-        char.hp = Math.max(1, char.hp - rolarDado(4));
-        personagens[sender] = char;
         saveData(CHARS_PATH, personagens);
-        return enviar(`🏃 *FUGIU COM SUCESSO!*\n\nRolagem: ${d20}+${formatarMod(modFuga)} = ${d20 + modFuga}\nHP perdido na fuga: -${char.hp_max - char.hp > 0 ? rolarDado(4) : 0}\n\n_"Você corre sem olhar para trás..."_`);
+        return enviar(`🏃 Você fugiu com sucesso!`);
       } else {
-        const dano = rolarDado(6);
-        char.hp = Math.max(0, char.hp - dano);
-        if (char.hp <= 0) {
-          char.em_batalha = false;
-          char.batalha_atual = null;
-          char.derrotas++;
-        }
-        personagens[sender] = char;
+        const dano = rolarDado(10);
+        char.hp -= dano;
         saveData(CHARS_PATH, personagens);
-        return enviar(`❌ *FALHOU EM FUGIR!*\n\nRolagem: ${d20}+${formatarMod(modFuga)} = ${d20 + modFuga}\nDano recebido ao tentar fugir: -${dano}\nHP: ${char.hp}/${char.hp_max}\n\n_"O inimigo te alcança!"_`);
+        return enviar(`❌ Falhou em fugir! Recebeu ${dano} de dano.`);
       }
     }
-
-    // ════════════════════════════════════════
-    // 🎲 ROLAR DADO
-    // ════════════════════════════════════════
-    case 'rolar': {
-      if (!q) return enviar(`Use: *${prefix}rolar 2d6* ou *${prefix}rolar 1d20*`);
-      const match = q.toLowerCase().match(/^(\d+)d(\d+)$/);
-      if (!match) return enviar(`❌ Formato inválido!\nUse: *${prefix}rolar 2d6*`);
-      const qtd = Math.min(parseInt(match[1]), 20);
-      const lados = Math.min(parseInt(match[2]), 100);
-      const resultados = rolarMultiplos(qtd, lados);
-      const total = resultados.reduce((a, b) => a + b, 0);
-      return enviar(`🎲 *ROLAGEM: ${qtd}d${lados}*\n\nResultados: [${resultados.join(', ')}]\nTotal: *${total}*`);
-    }
-
-    case 'dado': {
-      const lados = parseInt(q) || 20;
-      const resultado = rolarDado(Math.min(lados, 100));
-      const emojis = { 1: '💀', 20: '⭐', [lados]: lados === 20 ? '⭐' : '✅' };
-      const emoji = resultado === 1 ? '💀' : resultado === lados ? '⭐' : '🎲';
-      return enviar(`${emoji} *D${lados}: ${resultado}*${resultado === 1 ? '\n_Falha crítica!_' : resultado === lados ? '\n_Sucesso crítico!_' : ''}`);
-    }
-
-    // ════════════════════════════════════════
-    // 🏆 RANKING
-    // ════════════════════════════════════════
+    
     case 'rpgrank': {
-      if (!isGroup) return enviar('❌ Apenas em grupos!');
-      const personagens = loadData(CHARS_PATH);
-      const lista = Object.entries(personagens)
-        .map(([id, char]) => ({ id, ...char, nivel: calcularNivel(char.xp) }))
-        .sort((a, b) => b.xp - a.xp)
-        .slice(0, 10);
-      if (lista.length === 0) return enviar('❌ Nenhum personagem criado ainda!');
-      const emojisRank = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
-      let texto = `╔══════════════════════════════╗\n║    🏆 RANKING RPG BLACK LOTUS  ║\n╚══════════════════════════════╝\n\n`;
-      lista.forEach((char, i) => {
-        const classe = CLASSES[char.classe];
-        texto += `${emojisRank[i]} *${char.nome}* ${classe.emoji}\n   Nível ${char.nivel} | XP: ${char.xp} | 🏆 ${char.vitorias}V\n\n`;
-      });
-      return enviar(texto);
+        const personagens = loadData(CHARS_PATH);
+        const lista = Object.entries(personagens)
+          .map(([id, char]) => ({ id, ...char }))
+          .sort((a, b) => b.xp - a.xp)
+          .slice(0, 10);
+        
+        let txt = `🏆 *TOP 10 RPG BLACK LOTUS*\n\n`;
+        lista.forEach((c, i) => {
+          txt += `${i+1}. ${c.nome} - Nível ${calcularNivel(c.xp)} (${c.xp} XP)\n`;
+        });
+        return enviar(txt);
     }
-
-    // ════════════════════════════════════════
-    // 🗑️ DELETAR PERSONAGEM
-    // ════════════════════════════════════════
+    
     case 'deletarchar': {
-      const personagens = loadData(CHARS_PATH);
-      if (!personagens[sender]) return enviar(`❌ Você não tem personagem!`);
-      delete personagens[sender];
-      saveData(CHARS_PATH, personagens);
-      return enviar(`🗑️ Personagem deletado com sucesso!\nUse *${prefix}criarchar* para criar um novo.`);
+        const personagens = loadData(CHARS_PATH);
+        delete personagens[sender];
+        saveData(CHARS_PATH, personagens);
+        return enviar(`🗑️ Personagem deletado.`);
     }
   }
 }
 
-module.exports = { handleRPG, CLASSES, MONSTROS };
+module.exports = { handleRPG, CLASSES };

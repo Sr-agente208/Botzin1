@@ -59,6 +59,8 @@ sendImageAsSticker2,
  jidNormalizedUser
 } = require("./consts");
 
+const { handleRPG } = require("./SRC/rpg");
+
 module.exports = async function (conn, upsert) {
   try {
 const info = upsert?.messages && upsert?.messages[0];
@@ -187,6 +189,12 @@ const arg = body.trim().split(/ +/).slice(1);
 const q = args.join(' ');
 const isCmd = body.trim().startsWith(prefix);
 const command = isCmd ? budy2.trim().slice(1).split(/ +/).shift().toLocaleLowerCase(): null;
+
+// === SISTEMA DE RPG ===
+const rpgCommands = ['rpg', 'rpgajuda', 'criarchar', 'meuchar', 'trabalhar', 'loja', 'comprar', 'inventario', 'usar', 'batalha', 'atacar', 'fugir', 'rpgrank', 'deletarchar'];
+if (isCmd && rpgCommands.includes(command)) {
+    return await handleRPG(conn, from, info, command, args, sender, pushname, isGroup, prefix);
+}
 
 //INFO DE GRUPOS!!
 const Infos_Do_Grupo = isGroup ? await conn.groupMetadata(from) : {} || '';
