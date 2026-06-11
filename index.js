@@ -986,12 +986,18 @@ title: "🍁 MENU DOWNLOAD",
 description: "Baixar músicas e vídeos",
 id: prefix + "menudown"
 },
-{
-header: "🎭 ᴍᴇɴᴜ",
-title: "🍁 MENU FIGURINHAS",
-description: "Criar e editar stickers",
-id: prefix + "menufig"
-},
+	{
+	header: "🎭 ᴍᴇɴᴜ",
+	title: "🍁 MENU FIGURINHAS",
+	description: "Criar e editar stickers",
+	id: prefix + "menufig"
+	},
+	{
+	header: "📦 ᴘᴀᴄᴋ",
+	title: "🍁 PACK DE FIGURINHAS",
+	description: "Baixar pacotes completos",
+	id: prefix + "pack"
+	},
 {
 header: "👑 ᴍᴇɴᴜ",
 title: "🍁 MENU DONO",
@@ -3056,14 +3062,89 @@ break;
 
 //FINAL DE COMANDOS 
 	case 'deepsearch': case 'ia': case 'pesquisar': {
-	if (!q) return reply(`Uso: ${prefix}${command} como o universo surgiu?`);
-	await reagir(from, "⏳");
-	try {
-	const { data: res } = await axios.get(`${sysite}/api/ia/deepsearch`, { params: { q: q, apikey: syskey } });
-	if (!res?.status || !res?.result) return reply('Falha ao buscar resposta.');
-	await reply(res.result);
-	await reagir(from, "✅");
-	} catch (e) { console.error(e); reply('Erro na pesquisa.'); } }
+		if (!q) return reply(`Uso: ${prefix}${command} como o universo surgiu?`);
+		await reagir(from, "⏳");
+		try {
+		const { data: res } = await axios.get(`${sysite}/api/ia/deepsearch`, { params: { q: q, apikey: syskey } });
+		if (!res?.status || !res?.result) return reply('Falha ao buscar resposta.');
+		await reply(res.result);
+		await reagir(from, "✅");
+		} catch (e) { console.error(e); reply('Erro na pesquisa.'); } }
+		break;
+
+	case 'pack': { 
+	    try {
+	        if (!q) return reply(`Uso: ${prefix}pack <tema>\nEx: ${prefix}pack gatos`);
+	        await reagir(from, '🔍');
+
+	        const { data } = await axios.post('https://systemzone.store/api/v1/stickerly/search', {
+	            q: q
+	        }, { timeout: 20000 });
+
+	        if (!data?.status || !data?.resultados?.length)
+	            return reply(`Nenhum pack encontrado para "${q}".`);
+	        const firstPack = data.resultados[0];
+	        await reply(`Encontrado: *${firstPack.name}*\nBaixando e enviando as figurinhas...`);
+	        const { data: dlData } = await axios.post('https://systemzone.store/api/v1/stickerly/download', {
+	            url: firstPack.shareUrl
+	        }, { timeout: 30000 });
+	        if (!dlData?.status || !dlData?.resultado?.stickers?.length)
+	            return reply('Falha ao baixar os dados do pacote.');
+
+	        const pack = dlData.resultado;
+	        const stickers = pack.stickers.slice(0, 30);
+
+	        await reagir(from, '🚀');
+
+	        let enviados = 0;
+	        for (let i = 0; i < stickers.length; i++) {
+	            try {
+	                const url = stickers[i].url;
+	                const isPng = url.endsWith('.png');
+
+	                const stickerRes = await axios.get(url, { responseType: 'arraybuffer', timeout: 15000 });
+	                let buffer = Buffer.from(stickerRes.data);
+
+	                if (isPng) {
+	                    try {
+	                        // Tentativa de conversão rápida se sharp estiver disponível, senão ffmpeg
+	                        const crypto = require('crypto');
+	                        const tmpIn  = `/tmp/stk_${crypto.randomBytes(4).toString('hex')}.png`;
+	                        const tmpOut = `/tmp/stk_${crypto.randomBytes(4).toString('hex')}.webp`;
+	                        fs.writeFileSync(tmpIn, buffer);
+	                        await new Promise((resolve, reject) => {
+	                            exec(`ffmpeg -i ${tmpIn} -vf "scale=512:512:force_original_aspect_ratio=decrease,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=0x00000000" ${tmpOut}`, err => {
+	                                if (err) reject(err); else resolve();
+	                            });
+	                        });
+	                        buffer = fs.readFileSync(tmpOut);
+	                        fs.unlinkSync(tmpIn);
+	                        fs.unlinkSync(tmpOut);
+	                    } catch (err) {
+	                        console.error("[pack] erro na conversão:", err.message);
+	                    }
+	                }
+
+	                await conn.sendMessage(from, { sticker: buffer });
+	                enviados++;
+
+	                if (i < stickers.length - 1) {
+	                    await new Promise(r => setTimeout(r, 1500));
+	                }
+	            } catch (err) {
+	                console.error(`[pack] sticker ${i + 1} erro:`, err.message);
+	            }
+	        }
+
+	        await reagir(from, '✅');
+	        reply(`Sucesso! Foram enviadas *${enviados}* figurinhas do pacote *${pack.name}*.`);
+
+	    } catch (e) {
+	        console.error('[pack]', e.message);
+	        await reagir(from, '❌');
+	        reply('Erro: ' + (e.message || 'desconhecido'));
+	    }
+	}
 	break;
 
 	default:

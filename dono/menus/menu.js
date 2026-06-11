@@ -21,6 +21,7 @@ return `╭━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖
 ┃⟡⃟🟡 ${prefix}sticker   
 ┃⟡⃟🟡 ${prefix}toimg
 ┃⟡⃟🟡 ${prefix}figurinhas
+┃⟡⃟🟡 ${prefix}pack
 ┃⟡⃟🟡 ${prefix}figu_memes
 ┃╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖
 ┃ 🐦‍🔥💛 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃
