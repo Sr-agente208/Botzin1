@@ -1,5 +1,10 @@
 const baileys = require("@systemzero/baileys");
 const { NumberDono, prefix, NickDono, NomeBot, SHIZUKU_KEY, SHIZUKU_SITE, sysite, syskey } = require("./dono/dono");
+
+// Sessões para criação de packs personalizados
+if (global.pack_sessions === undefined) {
+    global.pack_sessions = {};
+}
 const ytSearch = require('yt-search');
 const chalk = require('chalk');
 const { version } = require("./package");
@@ -132,8 +137,25 @@ const isSticker = type == 'stickerMessage'
 const isContact = type == 'contactMessage'
 const isLocation = type == 'locationMessage'
 const isProduct = type == 'productMessage'
-const isMedia = (type === 'imageMessage' || type === 'videoMessage' || type === 'audioMessage' || type == "viewOnceMessage" || type == "viewOnceMessageV2")
-typeMessage = body.substr(0, 50).replace(/\n/g, '')
+	const isMedia = (type === 'imageMessage' || type === 'videoMessage' || type === 'audioMessage' || type == "viewOnceMessage" || type == "viewOnceMessageV2")
+	
+	// Lógica para adicionar figurinhas automaticamente se o pack estiver ativo
+	if (isImage && global.pack_sessions[sender]) {
+	    try {
+	        const buffer = await downloadContentFromMessage(info.message.imageMessage, 'image');
+	        let chunks = [];
+	        for await (const chunk of buffer) {
+	            chunks.push(chunk);
+	        }
+	        const finalBuffer = Buffer.concat(chunks);
+	        global.pack_sessions[sender].stickers.push(finalBuffer);
+	        await reagir(from, "📥");
+	    } catch (e) {
+	        console.error("Erro ao capturar imagem para o pack:", e);
+	    }
+	}
+
+	typeMessage = body.substr(0, 50).replace(/\n/g, '')
 if(isImage) typeMessage = "Image"
 else if(isVideo) typeMessage = "Video"
 else if(isAudio) typeMessage = "Audio"
@@ -3144,6 +3166,72 @@ break;
 	        await reagir(from, '❌');
 	        reply('Erro: ' + (e.message || 'desconhecido'));
 	    }
+	}
+	break;
+
+	case 'criarpack': {
+	    if (global.pack_sessions[sender]) return reply("Você já tem uma sessão de pack aberta! Use ™finalizarpack para concluir.");
+	    if (!q) return reply(`Uso: ${prefix}criarpack Nome do Pack\n\nApós este comando, envie as imagens que deseja transformar em figurinhas.`);
+	    global.pack_sessions[sender] = {
+	        name: q,
+	        stickers: []
+	    };
+	    await reagir(from, "📦");
+	    reply(`Sessão de pack *"${q}"* iniciada!\n\nEnvie agora as imagens (uma por uma). Quando terminar, digite *${prefix}finalizarpack*.`);
+	}
+	break;
+
+	case 'finalizarpack': {
+	    const session = global.pack_sessions[sender];
+	    if (!session) return reply("Você não tem nenhuma sessão de pack ativa! Use ™criarpack para começar.");
+	    if (session.stickers.length === 0) {
+	        delete global.pack_sessions[sender];
+	        return reply("Nenhuma imagem foi enviada. Sessão cancelada.");
+	    }
+
+	    await reply(`Processando *${session.stickers.length}* imagens para o pack *"${session.name}"*... Aguarde.`);
+	    await reagir(from, "⏳");
+
+	    let enviados = 0;
+	    for (let i = 0; i < session.stickers.length; i++) {
+	        try {
+	            let buffer = session.stickers[i];
+	            const crypto = require('crypto');
+	            const tmpIn  = `/tmp/userstk_${crypto.randomBytes(4).toString('hex')}.png`;
+	            const tmpOut = `/tmp/userstk_${crypto.randomBytes(4).toString('hex')}.webp`;
+	            
+	            fs.writeFileSync(tmpIn, buffer);
+	            await new Promise((resolve, reject) => {
+	                exec(`ffmpeg -i ${tmpIn} -vf "scale=512:512:force_original_aspect_ratio=decrease,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=0x00000000" ${tmpOut}`, err => {
+	                    if (err) reject(err); else resolve();
+	                });
+	            });
+	            
+	            const stickerBuffer = fs.readFileSync(tmpOut);
+	            await conn.sendMessage(from, { sticker: stickerBuffer });
+	            
+	            fs.unlinkSync(tmpIn);
+	            fs.unlinkSync(tmpOut);
+	            enviados++;
+	            
+	            if (i < session.stickers.length - 1) {
+	                await new Promise(r => setTimeout(r, 1200));
+	            }
+	        } catch (err) {
+	            console.error("[finalizarpack] erro:", err.message);
+	        }
+	    }
+
+	    delete global.pack_sessions[sender];
+	    await reagir(from, "✅");
+	    reply(`Pack *"${session.name}"* finalizado com sucesso! Enviadas *${enviados}* figurinhas.`);
+	}
+	break;
+
+	case 'cancelarpack': {
+	    if (!global.pack_sessions[sender]) return reply("Você não tem nenhuma sessão de pack ativa.");
+	    delete global.pack_sessions[sender];
+	    reply("Sessão de pack cancelada com sucesso.");
 	}
 	break;
 

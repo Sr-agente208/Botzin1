@@ -22,6 +22,9 @@ return `╭━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖
 ┃⟡⃟🟡 ${prefix}toimg
 ┃⟡⃟🟡 ${prefix}figurinhas
 ┃⟡⃟🟡 ${prefix}pack
+┃⟡⃟🟡 ${prefix}criarpack
+┃⟡⃟🟡 ${prefix}finalizarpack
+┃⟡⃟🟡 ${prefix}cancelarpack
 ┃⟡⃟🟡 ${prefix}figu_memes
 ┃╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖
 ┃ 🐦‍🔥💛 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃
