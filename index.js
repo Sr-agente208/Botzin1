@@ -962,12 +962,18 @@ title: "🇪🇸⃞ ᴄᴀᴛᴇɢᴏʀɪᴀs ⃞🇪🇸",
 highlight_label: `${NickDono}`,
 rows: [
 
-{
-header: "🔥 ᴍᴇɴᴜ",
-title: "🍁 MENU PRINCIPAL",
-description: "Comandos básicos do bot",
-id: prefix + "menuu"
-},
+	{
+	header: "🔥 ᴍᴇɴᴜ",
+	title: "🍁 MENU PRINCIPAL",
+	description: "Comandos básicos do bot",
+	id: prefix + "menuu"
+	},
+	{
+	header: "🧠 ɪᴀ",
+	title: "🍁 DEEPSEARCH (IA)",
+	description: "Pesquisa avançada com IA",
+	id: prefix + "deepsearch"
+	},
 {
 header: "🔞 ᴍᴇɴᴜ",
 title: "🍁 MENU +18",
@@ -3049,9 +3055,20 @@ reply('❌ Erro ao enviar a case.\n\n' + err.message);
 break;
 
 //FINAL DE COMANDOS 
-default:
+	case 'deepsearch': case 'ia': case 'pesquisar': {
+	if (!q) return reply(`Uso: ${prefix}${command} como o universo surgiu?`);
+	await reagir(from, "⏳");
+	try {
+	const { data: res } = await axios.get(`${sysite}/api/ia/deepsearch`, { params: { q: q, apikey: syskey } });
+	if (!res?.status || !res?.result) return reply('Falha ao buscar resposta.');
+	await reply(res.result);
+	await reagir(from, "✅");
+	} catch (e) { console.error(e); reply('Erro na pesquisa.'); } }
+	break;
 
-const similares = ListaComandos(command).slice(0, 5);
+	default:
+
+	const similares = ListaComandos(command).slice(0, 5);
 
 const sections = [
 {
