@@ -44,10 +44,15 @@ return `╭━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖
 ┃╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖
 ┃
 ┃ 🧠 𝐈𝐍𝐓𝐄𝐋𝐈𝐆𝐄̂𝐍𝐂𝐈𝐀 𝐀𝐑𝐓𝐈𝐅𝐈𝐂𝐈𝐀𝐋
+┃⟡⃟🌑 ${prefix}lotus (ia)
+┃⟡⃟🌑 ${prefix}deepsearch
 ┃⟡⃟🌑 ${prefix}gpt
-┃⟡⃟🌑 ${prefix}deepsearch (ia)
-┃⟡⃟🌑 ${prefix}gerarnick
-┃⟡⃟🌑 ${prefix}ping
+┃╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖
+┃
+┃ 🎮 𝐉𝐎𝐆𝐎𝐒 𝐃𝐄 𝐆𝐑𝐔𝐏𝐎
+┃⟡⃟🌑 ${prefix}roletarussa
+┃⟡⃟🌑 ${prefix}apostar
+┃⟡⃟🌑 ${prefix}caraoucoroa
 ┃╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖
 ┃
 ┃ 🎲 𝐑𝐏𝐆 𝐒𝐘𝐒𝐓𝐄𝐌

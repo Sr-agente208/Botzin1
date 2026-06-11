@@ -79,4 +79,16 @@ conn.sendMessage(from, {image: {url: mulher}, caption: "👰 | Perfil feminino"}
 return conn.sendMessage(from, {text: "Erro no comando"}, {quoted: info});
 }
 }
-module.exports = { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS }
+async function BlackLotusAI(query, SHIZUKU_SITE, SHIZUKU_KEY) {
+    const prompt = `Você é o Black Lotus AI, a inteligência oficial do bot Black Lotus. Sua personalidade é misteriosa, elegante, levemente sarcástica e muito inteligente. Você fala com autoridade, mas é prestativo. Use emojis como 🪷, 🌑, 💜 e ⟡. Responda de forma concisa e impactante. Pergunta do usuário: ${query}`;
+    try {
+        const res = await fetch(`${SHIZUKU_SITE}/api/ias/gpt-2?query=${encodeURIComponent(prompt)}&apitoken=${SHIZUKU_KEY}`);
+        const api = await res.json();
+        if (!api?.resposta) return "🌑 *As sombras estão silenciosas agora... tente novamente mais tarde.*";
+        return api.resposta.trim();
+    } catch (e) {
+        return "🌑 *Houve uma interferência no vácuo... não consegui processar sua pergunta.*";
+    }
+}
+
+module.exports = { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS, BlackLotusAI }

@@ -56,10 +56,12 @@ sendImageAsSticker2,
  getFileBuffer,
  downloadContentFromMessage,
  prepareWAMessageMedia,
- jidNormalizedUser
+ jidNormalizedUser,
+ BlackLotusAI
 } = require("./consts");
 
 const { handleRPG } = require("./SRC/rpg");
+const { handleJogos } = require("./SRC/jogos");
 
 module.exports = async function (conn, upsert) {
   try {
@@ -190,11 +192,24 @@ const q = args.join(' ');
 const isCmd = body.trim().startsWith(prefix);
 const command = isCmd ? budy2.trim().slice(1).split(/ +/).shift().toLocaleLowerCase(): null;
 
-// === SISTEMA DE RPG ===
-const rpgCommands = ['rpg', 'rpgajuda', 'criarchar', 'meuchar', 'trabalhar', 'loja', 'comprar', 'inventario', 'usar', 'batalha', 'atacar', 'fugir', 'rpgrank', 'deletarchar'];
-if (isCmd && rpgCommands.includes(command)) {
-    return await handleRPG(conn, from, info, command, args, sender, pushname, isGroup, prefix);
-}
+	// === SISTEMA DE RPG ===
+	const rpgCommands = ['rpg', 'rpgajuda', 'criarchar', 'meuchar', 'trabalhar', 'loja', 'comprar', 'inventario', 'usar', 'batalha', 'atacar', 'fugir', 'rpgrank', 'deletarchar'];
+	if (isCmd && rpgCommands.includes(command)) {
+	    return await handleRPG(conn, from, info, command, args, sender, pushname, isGroup, prefix);
+	}
+
+	// === JOGOS DE GRUPO ===
+	const jogoCommands = ['roletarussa', 'apostar', 'caraoucoroa'];
+	if (isCmd && jogoCommands.includes(command)) {
+	    return await handleJogos(conn, from, info, command, args, sender, pushname, isGroup, prefix);
+	}
+
+	// === BLACK LOTUS AI ===
+	if (command === 'lotus' || command === 'ia') {
+	    if (!q) return reply(`🌑 *Diga algo para as sombras...*\nEx: ${prefix}lotus Quem é você?`);
+	    const aiRes = await BlackLotusAI(q, SHIZUKU_SITE, SHIZUKU_KEY);
+	    return reply(aiRes);
+	}
 
 //INFO DE GRUPOS!!
 const Infos_Do_Grupo = isGroup ? await conn.groupMetadata(from) : {} || '';
