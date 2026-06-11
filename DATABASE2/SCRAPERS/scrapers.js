@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 async function BuscarNogpt(query, SHIZUKU_SITE, SHIZUKU_KEY) {
 try {const res = await fetch(`${SHIZUKU_SITE}/api/ias/gpt-2?query=${encodeURIComponent(query?.trim())}&apitoken=${SHIZUKU_KEY}`);
 const api = await res.json()
-if(!api?.resposta) return reply("Erro");
+if(!api?.resposta) return "Erro ao buscar resposta";
 return api.resposta.trim();
 } catch (e) {
 return "Erro em :" +e;

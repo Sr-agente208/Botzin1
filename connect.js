@@ -203,7 +203,6 @@ async function startSystemZR() {
     const systemZR = makeWASocket({
         version,
         logger: pino({ level: "silent" }),
-        printQRInTerminal: true,   // também imprime no log do Railway
         auth: state,
         browser: Browsers.ubuntu("Chrome"),
         connectTimeoutMs: 60000,

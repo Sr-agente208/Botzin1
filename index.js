@@ -97,7 +97,8 @@ IsCreator;
 const moment = require("moment-timezone");
 
 const date = moment().tz("America/Sao_Paulo").format("DD/MM/YYYY");
-const hora = moment().tz("America/Sao_Paulo").format("HH:mm:ss");
+// hora já importado do consts.js - usando hora2 para evitar conflito
+const _hora = moment().tz("America/Sao_Paulo").format("HH:mm:ss");
 
 const type = baileys.getContentType(info?.message);
 let body =
@@ -485,7 +486,7 @@ mentions: [menc_os2]
 break;
 
 case 'ban': case 'banir': case 'kick': case 'avadakedavra':
-if (!isGroupAdmins && !SoDono) return reply(msg.SoAdmin);
+if (!isGroupAdmins && !So_Dono) return reply(msg.SoAdmin);
 if (!isBotGroupAdmins) return reply(msg.BotAdmin);
 try {
 
@@ -793,7 +794,7 @@ break;
 case 'bemvindo':
 case 'welcome':
 if(!isGroup) return reply(msg.SoEmGrupo)
-if(!isGroupAdmins && !SoDono) return reply(msg.SoAdmin)
+if(!isGroupAdmins && !So_Dono) return reply(msg.SoAdmin)
 if(!isBotGroupAdmins) return reply(msg.BotAdmin)
 if(args.length < 1) return reply('1 pra ligar / 0 pra desligar')
 if(Number(args[0]) === 1) {
@@ -946,9 +947,10 @@ try {
 }
 
 // IMG
-const mediaMenu = await prepareWAMessageMedia(
- ".\dono\menus\Foto-menu\img-menu.png } } 
-);
+const mediaMenu = FotoMenu && FotoMenu.length > 0 ? await prepareWAMessageMedia(
+ { image: FotoMenu },
+ { upload: upload }
+).catch(() => null) : null;
 
 // 📂 LISTA COM CATEGORIAS
 const listaMenus = {
@@ -1045,7 +1047,7 @@ const textok = `┏╾ׁ═╼✵╾ᷓ═╼֡͜✯⃘✯╾═╼✵╾ᷓ═�
 const carouselMessage = {
 cards: [
 {
-header: { hasMediaAttachment: true, imageMessage: mediaMenu.imageMessage },
+header: { hasMediaAttachment: mediaMenu ? true : false, ...(mediaMenu ? { imageMessage: mediaMenu.imageMessage } : {}) },
 headerType: "IMAGE",
 body: { text: textok },
 footer: { text: `© ${NickDono}` },
@@ -1072,7 +1074,7 @@ carouselMessage
 
 } catch (e) {
 console.error(e);
-reply(mess.error());
+reply(msg.error());
 }
 break;
 }

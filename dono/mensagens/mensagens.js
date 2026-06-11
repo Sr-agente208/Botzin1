@@ -1,11 +1,17 @@
 
 
 const msg = {
-    SoAdm: "*_❗Voce não é adm, somente Admins podem usar esse comando_*", 
+    SoAdm: "*_❗Voce não é adm, somente Admins podem usar esse comando_*",
+    SoAdmin: "*_❗Voce não é adm, somente Admins podem usar esse comando_*",
+    SoAdmins: "*_❗Voce não é adm, somente Admins podem usar esse comando_*",
     SoDono: "*_❗Somente meu dono tem o poder de usar este comando_*",
     BotAdmin: "*_❕Eu preciso ser admin do grupo para esse comando funcionar_*",
     SoEmGrupos: "*_❕Esse comando só funciona em grupos_*",
-    Download: "*_⌛ Realizando ação, aguarde.._*"
+    SoEmGrupo: "*_❕Esse comando só funciona em grupos_*",
+    adm: "*_❗Voce não é adm, somente Admins podem usar esse comando_*",
+    grupo: "*_❕Esse comando só funciona em grupos_*",
+    Download: "*_⌛ Realizando ação, aguarde.._*",
+    error: () => "*_❌ Ocorreu um erro ao executar o comando. Tente novamente._*"
 };
 
 // TRANSFORMA EM FUNÇÃO
