@@ -1,9 +1,9 @@
 <div align="center">
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=BLACK%20LOTUS&fontSize=70&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=◆%20BOT%20◆&descAlignY=60&descSize=25" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=200&section=header&text=BLACK%20LOTUS&fontSize=70&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=◆%20O%20DOMÍNIO%20ABSOLUTO%20◆&descAlignY=60&descSize=25" width="100%"/>
 </div>
 
 <div align="center">
-  <img src="./img-menu2.png" width="220px" style="border-radius:50%;border:3px solid #6b21a8;" alt="Black Lotus Bot"/>
+  <img src="./dono/menus/Foto-menu/img-menu.png" width="220px" style="border-radius:50%;border:3px solid #6b21a8;" alt="Black Lotus Bot"/>
   
   <br/>
 
@@ -49,7 +49,7 @@
 
 | 🔥 Rápido | 🛡️ Seguro | ⚡ Estável | 🎨 Elegante |
 |:---------:|:---------:|:----------:|:-----------:|
-| Respostas instantâneas | Sistema de senha | Online 24/7 | Design único |
+| Respostas instantâneas | Sistema de ADM | Online 24/7 | Design Único |
 
 </div>
 
@@ -62,151 +62,96 @@ const BlackLotus = {
   criador:  "Sr.Agente208",
   contato:  "5511986059638",
   prefixo:  "™",
-  versao:   "2.0.0",
-  status:   "🟢 Online",
-  poder:    "∞ ILIMITADO"
+  versao:   "2.5.0 (Final Fix)",
+  status:   "🟢 Online & Corrigido"
 }
 ```
 
 ---
 
-## ✨ Recursos
+## ✨ Novos Recursos (v2.5)
 
 <div align="center">
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│   🛡️  PROTEÇÃO DE GRUPOS                                   │
-│   ├── Anti-Link          ├── Anti-Imagem                   │
-│   ├── Anti-Vídeo         ├── Anti-Áudio                    │
-│   ├── Anti-Sticker       ├── Anti-Documento                │
-│   ├── Anti-Palavrão      └── Anti-Emoji                    │
-│                                                             │
-│   🎮  MODO BRINCADEIRA                                      │
-│   ├── Abraço / Morder    ├── Shipômetro                    │
-│   ├── Bruxo / Maldição   ├── Namorar                       │
-│   └── Atropelar / Afogar └── Rank do Grupo                 │
-│                                                             │
-│   🎵  MULTIMÍDIA                                            │
-│   ├── Play YouTube       ├── Figurinhas                    │
-│   ├── Figurinha Animada  └── Converter Sticker             │
-│                                                             │
-│   ⚙️  ADMINISTRAÇÃO                                         │
-│   ├── Ban / Kick         ├── Promote / Demote              │
-│   ├── Marcar Todos       ├── Limpar Chat                   │
-│   ├── Fechar / Abrir GP  └── Link do Grupo                 │
-│                                                             │
-│   🌐  UTILITÁRIOS                                           │
-│   ├── Clima              ├── Calculadora                   │
-│   ├── Calendário         ├── IP Lookup                     │
-│   └── Encurtar Link      └── Gerador de Nick               │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
+| Recurso | Comando | Descrição |
+|:-------:|:-------:|-----------|
+| 🧠 **Deep Search** | `™deepsearch` | Inteligência Artificial avançada para pesquisas complexas. |
+| 📦 **Sticker Packs** | `™pack [tema]` | Busca e baixa pacotes completos do Sticker.ly automaticamente. |
+| 🎨 **Custom Packs** | `™criarpack` | Inicia a criação de um pacote personalizado com suas fotos. |
+| ✅ **Finalizer** | `™finalizarpack` | Converte e envia seu pacote personalizado de uma só vez. |
 
 </div>
 
 ---
 
-## 📋 Comandos Principais
+## 🚀 Instalação & Start
 
-<div align="center">
+Siga os passos abaixo para ter o **Black Lotus** rodando em segundos:
 
-| Emoji | Comando | Descrição |
-|:-----:|---------|-----------|
-| 📋 | `™menu` | Abre o menu completo |
-| ⚡ | `™ping` | Velocidade do bot |
-| 🖼️ | `™s` | Criar figurinha |
-| 🎵 | `™play nome` | Baixar música |
-| 🛡️ | `™antilink 1` | Ativar anti-link |
-| 👋 | `™bemvindo1` | Ativar boas-vindas |
-| 🔨 | `™ban @user` | Banir membro |
-| 📢 | `™marcar` | Marcar todos |
-| 🧹 | `™limpar` | Limpar chat |
-| 💘 | `™shippo @` | Shipômetro |
-| 🧙 | `™bruxo @` | Lançar maldição |
-| 🤗 | `™abraço @` | Dar abraço |
+### 1️⃣ Preparação do Ambiente
+Certifique-se de ter o **Node.js 18 ou superior** instalado.
 
-</div>
-
----
-
-## 🚀 Instalação
-
+### 2️⃣ Clonagem e Dependências
 ```bash
-# 1️⃣  Clone o repositório
-git clone https://github.com/Sr-agente208/Botzin1.git && cd Botzin1
+# Clone o repositório
+git clone https://github.com/Sr-agente208/Botzin1.git
 
-# 2️⃣  Instale as dependências
+# Entre na pasta
+cd Botzin1
+
+# Instale todas as dependências (Correção de erros inclusa)
 npm install
-
-# 3️⃣  Inicie o bot
-node index.js
-
-# 4️⃣  Digite seu número quando solicitado
-# 5️⃣  Insira o código no WhatsApp → Aparelhos Conectados
 ```
 
----
-
-## ☁️ Deploy Railway
-
-```
-1. Gere a sessão localmente com: node index.js
-2. Vincule seu número e aguarde a pasta 'conexão' ser criada
-3. Faça commit: git add . && git commit -m "sessao" && git push
-4. Conecte o repositório ao Railway
-5. 🟢 Bot online automaticamente!
-```
-
----
-
-## ⚙️ Configuração
-
-Edite `./arquivo/settings/setting.json`:
-
+### 3️⃣ Configuração Rápida
+Edite o arquivo `./dono/dono.json` com seus dados:
 ```json
 {
-  "nomeBot":   "Black Lotus",
-  "NickDono":  "Sr.Agente208",
-  "numero":    "5511986059638",
-  "prefix":    "™",
-  "jpgBot":    "URL_DA_SUA_IMAGEM"
+    "NumberDono": "SEU_NUMERO",
+    "prefix": "™",
+    "NickDono": "SEU_NICK",
+    "NomeBot": "Black_Lotus"
 }
 ```
 
+### 4️⃣ Iniciar o Bot
+```bash
+# Inicie o sistema
+npm start
+```
+*Escaneie o QR Code que aparecerá no terminal ou no link do servidor local (porta 3000).*
+
 ---
 
-## 📞 Contato
+## ☁️ Deploy no Railway
+
+O Black Lotus já vem configurado para o **Railway**!
+
+1. Conecte seu GitHub ao Railway.
+2. Selecione este repositório.
+3. O Railway detectará o `nixpacks.toml` e fará o deploy automático.
+4. **Importante:** Após o primeiro login, o bot salvará a sessão. Para manter online, você pode usar o QR Code via URL pública gerada pelo Railway.
+
+---
+
+## 📞 Contato & Suporte
 
 <div align="center">
 
-**👤 Criador: Sr.Agente208**
+**👤 Desenvolvedor: Sr.Agente208**
 
 [![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/5511986059638)
 
-*📲 Suporte • Aluguel • Personalização*
+*📲 Suporte • Aluguel • Personalização de Scripts*
 
 </div>
-
----
-
-## ⚠️ Termos de Uso
-
-```
-• Este projeto é de uso educacional e pessoal
-• Não nos responsabilizamos pelo uso indevido  
-• Respeite os Termos de Serviço do WhatsApp
-• Proibido uso para spam ou atividades ilegais
-```
 
 ---
 
 <div align="center">
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=120&section=footer&animation=twinkling" width="100%"/>
 
-**🪷 BLACK LOTUS BOT © 2025 — Sr.Agente208 🪷**
+**🪷 BLACK LOTUS BOT © 2026 — Sr.Agente208 🪷**
 
 *Poder nas Sombras • Elegância na Luz • Domínio nos Grupos*
 
