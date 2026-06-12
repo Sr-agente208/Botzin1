@@ -1,6 +1,6 @@
 // ╔══════════════════════════════════════════════╗
-// ║   🎲 SISTEMA RPG — BLACK LOTUS ORDEM/D&D     ║
-// ║   Inspirado em Ordem Paranormal & D&D 5e     ║
+// ║   🎲 SISTEMA RPG — BLACK LOTUS SESSÕES       ║
+// ║   Mesas de RPG em Grupo & IA Mestre          ║
 // ╚══════════════════════════════════════════════╝
 
 const fs = require('fs');
@@ -8,10 +8,12 @@ const path = require('path');
 
 const RPG_PATH = './SRC/rpg';
 const CHARS_PATH = `${RPG_PATH}/personagens.json`;
+const SESSIONS_PATH = `${RPG_PATH}/sessoes.json`;
 
 function initRPG() {
   if (!fs.existsSync(RPG_PATH)) fs.mkdirSync(RPG_PATH, { recursive: true });
   if (!fs.existsSync(CHARS_PATH)) fs.writeFileSync(CHARS_PATH, JSON.stringify({}));
+  if (!fs.existsSync(SESSIONS_PATH)) fs.writeFileSync(SESSIONS_PATH, JSON.stringify({}));
 }
 
 function loadData(filePath) {
@@ -27,71 +29,22 @@ function rolarDado(lados = 20) {
   return Math.floor(Math.random() * lados) + 1;
 }
 
-function modificador(valor) {
-  return Math.floor((valor - 10) / 2);
-}
-
-// 🧙 CLASSES / TRILHAS
+// 🧙 CLASSES
 const CLASSES = {
-  combatente: {
-    nome: 'Combatente ⚔️',
-    emoji: '⚔️',
-    hp_base: 20,
-    san_base: 12,
-    pe_base: 2,
-    atributos: { forca: 3, agilidade: 2, vigor: 3, intelecto: 1, presenca: 1 },
-    habilidades: ['Ataque Especial', 'Durão'],
-    origem: 'D&D / Ordem'
-  },
-  especialista: {
-    nome: 'Especialista 🔍',
-    emoji: '🔍',
-    hp_base: 16,
-    san_base: 16,
-    pe_base: 3,
-    atributos: { forca: 1, agilidade: 3, vigor: 2, intelecto: 3, presenca: 2 },
-    habilidades: ['Perito', 'Eclético'],
-    origem: 'Ordem'
-  },
-  ocultista: {
-    nome: 'Ocultista 🔮',
-    emoji: '🔮',
-    hp_base: 12,
-    san_base: 20,
-    pe_base: 4,
-    atributos: { forca: 1, agilidade: 1, vigor: 2, intelecto: 3, presenca: 3 },
-    habilidades: ['Ritual Arcano', 'Escolhido pelo Outro Lado'],
-    origem: 'Ordem'
-  },
-  mago: {
-    nome: 'Mago Arcano 🧙',
-    emoji: '🧙',
-    hp_base: 10,
-    san_base: 18,
-    pe_base: 5,
-    atributos: { forca: 1, agilidade: 2, vigor: 1, intelecto: 4, presenca: 2 },
-    habilidades: ['Bola de Fogo', 'Míssil Mágico'],
-    origem: 'D&D'
-  }
+  combatente: { nome: 'Combatente ⚔️', hp_base: 20, san_base: 12, pe_base: 2, atributos: { forca: 3, agilidade: 2, vigor: 3, intelecto: 1, presenca: 1 } },
+  especialista: { nome: 'Especialista 🔍', hp_base: 16, san_base: 16, pe_base: 3, atributos: { forca: 1, agilidade: 3, vigor: 2, intelecto: 3, presenca: 2 } },
+  ocultista: { nome: 'Ocultista 🔮', hp_base: 12, san_base: 20, pe_base: 4, atributos: { forca: 1, agilidade: 1, vigor: 2, intelecto: 3, presenca: 3 } },
+  mago: { nome: 'Mago Arcano 🧙', hp_base: 10, san_base: 18, pe_base: 5, atributos: { forca: 1, agilidade: 2, vigor: 1, intelecto: 4, presenca: 2 } }
 };
 
-// 👹 MONSTROS PARANORMAIS / D&D
-const MONSTROS = [
-  { nome: 'Zumbi de Sangue 🩸', hp: 30, atk: 5, san_loss: 2, xp: 50, nex: 5 },
-  { nome: 'Esqueleto Guerreiro 💀', hp: 25, atk: 6, san_loss: 1, xp: 40, nex: 5 },
-  { nome: 'Vulto Sombrio 🌑', hp: 45, atk: 8, san_loss: 5, xp: 120, nex: 15 },
-  { nome: 'Dragão Jovem 🐉', hp: 120, atk: 15, san_loss: 10, xp: 500, nex: 50 },
-  { nome: 'Existido 🌀', hp: 60, atk: 10, san_loss: 8, xp: 200, nex: 30 }
-];
-
 async function BlackLotusMestre(prompt, SHIZUKU_SITE, SHIZUKU_KEY) {
-    const fullPrompt = `Você é o Mestre de RPG do Black Lotus Bot. Sua narração é sombria, imersiva e detalhada, no estilo Ordem Paranormal e D&D. Narre de forma curta e épica. Contexto: ${prompt}`;
+    const fullPrompt = `Você é o Mestre de RPG do Black Lotus Bot. Narre uma sessão de RPG para um grupo de jogadores. Seja imersivo, use elementos de Ordem Paranormal e D&D. Responda em Português. Contexto: ${prompt}`;
     try {
         const fetch = require('node-fetch');
         const res = await fetch(`${SHIZUKU_SITE}/api/ias/gpt-2?query=${encodeURIComponent(fullPrompt)}&apitoken=${SHIZUKU_KEY}`);
         const api = await res.json();
-        return api?.resposta || "O destino é incerto nas sombras...";
-    } catch { return "O mestre está em silêncio..."; }
+        return api?.resposta || "As sombras observam em silêncio...";
+    } catch { return "O mestre perdeu a conexão com o Outro Lado..."; }
 }
 
 async function handleRPG(sock, from, info, command, args, sender, pushname, isGroup, prefix, SHIZUKU_SITE, SHIZUKU_KEY) {
@@ -99,138 +52,139 @@ async function handleRPG(sock, from, info, command, args, sender, pushname, isGr
   const enviar = (texto) => sock.sendMessage(from, { text: texto }, { quoted: info });
   const reagir = (emoji) => sock.sendMessage(from, { react: { text: emoji, key: info.key } });
 
+  const personagens = loadData(CHARS_PATH);
+  const sessoes = loadData(SESSIONS_PATH);
+
   switch (command) {
     case 'rpg':
     case 'rpgajuda': {
       return enviar(`
 ╔══════════════════════════════╗
-║  🌑 BLACK LOTUS: ORDEM & D&D ║
+║  🌑 BLACK LOTUS: SESSÕES RPG ║
 ╚══════════════════════════════╝
 
-*🧙 PERSONAGEM*
+*👤 PERSONAGEM*
 ▸ ${prefix}criarchar [classe] [nome]
-▸ ${prefix}meuchar (Status, NEX, Sanidade)
-▸ ${prefix}deletarchar
+▸ ${prefix}meuchar | ${prefix}deletarchar
 
-*⚔️ MISSÕES & IA*
-▸ ${prefix}aventura (Inicia narração com IA)
-▸ ${prefix}batalha (Combate Paranormal)
-▸ ${prefix}atacar / ${prefix}ritual / ${prefix}fugir
+*🌐 SESSÃO DE GRUPO*
+▸ ${prefix}criarsessao [tema] (Inicia mesa)
+▸ ${prefix}entrar (Entra na mesa atual)
+▸ ${prefix}narrar [ação] (IA narra a cena)
+▸ ${prefix}fecharsessao (Finaliza a mesa)
 
-*📊 STATUS*
-❤️ PV (Vida) | 🧠 SAN (Sanidade)
-⚡ PE (Esforço) | ⭐ NEX (Nível)
+*⚔️ COMBATE & IA*
+▸ ${prefix}batalha (Inicia combate na mesa)
+▸ ${prefix}atacar (Ataca o monstro da mesa)
 
 *Classes:* combatente, especialista, ocultista, mago`);
     }
 
     case 'criarchar': {
-      const personagens = loadData(CHARS_PATH);
-      if (personagens[sender]) return enviar(`❌ Você já possui uma ficha ativa.`);
+      if (personagens[sender]) return enviar(`❌ Você já possui uma ficha.`);
       const classeKey = args[0]?.toLowerCase();
       const nome = args.slice(1).join(' ') || pushname;
       if (!CLASSES[classeKey]) return enviar(`❌ Escolha: combatente, especialista, ocultista ou mago.`);
-
       const c = CLASSES[classeKey];
       personagens[sender] = {
-        nome, classe: classeKey, nex: 5, xp: 0,
-        hp: c.hp_base, hp_max: c.hp_base,
-        san: c.san_base, san_max: c.san_base,
-        pe: c.pe_base, pe_max: c.pe_base,
-        atributos: { ...c.atributos },
-        vitorias: 0, derrotas: 0, em_batalha: false
+        nome, classe: classeKey, nex: 5, xp: 0, hp: c.hp_base, hp_max: c.hp_base,
+        san: c.san_base, san_max: c.san_base, pe: c.pe_base, pe_max: c.pe_base,
+        atributos: { ...c.atributos }, vitorias: 0, derrotas: 0
       };
       saveData(CHARS_PATH, personagens);
       await reagir("📜");
-      return enviar(`📜 *Ficha de ${nome} criada com sucesso!*
-Classe: ${c.nome}
-NEX: 5% (Iniciante)
-PV: ${c.hp_base} | SAN: ${c.san_base} | PE: ${c.pe_base}`);
+      return enviar(`📜 *Ficha de ${nome} criada!* NEX: 5%`);
     }
 
     case 'meuchar': {
-      const personagens = loadData(CHARS_PATH);
       const p = personagens[sender];
       if (!p) return enviar(`❌ Crie sua ficha com ${prefix}criarchar`);
-      
-      const barraVida = '❤️' + '█'.repeat(Math.floor((p.hp/p.hp_max)*5)) + '░'.repeat(5-Math.floor((p.hp/p.hp_max)*5));
-      const barraSan = '🧠' + '█'.repeat(Math.floor((p.san/p.san_max)*5)) + '░'.repeat(5-Math.floor((p.san/p.san_max)*5));
-
-      return enviar(`
-👤 *${p.nome.toUpperCase()}* — ${CLASSES[p.classe].nome}
-⭐ *NEX:* ${p.nex}% | XP: ${p.xp}
-
-${barraVida} ${p.hp}/${p.hp_max}
-${barraSan} ${p.san}/${p.san_max}
-⚡ PE: ${p.pe}/${p.pe_max}
-
-📊 *ATRIBUTOS:*
-FOR: ${p.atributos.forca} | AGI: ${p.atributos.agilidade} | VIG: ${p.atributos.vigor}
-INT: ${p.atributos.intelecto} | PRE: ${p.atributos.presenca}
-
-🏆 Vitórias: ${p.vitorias} | 💀 Derrotas: ${p.derrotas}`);
+      return enviar(`👤 *${p.nome.toUpperCase()}* (${CLASSES[p.classe].nome})\n⭐ NEX: ${p.nex}% | PV: ${p.hp}/${p.hp_max}\n🧠 SAN: ${p.san}/${p.san_max}\n⚡ PE: ${p.pe}/${p.pe_max}`);
     }
 
-    case 'aventura': {
-        const personagens = loadData(CHARS_PATH);
-        const p = personagens[sender];
-        if (!p) return enviar(`❌ Crie sua ficha primeiro.`);
-        
-        await reagir("🔮");
-        const narra = await BlackLotusMestre(`O agente/herói ${p.nome} (${CLASSES[p.classe].nome}) está explorando um local amaldiçoado. O que ele encontra?`, SHIZUKU_SITE, SHIZUKU_KEY);
-        return enviar(`🔮 *NARRAÇÃO DO MESTRE:*\n\n${narra}\n\n_Use ${prefix}batalha para enfrentar o perigo._`);
+    case 'criarsessao': {
+      if (!isGroup) return enviar("❌ Apenas em grupos!");
+      if (sessoes[from]) return enviar("❌ Já existe uma sessão ativa neste grupo!");
+      const tema = args.join(' ') || "Investigação Paranormal";
+      sessoes[from] = {
+        mestre: sender, tema, jogadores: [sender], status: 'ativa',
+        historia: [`Sessão iniciada com o tema: ${tema}`], monstro: null
+      };
+      saveData(SESSIONS_PATH, sessoes);
+      await reagir("🌑");
+      const intro = await BlackLotusMestre(`Inicie uma sessão de RPG para um grupo de jogadores. O tema é: ${tema}. Descreva o cenário inicial onde os jogadores se encontram.`, SHIZUKU_SITE, SHIZUKU_KEY);
+      return enviar(`🌑 *SESSÃO INICIADA: ${tema.toUpperCase()}*\n\n🔮 *MESTRE:* ${intro}\n\n_Jogadores podem entrar com ${prefix}entrar_`);
+    }
+
+    case 'entrar': {
+      if (!sessoes[from]) return enviar("❌ Nenhuma sessão ativa.");
+      if (!personagens[sender]) return enviar(`❌ Crie sua ficha primeiro com ${prefix}criarchar`);
+      if (sessoes[from].jogadores.includes(sender)) return enviar("❌ Você já está na sessão.");
+      sessoes[from].jogadores.push(sender);
+      saveData(SESSIONS_PATH, sessoes);
+      await reagir("✅");
+      return enviar(`✅ *${personagens[sender].nome}* entrou na sessão!`);
+    }
+
+    case 'narrar': {
+      if (!sessoes[from]) return enviar("❌ Nenhuma sessão ativa.");
+      const acao = args.join(' ');
+      if (!acao) return enviar(`Ex: ${prefix}narrar Eu entro na casa abandonada.`);
+      await reagir("✍️");
+      const p = personagens[sender] || { nome: pushname };
+      const contexto = `O jogador ${p.nome} realizou a seguinte ação: "${acao}". Continue a história considerando os outros jogadores na mesa.`;
+      const resposta = await BlackLotusMestre(contexto, SHIZUKU_SITE, SHIZUKU_KEY);
+      sessoes[from].historia.push(`Ação: ${acao} | Mestre: ${resposta}`);
+      saveData(SESSIONS_PATH, sessoes);
+      return enviar(`📖 *HISTÓRIA:*\n\n${resposta}`);
     }
 
     case 'batalha': {
-      const personagens = loadData(CHARS_PATH);
-      const p = personagens[sender];
-      if (!p) return enviar(`❌ Crie sua ficha primeiro.`);
-      if (p.hp <= 0) return enviar(`💀 Você está inconsciente.`);
-
-      const m = MONSTROS[Math.floor(Math.random() * MONSTROS.length)];
-      p.em_batalha = true;
-      p.batalha_atual = { ...m, hp_atual: m.hp };
-      saveData(CHARS_PATH, personagens);
-
+      if (!sessoes[from]) return enviar("❌ Nenhuma sessão ativa.");
+      const monstros = [
+        { nome: 'Zumbi de Sangue 🩸', hp: 100, atk: 10 },
+        { nome: 'Vulto do Medo 🌑', hp: 150, atk: 15 },
+        { nome: 'Dragão Abissal 🐉', hp: 300, atk: 25 }
+      ];
+      const m = monstros[Math.floor(Math.random() * monstros.length)];
+      sessoes[from].monstro = { ...m, hp_atual: m.hp };
+      saveData(SESSIONS_PATH, sessoes);
       await reagir("⚔️");
-      const intro = await BlackLotusMestre(`Um ${m.nome} surge das sombras para atacar ${p.nome}! Descreva a aparição da criatura.`, SHIZUKU_SITE, SHIZUKU_KEY);
-      return enviar(`⚔️ *ENCONTRO PARANORMAL*\n\n${intro}\n\n❤️ HP Inimigo: ${m.hp}\n\n_Comandos: ${prefix}atacar, ${prefix}ritual, ${prefix}fugir_`);
+      const desc = await BlackLotusMestre(`Um ${m.nome} aparece para atacar o grupo! Descreva a ameaça.`, SHIZUKU_SITE, SHIZUKU_KEY);
+      return enviar(`⚔️ *COMBATE DE GRUPO*\n\n${desc}\n\n❤️ HP Inimigo: ${m.hp}\n\n_Todos os jogadores na sessão podem ${prefix}atacar!_`);
     }
 
     case 'atacar': {
-      const personagens = loadData(CHARS_PATH);
+      if (!sessoes[from] || !sessoes[from].monstro) return enviar("❌ Nenhum combate ativo.");
+      if (!sessoes[from].jogadores.includes(sender)) return enviar("❌ Você não está nesta sessão.");
+      
       const p = personagens[sender];
-      if (!p || !p.em_batalha) return enviar(`❌ Você não está em combate.`);
-
-      const b = p.batalha_atual;
-      const d20 = rolarDado(20);
-      const danoJ = rolarDado(8) + p.atributos.forca;
-      const danoM = Math.max(0, rolarDado(b.atk) - p.atributos.vigor);
-
-      b.hp_atual -= danoJ;
-      p.hp -= danoM;
-      p.san -= b.san_loss;
-
-      let res = `🎲 *D20:* ${d20}\n⚔️ Você causou *${danoJ}* de dano!\n👹 O inimigo revidou com *${danoM}* de dano!\n🧠 Perda de Sanidade: -${b.san_loss}`;
-
-      if (b.hp_atual <= 0) {
-        p.em_batalha = false;
-        p.xp += b.xp;
-        p.nex += Math.floor(b.nex / 5);
-        p.vitorias++;
-        res += `\n\n🏆 *VITÓRIA!* Você derrotou o ${b.nome}!\n📈 +${b.xp} XP | ⭐ NEX: ${p.nex}%`;
-      } else if (p.hp <= 0 || p.san <= 0) {
-        p.em_batalha = false;
-        p.derrotas++;
-        res += `\n\n💀 *DERROTA!* Você sucumbiu ao medo ou aos ferimentos.`;
+      const m = sessoes[from].monstro;
+      const dano = rolarDado(10) + (p?.atributos?.forca || 2);
+      m.hp_atual -= dano;
+      
+      let msg = `⚔️ *${p?.nome || pushname}* atacou o ${m.nome} e causou *${dano}* de dano!`;
+      
+      if (m.hp_atual <= 0) {
+        msg += `\n\n🏆 *VITÓRIA!* O grupo derrotou o inimigo!`;
+        sessoes[from].monstro = null;
+      } else {
+        msg += `\n❤️ HP restante: ${m.hp_atual}`;
       }
+      
+      saveData(SESSIONS_PATH, sessoes);
+      return enviar(msg);
+    }
 
-      saveData(CHARS_PATH, personagens);
-      return enviar(res);
+    case 'fecharsessao': {
+      if (!sessoes[from]) return enviar("❌ Nenhuma sessão ativa.");
+      if (sessoes[from].mestre !== sender) return enviar("❌ Apenas o mestre pode fechar a sessão.");
+      delete sessoes[from];
+      saveData(SESSIONS_PATH, sessoes);
+      return enviar("🏁 *Sessão finalizada.* Até a próxima aventura!");
     }
     
     case 'deletarchar': {
-        const personagens = loadData(CHARS_PATH);
         delete personagens[sender];
         saveData(CHARS_PATH, personagens);
         return enviar(`🗑️ Ficha apagada.`);
