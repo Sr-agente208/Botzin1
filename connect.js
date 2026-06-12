@@ -16,70 +16,107 @@ const path = require("path");
 const express = require("express");
 const QRCode = require("qrcode");
 
-// ─── SERVIDOR WEB PARA QR CODE ────────────────────────────────────────────────
+// ─── SERVIDOR WEB ─────────────────────────────────────────────────────────────
 const app = express();
 const PORT = process.env.PORT || 3000;
 let currentQR = null;
+let pairingCode = null;
 let botStatus = "aguardando";
 
 app.get("/", async (req, res) => {
     if (botStatus === "conectado") {
         return res.send(`<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Kay System</title>
-<style>body{background:#111;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}
-h1{color:#25D366;} p{color:#aaa;}</style></head>
-<body><h1>✅ Bot Conectado!</h1><p>Kay System está online e funcionando.</p></body></html>`);
-    }
-
-    if (!currentQR) {
-        return res.send(`<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Kay System - QR Code</title>
-<meta http-equiv="refresh" content="5">
-<style>body{background:#111;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}
-h1{color:#25D366;} p{color:#aaa;} .spin{border:4px solid #333;border-top:4px solid #25D366;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;}
-@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style></head>
-<body><h1>Kay System</h1><div class="spin"></div><p>Gerando QR Code... aguarde.</p><p style="font-size:12px">A página atualiza automaticamente.</p></body></html>`);
-    }
-
-    try {
-        const qrImage = await QRCode.toDataURL(currentQR, {
-            width: 300,
-            margin: 2,
-            color: { dark: "#000000", light: "#ffffff" }
-        });
-
-        res.send(`<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Kay System - QR Code</title>
-<meta http-equiv="refresh" content="30">
+<html><head><meta charset="UTF-8"><title>Black Lotus Bot</title>
 <style>
-body{background:#111;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;flex-direction:column;gap:16px;}
-h1{color:#25D366;margin:0;} 
-.box{background:#1a1a1a;border:2px solid #25D366;border-radius:16px;padding:24px;text-align:center;}
-img{border-radius:8px;display:block;}
-p{color:#aaa;margin:8px 0;font-size:14px;}
-.badge{background:#25D366;color:#000;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:bold;}
+body{background:#0a0a0a;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}
+h1{color:#7c3aed;} p{color:#aaa;}
+.badge{background:#7c3aed;color:#fff;padding:8px 20px;border-radius:20px;font-weight:bold;}
 </style></head>
 <body>
-  <h1>Kay System 🤖</h1>
-  <div class="box">
-    <img src="${qrImage}" alt="QR Code WhatsApp" width="280" height="280"/>
-    <p>Escaneie com o WhatsApp</p>
-    <span class="badge">Abre o WhatsApp → Aparelhos conectados → Conectar aparelho</span>
-  </div>
-  <p style="font-size:12px;color:#555">QR atualiza a cada 30s automaticamente</p>
+<h1>🪷 Black Lotus Bot</h1>
+<div class="badge">✅ Bot Conectado e Online!</div>
+<p style="margin-top:20px">O bot está funcionando normalmente.</p>
 </body></html>`);
-    } catch (e) {
-        res.send("Erro ao gerar QR. Veja os logs.");
     }
+
+    // Página com QR e Código de Vinculação
+    let qrImage = null;
+    if (currentQR) {
+        try {
+            qrImage = await QRCode.toDataURL(currentQR, {
+                width: 280, margin: 2,
+                color: { dark: "#000000", light: "#ffffff" }
+            });
+        } catch (e) {}
+    }
+
+    return res.send(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Black Lotus Bot - Conectar</title>
+<meta http-equiv="refresh" content="20">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0a0a0a;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;flex-direction:column;gap:20px;}
+h1{color:#7c3aed;font-size:28px;text-align:center;}
+.container{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;width:100%;max-width:800px;}
+.box{background:#111;border:2px solid #7c3aed;border-radius:16px;padding:24px;text-align:center;flex:1;min-width:260px;}
+.box h2{color:#a78bfa;margin-bottom:16px;font-size:18px;}
+.box p{color:#888;font-size:13px;margin-top:10px;}
+.code{background:#1a0a2e;border:2px solid #7c3aed;border-radius:12px;padding:20px;font-size:32px;font-weight:bold;letter-spacing:8px;color:#a78bfa;margin:10px 0;}
+.step{background:#1a1a1a;border-radius:8px;padding:10px 14px;margin:6px 0;font-size:13px;color:#ccc;text-align:left;}
+.step span{color:#7c3aed;font-weight:bold;}
+.spin{border:4px solid #333;border-top:4px solid #7c3aed;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.badge{background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:12px;}
+</style></head>
+<body>
+<h1>🪷 Black Lotus Bot</h1>
+<p style="color:#888;font-size:13px">Página atualiza automaticamente a cada 20s</p>
+
+<div class="container">
+
+  <!-- CÓDIGO DE VINCULAÇÃO -->
+  <div class="box">
+    <span class="badge">⚡ RECOMENDADO</span>
+    <h2>📱 Código de Vinculação</h2>
+    ${pairingCode ? `
+    <div class="code">${pairingCode}</div>
+    <div class="step"><span>1.</span> Abra o WhatsApp no celular</div>
+    <div class="step"><span>2.</span> Toque nos 3 pontinhos → Aparelhos conectados</div>
+    <div class="step"><span>3.</span> Toque em "Conectar aparelho"</div>
+    <div class="step"><span>4.</span> Escolha "Usar código de telefone"</div>
+    <div class="step"><span>5.</span> Digite o código acima</div>
+    ` : `
+    <div class="spin"></div>
+    <p>Gerando código... aguarde.</p>
+    <p style="font-size:11px;margin-top:8px">Configure a variável <b>NUMERO</b> no Railway com seu número (ex: 5511999999999)</p>
+    `}
+  </div>
+
+  <!-- QR CODE -->
+  <div class="box">
+    <h2>📷 QR Code</h2>
+    ${qrImage ? `
+    <img src="${qrImage}" alt="QR Code" width="240" height="240" style="border-radius:8px;"/>
+    <div class="step"><span>1.</span> Abra o WhatsApp no celular</div>
+    <div class="step"><span>2.</span> Aparelhos conectados → Conectar aparelho</div>
+    <div class="step"><span>3.</span> Escaneie o QR Code acima</div>
+    ` : `
+    <div class="spin"></div>
+    <p>Gerando QR Code... aguarde.</p>
+    `}
+  </div>
+
+</div>
+</body></html>`);
 });
 
 app.listen(PORT, () => {
     console.log(chalk.green(`[WEB] Servidor rodando na porta ${PORT}`));
-    console.log(chalk.cyan(`[WEB] Acesse a URL do seu deploy no Railway para ver o QR Code`));
+    console.log(chalk.cyan(`[WEB] Acesse a URL do Railway para conectar o bot`));
 });
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ─── SESSION DATA (Railway) ───────────────────────────────────────────────────
+// ─── SESSION DATA ─────────────────────────────────────────────────────────────
 const SESSION_PATH = path.resolve(__dirname, "session");
 
 function restaurarSessao() {
@@ -176,6 +213,7 @@ async function startSystemZR() {
     }
     isReconnecting = true;
     currentQR = null;
+    pairingCode = null;
     botStatus = "aguardando";
 
     restaurarSessao();
@@ -197,8 +235,8 @@ async function startSystemZR() {
         return { version: fallback };
     })();
 
-    console.log(chalk.cyan(figlet.textSync("Kay System", { font: "Small", horizontalLayout: "default" })));
-    console.log(chalk.green(`\nIniciando Kay System v1.0.0...\n`));
+    console.log(chalk.hex("#7c3aed")(figlet.textSync("Black Lotus", { font: "Small" })));
+    console.log(chalk.green(`\nIniciando Black Lotus Bot v2.0.0...\n`));
 
     const systemZR = makeWASocket({
         version,
@@ -212,6 +250,7 @@ async function startSystemZR() {
         generateHighQualityLinkPreview: false,
         syncFullHistory: false,
         emitOwnEvents: false,
+        printQRInTerminal: false,
         getMessage: async (key) => {
             const msg = await store.loadMessage(key.remoteJid, key.id);
             return msg?.message || { conversation: "Ola!" };
@@ -220,8 +259,30 @@ async function startSystemZR() {
 
     currentSocket = systemZR;
     setInterval(() => clearOldSessionFiles(SESSION_PATH), 3600000);
-
     store.bind(systemZR.ev);
+
+    // ─── GERAR CÓDIGO DE VINCULAÇÃO ───────────────────────────────────────────
+    if (!state.creds.registered) {
+        const numero = process.env.NUMERO;
+        if (numero) {
+            try {
+                const numeroLimpo = numero.replace(/\D/g, "");
+                console.log(chalk.yellow(`[PAIRING] Gerando código para o número: ${numeroLimpo}...`));
+                await new Promise(r => setTimeout(r, 3000));
+                const code = await systemZR.requestPairingCode(numeroLimpo);
+                pairingCode = code?.match(/.{1,4}/g)?.join("-") || code;
+                console.log(chalk.bgMagenta.white(`\n🔑 CÓDIGO DE VINCULAÇÃO: ${pairingCode}\n`));
+                console.log(chalk.cyan(`[WEB] Acesse a URL do Railway para ver o código na página web`));
+            } catch (e) {
+                console.log(chalk.red("[PAIRING] Erro ao gerar código: " + e.message));
+                console.log(chalk.yellow("[PAIRING] Usando QR Code como alternativa..."));
+            }
+        } else {
+            console.log(chalk.yellow("[PAIRING] Variável NUMERO não definida — usando QR Code"));
+            console.log(chalk.cyan("[PAIRING] Para usar código, adicione NUMERO=5511999999999 nas variáveis do Railway"));
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     systemZR.ev.on("messages.upsert", async (chatUpdate) => {
         try {
@@ -237,7 +298,6 @@ async function startSystemZR() {
     systemZR.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
-        // Atualiza o QR para a página web
         if (qr) {
             currentQR = qr;
             botStatus = "aguardando_qr";
@@ -250,6 +310,7 @@ async function startSystemZR() {
 
         if (connection === "close") {
             currentQR = null;
+            pairingCode = null;
             botStatus = "desconectado";
             const statusCode = new Boom(lastDisconnect?.error)?.output.statusCode;
             console.log(chalk.red(`\nConexao fechada (codigo: ${statusCode})`));
@@ -266,8 +327,9 @@ async function startSystemZR() {
             }
         } else if (connection === "open") {
             currentQR = null;
+            pairingCode = null;
             botStatus = "conectado";
-            console.log(chalk.green("\n✅ Kay System conectado com sucesso!\n"));
+            console.log(chalk.green("\n✅ Black Lotus Bot conectado com sucesso!\n"));
             isReconnecting = false;
             gerarSessionData();
         }
