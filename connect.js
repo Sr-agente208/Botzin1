@@ -15,6 +15,7 @@ const figlet = require("figlet");
 const path = require("path");
 const express = require("express");
 const QRCode = require("qrcode");
+const qrcodeTerminal = require("qrcode-terminal");
 
 // ─── SERVIDOR WEB ─────────────────────────────────────────────────────────────
 const app = express();
@@ -250,7 +251,7 @@ async function startSystemZR() {
         generateHighQualityLinkPreview: false,
         syncFullHistory: false,
         emitOwnEvents: false,
-        printQRInTerminal: false,
+        printQRInTerminal: true,
         getMessage: async (key) => {
             const msg = await store.loadMessage(key.remoteJid, key.id);
             return msg?.message || { conversation: "Ola!" };
@@ -301,7 +302,9 @@ async function startSystemZR() {
         if (qr) {
             currentQR = qr;
             botStatus = "aguardando_qr";
-            console.log(chalk.yellow("[QR] Novo QR gerado — acesse a URL do Railway para escanear"));
+            console.log(chalk.yellow("[QR] Novo QR gerado"));
+            try { qrcodeTerminal.generate(qr, { small: true }); } catch(e) {}
+            console.log(chalk.cyan("[QR] Abra a URL do Railway ou use o QR acima"));
         }
 
         if (connection === "connecting") {
