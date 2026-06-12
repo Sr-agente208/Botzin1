@@ -1,6 +1,6 @@
 // ╔══════════════════════════════════════════════╗
-// ║   🎲 SISTEMA RPG — BLACK LOTUS BOT 🎲        ║
-// ║   Estilo Ordem Paranormal / D&D              ║
+// ║   🎲 SISTEMA RPG — BLACK LOTUS ORDEM/D&D     ║
+// ║   Inspirado em Ordem Paranormal & D&D 5e     ║
 // ╚══════════════════════════════════════════════╝
 
 const fs = require('fs');
@@ -8,11 +8,7 @@ const path = require('path');
 
 const RPG_PATH = './SRC/rpg';
 const CHARS_PATH = `${RPG_PATH}/personagens.json`;
-const LOJA_PATH = `${RPG_PATH}/loja.json`;
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🗂️ INICIALIZAÇÃO DOS ARQUIVOS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function initRPG() {
   if (!fs.existsSync(RPG_PATH)) fs.mkdirSync(RPG_PATH, { recursive: true });
   if (!fs.existsSync(CHARS_PATH)) fs.writeFileSync(CHARS_PATH, JSON.stringify({}));
@@ -27,377 +23,217 @@ function saveData(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🎲 FUNÇÕES DE DADO
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function rolarDado(lados = 20) {
   return Math.floor(Math.random() * lados) + 1;
-}
-
-function rolarMultiplos(qtd, lados) {
-  let resultados = [];
-  for (let i = 0; i < qtd; i++) resultados.push(rolarDado(lados));
-  return resultados;
 }
 
 function modificador(valor) {
   return Math.floor((valor - 10) / 2);
 }
 
-function formatarMod(mod) {
-  return mod >= 0 ? `+${mod}` : `${mod}`;
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🧙 CLASSES DISPONÍVEIS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🧙 CLASSES / TRILHAS
 const CLASSES = {
-  guerreiro: {
-    nome: 'Guerreiro ⚔️',
+  combatente: {
+    nome: 'Combatente ⚔️',
     emoji: '⚔️',
-    hp_base: 30,
-    dado_vida: 10,
-    atributos: { forca: 16, destreza: 12, constituicao: 14, inteligencia: 10, sabedoria: 10, carisma: 10 },
-    habilidades: ['Ataque Poderoso', 'Defesa Férrea', 'Investida'],
-    descricao: 'Mestre do combate corpo-a-corpo'
+    hp_base: 20,
+    san_base: 12,
+    pe_base: 2,
+    atributos: { forca: 3, agilidade: 2, vigor: 3, intelecto: 1, presenca: 1 },
+    habilidades: ['Ataque Especial', 'Durão'],
+    origem: 'D&D / Ordem'
+  },
+  especialista: {
+    nome: 'Especialista 🔍',
+    emoji: '🔍',
+    hp_base: 16,
+    san_base: 16,
+    pe_base: 3,
+    atributos: { forca: 1, agilidade: 3, vigor: 2, intelecto: 3, presenca: 2 },
+    habilidades: ['Perito', 'Eclético'],
+    origem: 'Ordem'
+  },
+  ocultista: {
+    nome: 'Ocultista 🔮',
+    emoji: '🔮',
+    hp_base: 12,
+    san_base: 20,
+    pe_base: 4,
+    atributos: { forca: 1, agilidade: 1, vigor: 2, intelecto: 3, presenca: 3 },
+    habilidades: ['Ritual Arcano', 'Escolhido pelo Outro Lado'],
+    origem: 'Ordem'
   },
   mago: {
-    nome: 'Mago 🧙',
+    nome: 'Mago Arcano 🧙',
     emoji: '🧙',
-    hp_base: 18,
-    dado_vida: 6,
-    atributos: { forca: 8, destreza: 12, constituicao: 12, inteligencia: 18, sabedoria: 14, carisma: 12 },
-    habilidades: ['Bola de Fogo', 'Raio Arcano', 'Escudo Mágico'],
-    descricao: 'Wielder de magias poderosas'
-  },
-  ladino: {
-    nome: 'Ladino 🗡️',
-    emoji: '🗡️',
-    hp_base: 22,
-    dado_vida: 8,
-    atributos: { forca: 10, destreza: 18, constituicao: 12, inteligencia: 14, sabedoria: 12, carisma: 14 },
-    habilidades: ['Ataque Furtivo', 'Evasão', 'Golpe Baixo'],
-    descricao: 'Especialista em furtividade e golpes precisos'
-  },
-  clerigo: {
-    nome: 'Clérigo ✨',
-    emoji: '✨',
-    hp_base: 24,
-    dado_vida: 8,
-    atributos: { forca: 12, destreza: 10, constituicao: 14, inteligencia: 12, sabedoria: 18, carisma: 14 },
-    habilidades: ['Curar Ferimentos', 'Luz Divina', 'Benção'],
-    descricao: 'Canal da vontade divina'
-  },
-  cacador: {
-    nome: 'Caçador 🏹',
-    emoji: '🏹',
-    hp_base: 24,
-    dado_vida: 8,
-    atributos: { forca: 12, destreza: 16, constituicao: 14, inteligencia: 12, sabedoria: 16, carisma: 10 },
-    habilidades: ['Tiro Certeiro', 'Rastreamento', 'Armadilha'],
-    descricao: 'Mestre do rastreamento e da sobrevivência'
-  },
-  paranormal: {
-    nome: 'Agente Paranormal 👁️',
-    emoji: '👁️',
-    hp_base: 20,
-    dado_vida: 8,
-    atributos: { forca: 10, destreza: 14, constituicao: 12, inteligencia: 16, sabedoria: 18, carisma: 14 },
-    habilidades: ['Visão Além', 'Proteção Psíquica', 'Ritual de Contenção'],
-    descricao: 'Investigador do sobrenatural — estilo Ordem Paranormal'
+    hp_base: 10,
+    san_base: 18,
+    pe_base: 5,
+    atributos: { forca: 1, agilidade: 2, vigor: 1, intelecto: 4, presenca: 2 },
+    habilidades: ['Bola de Fogo', 'Míssil Mágico'],
+    origem: 'D&D'
   }
 };
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🛒 ITENS DA LOJA
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const ITENS = {
-  poçao_pequena: { nome: 'Poção Pequena 🧪', preco: 20, cura: 15, desc: 'Recupera 15 HP' },
-  poçao_media: { nome: 'Poção Média ⚗️', preco: 50, cura: 40, desc: 'Recupera 40 HP' },
-  espada_aço: { nome: 'Espada de Aço ⚔️', preco: 150, bonus: 2, tipo: 'forca', desc: '+2 Força' },
-  arco_longo: { nome: 'Arco Longo 🏹', preco: 150, bonus: 2, tipo: 'destreza', desc: '+2 Destreza' },
-  amuleto_arcano: { nome: 'Amuleto Arcano 🔮', preco: 200, bonus: 3, tipo: 'inteligencia', desc: '+3 Inteligência' },
-  armadura_leve: { nome: 'Armadura Leve 🛡️', preco: 100, bonus: 5, tipo: 'hp', desc: '+5 HP Max' }
-};
+// 👹 MONSTROS PARANORMAIS / D&D
+const MONSTROS = [
+  { nome: 'Zumbi de Sangue 🩸', hp: 30, atk: 5, san_loss: 2, xp: 50, nex: 5 },
+  { nome: 'Esqueleto Guerreiro 💀', hp: 25, atk: 6, san_loss: 1, xp: 40, nex: 5 },
+  { nome: 'Vulto Sombrio 🌑', hp: 45, atk: 8, san_loss: 5, xp: 120, nex: 15 },
+  { nome: 'Dragão Jovem 🐉', hp: 120, atk: 15, san_loss: 10, xp: 500, nex: 50 },
+  { nome: 'Existido 🌀', hp: 60, atk: 10, san_loss: 8, xp: 200, nex: 30 }
+];
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📊 XP E NÍVEL
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const NIVEIS_XP = [0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000];
-
-function calcularNivel(xp) {
-  for (let i = NIVEIS_XP.length - 1; i >= 0; i--) {
-    if (xp >= NIVEIS_XP[i]) return i + 1;
-  }
-  return 1;
+async function BlackLotusMestre(prompt, SHIZUKU_SITE, SHIZUKU_KEY) {
+    const fullPrompt = `Você é o Mestre de RPG do Black Lotus Bot. Sua narração é sombria, imersiva e detalhada, no estilo Ordem Paranormal e D&D. Narre de forma curta e épica. Contexto: ${prompt}`;
+    try {
+        const fetch = require('node-fetch');
+        const res = await fetch(`${SHIZUKU_SITE}/api/ias/gpt-2?query=${encodeURIComponent(fullPrompt)}&apitoken=${SHIZUKU_KEY}`);
+        const api = await res.json();
+        return api?.resposta || "O destino é incerto nas sombras...";
+    } catch { return "O mestre está em silêncio..."; }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🎮 COMANDOS RPG
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async function handleRPG(sock, from, info, command, args, sender, pushname, isGroup, prefix) {
+async function handleRPG(sock, from, info, command, args, sender, pushname, isGroup, prefix, SHIZUKU_SITE, SHIZUKU_KEY) {
   initRPG();
   const enviar = (texto) => sock.sendMessage(from, { text: texto }, { quoted: info });
   const reagir = (emoji) => sock.sendMessage(from, { react: { text: emoji, key: info.key } });
-  const q = args.join(' ');
 
   switch (command) {
-
     case 'rpg':
     case 'rpgajuda': {
-      const texto = `
+      return enviar(`
 ╔══════════════════════════════╗
-║  🌑 BLACK LOTUS RPG SYSTEM  ║
+║  🌑 BLACK LOTUS: ORDEM & D&D ║
 ╚══════════════════════════════╝
 
 *🧙 PERSONAGEM*
 ▸ ${prefix}criarchar [classe] [nome]
-▸ ${prefix}meuchar
-▸ ${prefix}inventario
+▸ ${prefix}meuchar (Status, NEX, Sanidade)
 ▸ ${prefix}deletarchar
 
-*⚔️ AVENTURA*
-▸ ${prefix}batalha [monstro]
-▸ ${prefix}atacar
-▸ ${prefix}fugir
-▸ ${prefix}trabalhar (Ganha ouro)
+*⚔️ MISSÕES & IA*
+▸ ${prefix}aventura (Inicia narração com IA)
+▸ ${prefix}batalha (Combate Paranormal)
+▸ ${prefix}atacar / ${prefix}ritual / ${prefix}fugir
 
-*🛒 ECONOMIA*
-▸ ${prefix}loja (Ver itens)
-▸ ${prefix}comprar [item]
-▸ ${prefix}usar [item]
+*📊 STATUS*
+❤️ PV (Vida) | 🧠 SAN (Sanidade)
+⚡ PE (Esforço) | ⭐ NEX (Nível)
 
-*🏆 COMPETIÇÃO*
-▸ ${prefix}rpgrank
-
-*📋 CLASSES:*
-guerreiro, mago, ladino, clerigo, cacador, paranormal`;
-      return enviar(texto);
+*Classes:* combatente, especialista, ocultista, mago`);
     }
 
     case 'criarchar': {
       const personagens = loadData(CHARS_PATH);
-      if (personagens[sender]) return enviar(`❌ Você já tem um personagem!`);
+      if (personagens[sender]) return enviar(`❌ Você já possui uma ficha ativa.`);
       const classeKey = args[0]?.toLowerCase();
-      const nomeChar = args.slice(1).join(' ') || pushname;
-      if (!classeKey || !CLASSES[classeKey]) return enviar(`❌ Classe inválida!`);
-      
-      const classe = CLASSES[classeKey];
+      const nome = args.slice(1).join(' ') || pushname;
+      if (!CLASSES[classeKey]) return enviar(`❌ Escolha: combatente, especialista, ocultista ou mago.`);
+
+      const c = CLASSES[classeKey];
       personagens[sender] = {
-        nome: nomeChar,
-        classe: classeKey,
-        nivel: 1,
-        xp: 0,
-        hp: classe.hp_base,
-        hp_max: classe.hp_base,
-        ouro: 100,
-        atributos: { ...classe.atributos },
-        inventario: [],
-        vitorias: 0,
-        derrotas: 0,
-        ultima_vez: 0
+        nome, classe: classeKey, nex: 5, xp: 0,
+        hp: c.hp_base, hp_max: c.hp_base,
+        san: c.san_base, san_max: c.san_base,
+        pe: c.pe_base, pe_max: c.pe_base,
+        atributos: { ...c.atributos },
+        vitorias: 0, derrotas: 0, em_batalha: false
       };
       saveData(CHARS_PATH, personagens);
-      await reagir("✨");
-      return enviar(`✨ *Personagem ${nomeChar} criado como ${classe.nome}!*`);
+      await reagir("📜");
+      return enviar(`📜 *Ficha de ${nome} criada com sucesso!*
+Classe: ${c.nome}
+NEX: 5% (Iniciante)
+PV: ${c.hp_base} | SAN: ${c.san_base} | PE: ${c.pe_base}`);
     }
 
     case 'meuchar': {
       const personagens = loadData(CHARS_PATH);
-      const char = personagens[sender];
-      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
-      const nivel = calcularNivel(char.xp);
-      const barraHP = '█'.repeat(Math.floor((char.hp / char.hp_max) * 10)) + '░'.repeat(10 - Math.floor((char.hp / char.hp_max) * 10));
+      const p = personagens[sender];
+      if (!p) return enviar(`❌ Crie sua ficha com ${prefix}criarchar`);
       
+      const barraVida = '❤️' + '█'.repeat(Math.floor((p.hp/p.hp_max)*5)) + '░'.repeat(5-Math.floor((p.hp/p.hp_max)*5));
+      const barraSan = '🧠' + '█'.repeat(Math.floor((p.san/p.san_max)*5)) + '░'.repeat(5-Math.floor((p.san/p.san_max)*5));
+
       return enviar(`
-🎭 *${char.nome}* — ${CLASSES[char.classe].emoji} ${CLASSES[char.classe].nome}
-⭐ *Nível ${nivel}* | XP: ${char.xp}
-❤️ HP: [${barraHP}] ${char.hp}/${char.hp_max}
-💰 *Ouro:* ${char.ouro}
+👤 *${p.nome.toUpperCase()}* — ${CLASSES[p.classe].nome}
+⭐ *NEX:* ${p.nex}% | XP: ${p.xp}
+
+${barraVida} ${p.hp}/${p.hp_max}
+${barraSan} ${p.san}/${p.san_max}
+⚡ PE: ${p.pe}/${p.pe_max}
 
 📊 *ATRIBUTOS:*
-💪 FOR: ${char.atributos.forca} | 🏃 DES: ${char.atributos.destreza}
-🛡️ CON: ${char.atributos.constituicao} | 🧠 INT: ${char.atributos.inteligencia}
-👁️ SAB: ${char.atributos.sabedoria} | ✨ CAR: ${char.atributos.carisma}
+FOR: ${p.atributos.forca} | AGI: ${p.atributos.agilidade} | VIG: ${p.atributos.vigor}
+INT: ${p.atributos.intelecto} | PRE: ${p.atributos.presenca}
 
-🏆 Vitórias: ${char.vitorias} | 💀 Derrotas: ${char.derrotas}`);
+🏆 Vitórias: ${p.vitorias} | 💀 Derrotas: ${p.derrotas}`);
     }
 
-    case 'trabalhar': {
-      const personagens = loadData(CHARS_PATH);
-      const char = personagens[sender];
-      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
-      
-      const agora = Date.now();
-      const cooldown = 300000; // 5 minutos
-      if (agora - char.ultima_vez < cooldown) {
-        const resto = Math.ceil((cooldown - (agora - char.ultima_vez)) / 60000);
-        return enviar(`⏳ Você está exausto! Volte em ${resto} minutos.`);
-      }
-
-      const ganho = rolarDado(50) + (char.atributos.forca / 2);
-      char.ouro += Math.floor(ganho);
-      char.ultima_vez = agora;
-      saveData(CHARS_PATH, personagens);
-      await reagir("💰");
-      return enviar(`⚒️ *Você trabalhou duro e ganhou ${Math.floor(ganho)} moedas de ouro!*`);
-    }
-
-    case 'loja': {
-      let texto = `🛒 *LOJA DO BLACK LOTUS*\n\n`;
-      for (const [key, item] of Object.entries(ITENS)) {
-        texto += `▸ *${item.nome}* — 💰 ${item.preco}\n   _${item.desc}_\n   Comando: ${prefix}comprar ${key}\n\n`;
-      }
-      return enviar(texto);
-    }
-
-    case 'comprar': {
-      const personagens = loadData(CHARS_PATH);
-      const char = personagens[sender];
-      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
-      const itemKey = args[0]?.toLowerCase();
-      const item = ITENS[itemKey];
-      if (!item) return enviar(`❌ Item não encontrado na loja!`);
-      if (char.ouro < item.preco) return enviar(`❌ Ouro insuficiente!`);
-
-      char.ouro -= item.preco;
-      char.inventario.push(itemKey);
-      saveData(CHARS_PATH, personagens);
-      await reagir("🛍️");
-      return enviar(`✅ Você comprou *${item.nome}*!`);
-    }
-
-    case 'inventario': {
-      const personagens = loadData(CHARS_PATH);
-      const char = personagens[sender];
-      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
-      if (char.inventario.length === 0) return enviar(`🎒 Seu inventário está vazio.`);
-      
-      let texto = `🎒 *INVENTÁRIO DE ${char.nome}*\n\n`;
-      const contagem = {};
-      char.inventario.forEach(i => contagem[i] = (contagem[i] || 0) + 1);
-      
-      for (const [key, qtd] of Object.entries(contagem)) {
-        texto += `▸ ${ITENS[key].nome} (x${qtd})\n`;
-      }
-      texto += `\nUse *${prefix}usar [item]*`;
-      return enviar(texto);
-    }
-
-    case 'usar': {
-      const personagens = loadData(CHARS_PATH);
-      const char = personagens[sender];
-      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
-      const itemKey = args[0]?.toLowerCase();
-      const index = char.inventario.indexOf(itemKey);
-      if (index === -1) return enviar(`❌ Você não tem esse item!`);
-      
-      const item = ITENS[itemKey];
-      if (item.cura) {
-        char.hp = Math.min(char.hp_max, char.hp + item.cura);
-        enviar(`🧪 Você usou ${item.nome} e recuperou ${item.cura} HP!`);
-      } else if (item.bonus) {
-        if (item.tipo === 'hp') {
-          char.hp_max += item.bonus;
-          char.hp += item.bonus;
-        } else {
-          char.atributos[item.tipo] += item.bonus;
-        }
-        enviar(`⚔️ Você equipou ${item.nome}! Bonus: ${item.desc}`);
-      }
-      
-      char.inventario.splice(index, 1);
-      saveData(CHARS_PATH, personagens);
-      return await reagir("✨");
+    case 'aventura': {
+        const personagens = loadData(CHARS_PATH);
+        const p = personagens[sender];
+        if (!p) return enviar(`❌ Crie sua ficha primeiro.`);
+        
+        await reagir("🔮");
+        const narra = await BlackLotusMestre(`O agente/herói ${p.nome} (${CLASSES[p.classe].nome}) está explorando um local amaldiçoado. O que ele encontra?`, SHIZUKU_SITE, SHIZUKU_KEY);
+        return enviar(`🔮 *NARRAÇÃO DO MESTRE:*\n\n${narra}\n\n_Use ${prefix}batalha para enfrentar o perigo._`);
     }
 
     case 'batalha': {
       const personagens = loadData(CHARS_PATH);
-      const char = personagens[sender];
-      if (!char) return enviar(`❌ Crie um personagem primeiro!`);
-      if (char.hp <= 0) return enviar(`💀 Você está morto! Use poções.`);
+      const p = personagens[sender];
+      if (!p) return enviar(`❌ Crie sua ficha primeiro.`);
+      if (p.hp <= 0) return enviar(`💀 Você está inconsciente.`);
 
-      const monstros = [
-        { nome: 'Goblin 👺', hp: 20, atk: 5, xp: 50, ouro: 30 },
-        { nome: 'Zumbi 🧟', hp: 35, atk: 8, xp: 80, ouro: 50 },
-        { nome: 'Dragão 🐉', hp: 150, atk: 25, xp: 500, ouro: 300 }
-      ];
-      
-      const monstro = monstros[rolarDado(monstros.length) - 1];
-      char.em_batalha = true;
-      char.batalha_atual = { ...monstro, hp_atual: monstro.hp };
+      const m = MONSTROS[Math.floor(Math.random() * MONSTROS.length)];
+      p.em_batalha = true;
+      p.batalha_atual = { ...m, hp_atual: m.hp };
       saveData(CHARS_PATH, personagens);
-      
-      return enviar(`⚔️ *BATALHA!* ⚔️\n\nVocê encontrou um *${monstro.nome}*!\n❤️ HP: ${monstro.hp}\n⚔️ ATK: ${monstro.atk}\n\nUse *${prefix}atacar* ou *${prefix}fugir*`);
+
+      await reagir("⚔️");
+      const intro = await BlackLotusMestre(`Um ${m.nome} surge das sombras para atacar ${p.nome}! Descreva a aparição da criatura.`, SHIZUKU_SITE, SHIZUKU_KEY);
+      return enviar(`⚔️ *ENCONTRO PARANORMAL*\n\n${intro}\n\n❤️ HP Inimigo: ${m.hp}\n\n_Comandos: ${prefix}atacar, ${prefix}ritual, ${prefix}fugir_`);
     }
 
     case 'atacar': {
       const personagens = loadData(CHARS_PATH);
-      const char = personagens[sender];
-      if (!char || !char.em_batalha) return enviar(`❌ Você não está em batalha!`);
-      
-      const batalha = char.batalha_atual;
-      const danoJ = rolarDado(10) + modificador(char.atributos.forca);
-      const danoM = rolarDado(batalha.atk);
-      
-      batalha.hp_atual -= danoJ;
-      char.hp -= danoM;
-      
-      let res = `⚔️ Você causou *${danoJ}* de dano!\n👹 O inimigo causou *${danoM}* de dano!\n\n❤️ Seu HP: ${char.hp}\n❤️ HP Inimigo: ${batalha.hp_atual}`;
-      
-      if (batalha.hp_atual <= 0) {
-        char.em_batalha = false;
-        char.xp += batalha.xp;
-        char.ouro += batalha.ouro;
-        char.vitorias++;
-        res += `\n\n🏆 *VITÓRIA!* Você ganhou ${batalha.xp} XP e ${batalha.ouro} ouro!`;
-      } else if (char.hp <= 0) {
-        char.em_batalha = false;
-        char.derrotas++;
-        res += `\n\n💀 *DERROTA!* Você morreu e perdeu a batalha.`;
+      const p = personagens[sender];
+      if (!p || !p.em_batalha) return enviar(`❌ Você não está em combate.`);
+
+      const b = p.batalha_atual;
+      const d20 = rolarDado(20);
+      const danoJ = rolarDado(8) + p.atributos.forca;
+      const danoM = Math.max(0, rolarDado(b.atk) - p.atributos.vigor);
+
+      b.hp_atual -= danoJ;
+      p.hp -= danoM;
+      p.san -= b.san_loss;
+
+      let res = `🎲 *D20:* ${d20}\n⚔️ Você causou *${danoJ}* de dano!\n👹 O inimigo revidou com *${danoM}* de dano!\n🧠 Perda de Sanidade: -${b.san_loss}`;
+
+      if (b.hp_atual <= 0) {
+        p.em_batalha = false;
+        p.xp += b.xp;
+        p.nex += Math.floor(b.nex / 5);
+        p.vitorias++;
+        res += `\n\n🏆 *VITÓRIA!* Você derrotou o ${b.nome}!\n📈 +${b.xp} XP | ⭐ NEX: ${p.nex}%`;
+      } else if (p.hp <= 0 || p.san <= 0) {
+        p.em_batalha = false;
+        p.derrotas++;
+        res += `\n\n💀 *DERROTA!* Você sucumbiu ao medo ou aos ferimentos.`;
       }
-      
+
       saveData(CHARS_PATH, personagens);
       return enviar(res);
-    }
-    
-    case 'fugir': {
-      const personagens = loadData(CHARS_PATH);
-      const char = personagens[sender];
-      if (!char || !char.em_batalha) return enviar(`❌ Você não está em batalha!`);
-      
-      if (rolarDado(20) + modificador(char.atributos.destreza) > 12) {
-        char.em_batalha = false;
-        char.batalha_atual = null;
-        saveData(CHARS_PATH, personagens);
-        return enviar(`🏃 Você fugiu com sucesso!`);
-      } else {
-        const dano = rolarDado(10);
-        char.hp -= dano;
-        saveData(CHARS_PATH, personagens);
-        return enviar(`❌ Falhou em fugir! Recebeu ${dano} de dano.`);
-      }
-    }
-    
-    case 'rpgrank': {
-        const personagens = loadData(CHARS_PATH);
-        const lista = Object.entries(personagens)
-          .map(([id, char]) => ({ id, ...char }))
-          .sort((a, b) => b.xp - a.xp)
-          .slice(0, 10);
-        
-        let txt = `🏆 *TOP 10 RPG BLACK LOTUS*\n\n`;
-        lista.forEach((c, i) => {
-          txt += `${i+1}. ${c.nome} - Nível ${calcularNivel(c.xp)} (${c.xp} XP)\n`;
-        });
-        return enviar(txt);
     }
     
     case 'deletarchar': {
         const personagens = loadData(CHARS_PATH);
         delete personagens[sender];
         saveData(CHARS_PATH, personagens);
-        return enviar(`🗑️ Personagem deletado.`);
+        return enviar(`🗑️ Ficha apagada.`);
     }
   }
 }
