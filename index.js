@@ -97,16 +97,22 @@ const MeuNumero = jidNormalizedUser(`${NumberDono}@s.whatsapp.net`);
 const IsCreator = jpzinhhomi?.includes(sender);
 const SoCriador = Shizukuu?.includes(sender);
 const SoBot = botNumber?.includes(sender)
-const So_Dono = MeuNumero?.includes(sender) || 
-Numero1?.includes(sender) ||
-Numero2?.includes(sender) || 
-Numero3?.includes(sender) ||
-Numero4?.includes(sender) ||
-Numero5?.includes(sender) ||
-Numero6?.includes(sender) ||
-SoBot || 
-SoCriador ||
-IsCreator;
+	// VERIFICAÇÃO DE DONO FLEXÍVEL (Ignora inconsistências do dígito 9)
+	const senderNumber = sender.split('@')[0];
+	const ownerNumber = NumberDono.replace(/\D/g, '');
+	const isOwnerByNumber = senderNumber.includes(ownerNumber) || ownerNumber.includes(senderNumber);
+
+	const So_Dono = isOwnerByNumber ||
+	MeuNumero?.includes(sender) || 
+	Numero1?.includes(sender) ||
+	Numero2?.includes(sender) || 
+	Numero3?.includes(sender) ||
+	Numero4?.includes(sender) ||
+	Numero5?.includes(sender) ||
+	Numero6?.includes(sender) ||
+	SoBot || 
+	SoCriador ||
+	IsCreator;
 
 	const moment = require("moment-timezone");
 	
