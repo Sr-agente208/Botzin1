@@ -566,6 +566,174 @@ switch (command) {
 		}
 		break;
 
+		case 'fotogrupo':
+		case 'setppg': {
+			if (!isGroup) return reply('❌ Este comando só funciona em grupo.');
+			if (!isGroupAdmins) return reply(msg.SoAdm);
+			if (!isBotGroupAdmins) return reply(msg.BotAdmin);
+			
+			if (!isImage && !isQuotedImage) return reply(`💡 *Como usar:* Envie uma imagem com a legenda *${prefix}fotogrupo* ou responda a uma imagem usando o comando.`);
+			
+			reply('⏳ *Baixando e atualizando a foto do grupo... Aguarde.*');
+			try {
+				const imgData = isQuotedImage ? info.message.extendedTextMessage.contextInfo.quotedMessage.imageMessage : info.message.imageMessage;
+				const buffer = await getFileBuffer(imgData, 'image');
+				await conn.updateProfilePicture(from, buffer);
+				reply('✅ *Sucesso!* A foto de perfil do grupo foi atualizada.');
+			} catch (e) {
+				console.error(e);
+				reply('❌ Erro ao atualizar a imagem. Verifique as permissões.');
+			}
+		}
+		break;
+
+		case 'promover': {
+			if (!isGroup) return reply('❌ Este comando só funciona em grupo.');
+			if (!isGroupAdmins) return reply(msg.SoAdm);
+			if (!isBotGroupAdmins) return reply(msg.BotAdmin);
+			
+			let alvo = menc_jid;
+			if (!alvo || alvo === sender) return reply('❌ Marque ou responda a mensagem de quem deseja promover.');
+			
+			try {
+				await conn.groupParticipantsUpdate(from, [alvo], 'promote');
+				reply(`✅ @${alvo.split('@')[0]} agora é um Administrador!`, {mentions: [alvo]});
+			} catch (e) {
+				reply('❌ Falha ao promover membro.');
+			}
+		}
+		break;
+
+		case 'rebaixar':
+		case 'demitir': {
+			if (!isGroup) return reply('❌ Este comando só funciona em grupo.');
+			if (!isGroupAdmins) return reply(msg.SoAdm);
+			if (!isBotGroupAdmins) return reply(msg.BotAdmin);
+			
+			let alvo = menc_jid;
+			if (!alvo || alvo === sender) return reply('❌ Marque ou responda a mensagem de quem deseja rebaixar.');
+			
+			try {
+				await conn.groupParticipantsUpdate(from, [alvo], 'demote');
+				reply(`✅ @${alvo.split('@')[0]} foi removido da administração.`, {mentions: [alvo]});
+			} catch (e) {
+				reply('❌ Falha ao rebaixar membro.');
+			}
+		}
+		break;
+
+		case 'abrir': {
+			if (!isGroup) return reply('❌ Este comando só funciona em grupo.');
+			if (!isGroupAdmins) return reply(msg.SoAdm);
+			if (!isBotGroupAdmins) return reply(msg.BotAdmin);
+			try {
+				await conn.groupSettingUpdate(from, 'not_announcement');
+				reply('🔓 *Grupo Aberto!* Todos os membros já podem enviar mensagens.');
+			} catch (e) {
+				reply('❌ Erro ao abrir o grupo.');
+			}
+		}
+		break;
+
+		case 'fechar': {
+			if (!isGroup) return reply('❌ Este comando só funciona em grupo.');
+			if (!isGroupAdmins) return reply(msg.SoAdm);
+			if (!isBotGroupAdmins) return reply(msg.BotAdmin);
+			try {
+				await conn.groupSettingUpdate(from, 'announcement');
+				reply('🔒 *Grupo Fechado!* Apenas administradores podem enviar mensagens.');
+			} catch (e) {
+				reply('❌ Erro ao fechar o grupo.');
+			}
+		}
+		break;
+
+		case 'marcar':
+		case 'todos': {
+			if (!isGroup) return reply('❌ Este comando só funciona em grupo.');
+			if (!isGroupAdmins) return reply(msg.SoAdm);
+			
+			let texto = `📢 *AVISO GERAL* 📢\n\n*Mensagem:* ${q || 'Atenção a todos!'}\n\n`;
+			let mentions = [];
+			for (let i of MembrosGP) {
+				texto += `⟡ @${i.id.split('@')[0]}\n`;
+				mentions.push(i.id);
+			}
+			await conn.sendMessage(from, { text: texto, mentions: mentions }, { quoted: selo });
+		}
+		break;
+
+		case 'admins':
+		case 'staff': {
+			if (!isGroup) return reply('❌ Este comando só funciona em grupo.');
+			let texto = `⚡ *CHAMANDO A STAFF* ⚡\n\n*Motivo:* ${q || 'Suporte solicitado!'}\n\n`;
+			let mentions = So_Admins;
+			for (let i of mentions) {
+				texto += `🛡️ @${i.split('@')[0]}\n`;
+			}
+			await conn.sendMessage(from, { text: texto, mentions: mentions }, { quoted: selo });
+		}
+		break;
+
+		case 'ship':
+		case 'casal': {
+			if (!isGroup) return reply('❌ Este comando só funciona em grupo.');
+			const p1 = MembrosGP[Math.floor(Math.random() * MembrosGP.length)].id;
+			let p2 = MembrosGP[Math.floor(Math.random() * MembrosGP.length)].id;
+			while (p1 === p2) { p2 = MembrosGP[Math.floor(Math.random() * MembrosGP.length)].id; }
+			
+			const amor = Math.floor(Math.random() * 100) + 1;
+			let barra = '';
+			const blocos = Math.round(amor / 10);
+			for (let i = 0; i < 10; i++) { barra += (i < blocos) ? '❤️' : '🖤'; }
+			
+			let res = `💘 *MATCHMAKER BLACK LOTUS* 💘\n\n👤 @${p1.split('@')[0]}\n➕\n👤 @${p2.split('@')[0]}\n\n📊 *Compatibilidade:* ${amor}%\n${barra}\n\n`;
+			if (amor > 80) res += '💍 *Casamento à vista! Almas gêmeas detectadas.*';
+			else if (amor > 50) res += '👀 *Dá pra rolar algo, só falta atitude.*';
+			else res += '🛑 *Melhor continuarem apenas como amigos...*';
+			
+			await conn.sendMessage(from, { text: res, mentions: [p1, p2] }, { quoted: selo });
+		}
+		break;
+
+		case 'enquete':
+		case 'voto': {
+			if (!isGroup) return reply('❌ Este comando só funciona em grupo.');
+			const partes = q.split('|');
+			const pergunta = partes[0]?.trim();
+			if (!pergunta || partes.length < 3) return reply(`💡 *Como usar:* ${prefix}enquete Título | Opção 1 | Opção 2`);
+			
+			const opcoes = partes.slice(1).map(o => o.trim());
+			await conn.sendMessage(from, {
+				poll: {
+					name: `📊 *ENQUETE BLACK LOTUS:* ${pergunta}`,
+					values: opcoes,
+					selectableCount: 1
+				}
+			});
+		}
+		break;
+
+		case 'clima':
+		case 'tempo': {
+			if (!q) return reply(`💡 Informe a cidade. Exemplo: *${prefix}clima São Paulo*`);
+			try {
+				const res = await fetchJson(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(q)}&appid=8af2693897782167f22502a24f0c4068&units=metric&lang=pt_br`);
+				if (!res.main) return reply('❌ Cidade não encontrada.');
+				
+				let rel = `🌤️ *PREVISÃO DO TEMPO: ${res.name}* 🌤️\n\n`;
+				rel += `🌡️ *Temperatura:* ${res.main.temp}°C\n`;
+				rel += `🔥 *Sensação:* ${res.main.feels_like}°C\n`;
+				rel += `💧 *Umidade:* ${res.main.humidity}%\n`;
+				rel += `💨 *Vento:* ${res.wind.speed} km/h\n`;
+				rel += `📝 *Condição:* ${res.weather[0].description.toUpperCase()}`;
+				reply(rel);
+			} catch (e) {
+				reply('❌ Erro ao consultar clima.');
+			}
+		}
+		break;
+
 		case 'getsession':
 		case 'session':
 		case 'token':
