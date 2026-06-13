@@ -410,7 +410,7 @@ switch (command) {
 	case 'help':
 	case 'ajuda':
 	case '™menu':
-		return reply(menu(prefix, pushname, _hora, date, NickDono, NomeBot));
+		return reply(menu(prefix, sender, NickDono, NomeBot, date, _hora, NumberDono, version));
 		break;
 
 	case 'deepsearch':
