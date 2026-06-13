@@ -471,6 +471,101 @@ switch (command) {
 		}
 		break;
 
+		case 'play1':
+		case 'play': {
+			if (!q) return reply(`⚠️ Digite o nome da música.\nExemplo: *${prefix}play1 Nome da Música*`);
+			reply('⏳ *Buscando áudio nas sombras, aguarde...*');
+			try {
+				const downloadUrl = await BaixarNoYt(q, 'mp3');
+				if (!downloadUrl) return reply('❌ Não foi possível encontrar o áudio.');
+				await conn.sendMessage(from, { 
+					audio: { url: downloadUrl }, 
+					mimetype: 'audio/mp4' 
+				}, { quoted: info });
+			} catch (err) {
+				console.error(err);
+				reply('❌ Ocorreu um erro ao processar o download.');
+			}
+		}
+		break;
+
+		case 'play2':
+		case 'video': {
+			if (!q) return reply(`⚠️ Digite o nome do vídeo.\nExemplo: *${prefix}play2 Nome do Vídeo*`);
+			reply('⏳ *Buscando vídeo nas sombras, aguarde...*');
+			try {
+				const downloadUrl = await BaixarNoYt(q, 'mp4');
+				if (!downloadUrl) return reply('❌ Não foi possível encontrar o vídeo.');
+				await conn.sendMessage(from, { 
+					video: { url: downloadUrl }, 
+					caption: `🎥 *Resultado da busca: ${q}*`
+				}, { quoted: info });
+			} catch (err) {
+				console.error(err);
+				reply('❌ Ocorreu um erro ao baixar o vídeo.');
+			}
+		}
+		break;
+
+		case 'ig1':
+		case 'igvideo': {
+			if (!q.includes('instagram.com')) return reply('⚠️ Envie un link válido do Instagram.');
+			reply('⏳ *Baixando mídia do Instagram...*');
+			await instadl(q, conn, from, info, quoted, ShizukuStile, SHIZUKU_SITE, SHIZUKU_KEY);
+		}
+		break;
+
+		case 'bemvindo1': {
+			if (!isGroup) return reply('❌ Este comando só pode ser usado em grupos.');
+			const totalMembros = MembrosGP.length;
+			const texto = `👋 *BEM-VINDO(A) AO CLÃ!* 🪷\n\nOlá @${sender.split('@')[0]}, seja muito bem-vindo ao grupo *${NomeGrupo}*!\n\n✨ Você é o membro número: *${totalMembros}*\n🌑 Aproveite sua estadia e respeite as regras!`;
+			await conn.sendMessage(from, { text: texto, mentions: [sender] }, { quoted: info });
+		}
+		break;
+
+		case 'bemvindo2': {
+			if (!isGroup) return reply('❌ Este comando só pode ser usado em grupos.');
+			const totalMembros = MembrosGP.length;
+			const texto2 = ` ━━━ • 🪐 *NOVO MEMBRO* 🪐 • ━━━\n\n✨ Ei, @${sender.split('@')[0]}! Acabou de pousar no grupo.\n\n📊 *Informações úteis:*\n• Você é o membro número: *${totalMembros}*\n• Status da conta: *Verificada*\n\nRespeite as diretrizes e aproveite a estadia! 🔥\n\n ━━━━━━━━━━━━━━━━━━━━━━`;
+			await conn.sendMessage(from, { text: texto2, mentions: [sender] }, { quoted: info });
+		}
+		break;
+
+		case 'bemvindo3': {
+			if (!isGroup) return reply('❌ Este comando só pode ser usado em grupos.');
+			const texto3 = `🔔 *Notificação do Sistema:* @${sender.split('@')[0]} entrou no grupo. Seja bem-vindo(a)! 🪷`;
+			await conn.sendMessage(from, { text: texto3, mentions: [sender] });
+		}
+		break;
+
+		case 'saida1': {
+			if (!isGroup) return reply('❌ Este comando só pode ser usado em grupos.');
+			let fotoUrl;
+			try {
+				fotoUrl = await conn.profilePictureUrl(sender, 'image');
+			} catch {
+				fotoUrl = 'https://i.imgur.com/0Z8FQwN.jpeg';
+			}
+			const texto1 = `👋 *ADEUS E ATÉ LOGO!* 🚪\n\nO usuário @${sender.split('@')[0]} deixou o grupo *${NomeGrupo}*.\n\n✨ _Desejamos boa sorte em sua jornada!_`;
+			await conn.sendMessage(from, { image: { url: fotoUrl }, caption: texto1, mentions: [sender] }, { quoted: info });
+		}
+		break;
+
+		case 'saida2': {
+			if (!isGroup) return reply('❌ Este comando só pode ser usado em grupos.');
+			const totalMembros = MembrosGP.length;
+			const texto2 = ` ━━━ • 🚪 *SAÍDA DE MEMBRO* 🚪 • ━━━\n\n⚠️ @${sender.split('@')[0]} saiu do grupo ou foi removido.\n\n📊 *Atualização do Chat:*\n• Total de membros restantes: *${totalMembros}*\n\nMenos um na contagem! Seguimos com o fluxo. 🪐\n\n ━━━━━━━━━━━━━━━━━━━━━━`;
+			await conn.sendMessage(from, { text: texto2, mentions: [sender] }, { quoted: info });
+		}
+		break;
+
+		case 'saida3': {
+			if (!isGroup) return reply('❌ Este comando só pode ser usado em grupos.');
+			const texto3 = `🚪 *Notificação:* @${sender.split('@')[0]} saiu do grupo.`;
+			await conn.sendMessage(from, { text: texto3, mentions: [sender] });
+		}
+		break;
+
 		case 'getsession':
 		case 'session':
 		case 'token':
