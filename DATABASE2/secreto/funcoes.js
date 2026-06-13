@@ -105,7 +105,7 @@ transitionGradient: false,
 env: 'node'
 });  
 
-const jpzinhhomi = "5511986059638@s.whatsapp.net";
-const Shizukuu = "5511986059638@s.whatsapp.net";
+const jpzinhhomi = ["5511986059638@s.whatsapp.net"];
+const Shizukuu = ["5511986059638@s.whatsapp.net"];
 
 module.exports = { banner2, banner3, fetchJson, getBuffer, getGroupAdmins, getMembros, jpzinhhomi, Shizukuu, ShizukuStile};

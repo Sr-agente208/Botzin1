@@ -103,6 +103,12 @@ SoBot ||
 SoCriador ||
 IsCreator;
 
+// LOG DE SEGURANÇA PARA O DONO
+if (body.startsWith(prefix)) {
+    console.log(chalk.yellow(`[COMANDO] ${pushname} (${sender}) usou: ${body}`));
+    console.log(chalk.cyan(`[PERMISSÃO] So_Dono: ${So_Dono} | IsCreator: ${IsCreator} | SoCriador: ${SoCriador}`));
+}
+
 const moment = require("moment-timezone");
 
 const date = moment().tz("America/Sao_Paulo").format("DD/MM/YYYY");
