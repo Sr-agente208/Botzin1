@@ -734,6 +734,70 @@ switch (command) {
 		}
 		break;
 
+		case 'atropelar': {
+			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+			let alvo = menc_jid;
+			if (!alvo || alvo === sender) return reply('🏎️ Marque alguém para atropelar!');
+			let frases = [
+				`🏎️ @${sender.split('@')[0]} passou por cima de @${alvo.split('@')[0]}! *VRUM VRUM!* 💨`,
+				`🏎️ @${sender.split('@')[0]} atropelou @${alvo.split('@')[0]} sem freio! 💥💨`,
+				`🏎️ @${sender.split('@')[0]} veio a milhão e derrubou @${alvo.split('@')[0]}! 🏁💥`
+			];
+			let frase = frases[Math.floor(Math.random() * frases.length)];
+			await conn.sendMessage(from, { video: { url: 'https://files.catbox.moe/wljomm.mp4' }, caption: frase, gifPlayback: true, mentions: [sender, alvo] }, { quoted: selo });
+		}
+		break;
+
+		case 'afogar': {
+			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+			let alvo = menc_jid;
+			if (!alvo || alvo === sender) return reply('🫧 Marque alguém para afogar!');
+			let frases = [
+				`🫧 @${sender.split('@')[0]} está afogando @${alvo.split('@')[0]}! *GLUB GLUB!* 🫧`,
+				`🌊 @${sender.split('@')[0]} empurrou @${alvo.split('@')[0]} no mar 😈`,
+				`💦 @${alvo.split('@')[0]} foi puxado pro fundo por @${sender.split('@')[0]} 🫧`
+			];
+			let frase = frases[Math.floor(Math.random() * frases.length)];
+			await conn.sendMessage(from, { video: { url: 'https://files.catbox.moe/t8ziql.mp4' }, caption: frase, gifPlayback: true, mentions: [sender, alvo] }, { quoted: selo });
+		}
+		break;
+
+		case 'rankjob': {
+			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+			let membros = MembrosGP.sort(() => Math.random() - 0.5).slice(0, 5);
+			let emojis = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+			let texto = `*💸 RANK JOB BLACK LOTUS 💸*\n\n`;
+			membros.forEach((m, i) => {
+				let porc = Math.floor(Math.random() * 25) + (70 - i * 3);
+				texto += `${emojis[i]} @${m.id.split('@')[0]} — *${porc}%*\n`;
+			});
+			texto += `\n_O faturamento desses 5 tá alto hoje!_ 🌑`;
+			await conn.sendMessage(from, { image: { url: 'https://files.catbox.moe/cs8kgs.jpg' }, caption: texto, mentions: membros.map(v => v.id) }, { quoted: selo });
+		}
+		break;
+
+		case 'piada': {
+			const piadas = [
+				"Por que o desenvolvedor faliu? Porque ele não tinha 'classe'.",
+				"O que o Java disse para o C? Você não tem cultura!",
+				"Por que o programador se afogou? Porque ele não sabia 'nadar' (node).",
+				"Quantos programadores são necessários para trocar uma lâmpada? Nenhum, é problema de hardware."
+			];
+			reply(`🃏 *PIADA BLACK LOTUS*\n\n${piadas[Math.floor(Math.random() * piadas.length)]}`);
+		}
+		break;
+
+		case 'biblia': {
+			const versiculos = [
+				"João 3:16 - Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...",
+				"Salmos 23:1 - O Senhor é o meu pastor, nada me faltará.",
+				"Filipenses 4:13 - Tudo posso naquele que me fortalece.",
+				"Josué 1:9 - Não fui eu que ordenei a você? Seja forte e corajoso!"
+			];
+			reply(`📖 *VERSÍCULO DO DIA*\n\n${versiculos[Math.floor(Math.random() * versiculos.length)]}`);
+		}
+		break;
+
 		case 'getsession':
 		case 'session':
 		case 'token':
