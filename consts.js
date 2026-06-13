@@ -60,21 +60,15 @@ const similarity = Math.round((2 * commonNGrams.length) / (nGrams1.length + nGra
 return similarity;
 }
 const ListaComandos = (targetWord) => {
-const fileContent = fs.readFileSync("index.js", "utf8");
-const commandsRegex = /case\s+['"](.+?)['"]/g;
-const results = [];
-const seen = new Set();
-let match;
-while ((match = commandsRegex.exec(fileContent)) !== null) {
-const extractedCommand = match[1];
-if (seen.has(extractedCommand)) continue;
-seen.add(extractedCommand);
-const similarity = SimilarComandos(targetWord, extractedCommand);
-results.push({ command: extractedCommand, similarity });
-}
-results.sort((a, b) => b.similarity - a.similarity);
-return results;
-};
+	// Lista estática básica para evitar dependência circular com o index.js
+	const commands = ['menu', 'ia', 'lotus', 'rpg', 'pack', 'criarpack', 'finalizarpack', 'roletarussa', 'apostar', 'caraoucoroa', 'getsession'];
+	const results = commands.map(cmd => ({
+		command: cmd,
+		similarity: SimilarComandos(targetWord, cmd)
+	}));
+	results.sort((a, b) => b.similarity - a.similarity);
+	return results;
+	};
 
 function kyun(seconds){
 function pad(s){
