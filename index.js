@@ -190,7 +190,10 @@ const args = body.trim().split(/ +/).slice(1);
 const arg = body.trim().split(/ +/).slice(1);
 const q = args.join(' ');
 const isCmd = body.trim().startsWith(prefix);
-const command = isCmd ? budy2.trim().slice(1).split(/ +/).shift().toLocaleLowerCase(): null;
+	const command = isCmd ? budy2.trim().slice(1).split(/ +/).shift().toLocaleLowerCase(): null;
+
+	// LOG DE DEPURAÇÃO
+	console.log(chalk.cyan(`[MSG] De: ${pushname} | Cmd: ${command} | isCmd: ${isCmd} | Body: ${body.slice(0, 30)}`));
 
 	// === SISTEMA DE RPG ===
 	const rpgCommands = ['rpg', 'rpgajuda', 'criarchar', 'meuchar', 'trabalhar', 'loja', 'comprar', 'inventario', 'usar', 'batalha', 'atacar', 'fugir', 'rpgrank', 'deletarchar', 'aventura', 'ritual', 'criarsessao', 'entrar', 'narrar', 'fecharsessao'];

@@ -170,9 +170,16 @@ async function startBot() {
         try {
             const m = chatUpdate.messages[0];
             if (!m.message) return;
-            require("./index")(conn, chatUpdate);
+            
+            // Log para confirmar que a mensagem chegou ao connect.js
+            console.log(chalk.blue(`[SOCKET] Mensagem recebida de ${m.pushName || m.key.remoteJid}`));
+            
+            // Chamando o index.js para processar
+            const handler = require("./index");
+            await handler(conn, chatUpdate);
+            
         } catch (err) {
-            console.log(chalk.red("[ERRO INDEX]:"), err);
+            console.log(chalk.red("[ERRO NO FLUXO DE MENSAGEM]:"), err);
         }
     });
 }
