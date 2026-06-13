@@ -4,5 +4,6 @@ buildCommand = "npm install --legacy-peer-deps"
 
 [deploy]
 startCommand = "node connect.js"
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
+restartPolicyType = "ALWAYS"
+healthCheckPath = "/"
+healthCheckTimeout = 120
