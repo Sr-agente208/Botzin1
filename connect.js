@@ -144,13 +144,16 @@ async function startSystemZR() {
     const { version } = await fetchLatestWaWebVersion().catch(() => ({ version: [2, 3000, 1015901307] }));
 
     console.log(chalk.magenta(figlet.textSync("Black Lotus", { font: "Small" })));
-    console.log(chalk.magenta(`\nIniciando Black Lotus Bot v2.5.1...\n`));
+    console.log(chalk.magenta(`\nIniciando Black Lotus Bot v2.5.2...\n`));
 
     const systemZR = makeWASocket({
         version,
         logger: pino({ level: "silent" }),
         auth: state,
-        browser: ["Black Lotus", "Chrome", "1.0.0"],
+        browser: Browsers.ubuntu("Chrome"), // Browser padrão para melhor compatibilidade
+        printQRInTerminal: false,
+        syncFullHistory: true, // Sincronização completa
+        shouldSyncHistoryMessage: () => true,
         getMessage: async (key) => ({ conversation: "Ola!" })
     });
 
@@ -164,7 +167,7 @@ async function startSystemZR() {
             } catch (e) {
                 console.log(chalk.red("\n❌ Erro ao gerar código de pareamento: " + e.message));
             }
-        }, 3000);
+        }, 5000);
     }
 
     systemZR.ev.on("messages.upsert", async (chatUpdate) => {
@@ -172,8 +175,14 @@ async function startSystemZR() {
             const mek = chatUpdate.messages[0];
             if (!mek || !mek.message) return;
             if (mek.key.remoteJid === "status@broadcast") return;
+            
+            // Log de recebimento para depuração no Railway
+            console.log(chalk.cyan(`[MSG] Recebida de: ${mek.key.remoteJid}`));
+            
             await require("./index")(systemZR, chatUpdate);
-        } catch (err) {}
+        } catch (err) {
+            console.error(chalk.red("[ERRO INDEX]:"), err);
+        }
     });
 
     systemZR.ev.on("connection.update", async (update) => {
@@ -193,7 +202,7 @@ async function startSystemZR() {
             botStatus = "conectado";
             currentQR = null;
             pairingCode = null;
-            console.log(chalk.green("\n✅ Black Lotus conectado!\n"));
+            console.log(chalk.green("\n✅ Black Lotus conectado e sincronizado!\n"));
             isReconnecting = false;
             gerarSessionData();
         }
