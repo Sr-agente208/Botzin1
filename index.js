@@ -938,38 +938,38 @@ switch (command) {
 	    }
 	    break;
 
-		case 'menu':
-		case 'help':
-		case 'ajuda':
-		case '™menu':
-			return reply(menu(prefix, sender, NickDono, NomeBot, date, _hora, NumberDono, version));
-			break;
+			case 'menu':
+			case 'help':
+			case 'ajuda':
+			case '™menu':
+				await conn.sendMessage(from, { image: FotoMenu, caption: menu(prefix, sender, NickDono, NomeBot, date, _hora, NumberDono, version), mentions: [sender] }, { quoted: selo });
+				break;
 
-		case 'menuadm':
-		case 'menugrupo':
-			return reply(menuadm(prefix, sender));
-			break;
+			case 'menuadm':
+			case 'menugrupo':
+				await conn.sendMessage(from, { image: FotoMenu, caption: menuadm(prefix, sender), mentions: [sender] }, { quoted: selo });
+				break;
 
-		case 'menudown':
-		case 'menudownload':
-			return reply(menuDown(prefix, sender));
-			break;
+			case 'menudown':
+			case 'menudownload':
+				await conn.sendMessage(from, { image: FotoMenu, caption: menuDown(prefix, sender), mentions: [sender] }, { quoted: selo });
+				break;
 
-		case 'menufig':
-		case 'menusticker':
-			return reply(menuStickers(prefix, sender));
-			break;
+			case 'menufig':
+			case 'menusticker':
+				await conn.sendMessage(from, { image: FotoMenu, caption: menuStickers(prefix, sender), mentions: [sender] }, { quoted: selo });
+				break;
 
-		case 'menudono':
-		case 'menuowner':
-			if (!So_Dono) return reply(msg.SoDono);
-			return reply(menuDono(prefix, sender));
-			break;
+			case 'menudono':
+			case 'menuowner':
+				if (!So_Dono) return reply(msg.SoDono);
+				await conn.sendMessage(from, { image: FotoMenu, caption: menuDono(prefix, sender), mentions: [sender] }, { quoted: selo });
+				break;
 
-		case 'menu18':
-		case 'menusecret':
-			return reply(menu18(prefix, sender));
-			break;
+			case 'menu18':
+			case 'menusecret':
+				await conn.sendMessage(from, { image: FotoMenu, caption: menu18(prefix, sender), mentions: [sender] }, { quoted: selo });
+				break;
 
 	case 'deepsearch':
 	case 'ia':
