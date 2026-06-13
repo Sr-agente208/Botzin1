@@ -870,20 +870,102 @@ switch (command) {
 		}
 		break;
 
-		case 'beijar':
-		case 'kiss': {
-			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
-			let alvo = menc_jid;
-			if (!alvo || alvo === sender) return reply('💜 Marque alguém para dar um beijo!');
-			let frases = [
-				`💜 @${sender.split('@')[0]} deu um beijo apaixonado em @${alvo.split('@')[0]}! ✨`,
-				`💜 @${sender.split('@')[0]} beijou @${alvo.split('@')[0]}! Que fofos! 🥰`,
-				`💜 Um clima de romance surgiu entre @${sender.split('@')[0]} e @${alvo.split('@')[0]}! 💋`
-			];
-			let frase = frases[Math.floor(Math.random() * frases.length)];
-			await conn.sendMessage(from, { video: { url: 'https://files.catbox.moe/6v0z4v.mp4' }, caption: frase, gifPlayback: true, mentions: [sender, alvo] }, { quoted: selo });
-		}
-		break;
+			case 'beijar':
+			case 'kiss': {
+				if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+				let alvo = menc_jid;
+				if (!alvo || alvo === sender) return reply('💜 Marque alguém para dar um beijo!');
+				let frases = [
+					`💜 @${sender.split('@')[0]} deu um beijo apaixonado em @${alvo.split('@')[0]}! ✨`,
+					`💜 @${sender.split('@')[0]} beijou @${alvo.split('@')[0]}! Que fofos! 🥰`,
+					`💜 @${sender.split('@')[0]} roubou um beijo de @${alvo.split('@')[0]}! 😈✨`
+				];
+				let frase = frases[Math.floor(Math.random() * frases.length)];
+				await conn.sendMessage(from, { video: { url: 'https://files.catbox.moe/p9p48i.mp4' }, caption: frase, gifPlayback: true, mentions: [sender, alvo] }, { quoted: selo });
+			}
+			break;
+
+			case 's':
+			case 'sticker':
+			case 'figurinha': {
+				if (!isImage && !isQuotedImage && !isVideo && !isQuotedVideo) return reply(`💡 Envie uma imagem ou vídeo com a legenda *${prefix}sticker*`);
+				reply('⏳ *Criando sua figurinha...*');
+				try {
+					const mediaData = isQuotedImage ? info.message.extendedTextMessage.contextInfo.quotedMessage.imageMessage : 
+									isQuotedVideo ? info.message.extendedTextMessage.contextInfo.quotedMessage.videoMessage :
+									isImage ? info.message.imageMessage : info.message.videoMessage;
+					const buffer = await getFileBuffer(mediaData, isImage || isQuotedImage ? 'image' : 'video');
+					if (isImage || isQuotedImage) {
+						await sendImageAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
+					} else {
+						await sendVideoAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
+					}
+				} catch (e) {
+					reply('❌ Erro ao criar figurinha.');
+				}
+			}
+			break;
+
+			case 'toimg': {
+				if (!isQuotedSticker) return reply('❌ Responda a uma figurinha (não animada).');
+				reply('⏳ *Convertendo para imagem...*');
+				try {
+					const buffer = await getFileBuffer(info.message.extendedTextMessage.contextInfo.quotedMessage.stickerMessage, 'sticker');
+					await conn.sendMessage(from, { image: buffer, caption: '✅ *Convertido com sucesso!*' }, { quoted: info });
+				} catch (e) {
+					reply('❌ Erro na conversão.');
+				}
+			}
+			break;
+
+			case 'kick':
+			case 'ban': {
+				if (!isGroup) return reply('❌ Comando para grupos.');
+				if (!isGroupAdmins) return reply(msg.SoAdm);
+				if (!isBotGroupAdmins) return reply(msg.BotAdmin);
+				let alvo = menc_jid;
+				if (!alvo) return reply('❌ Marque quem deseja remover.');
+				await conn.groupParticipantsUpdate(from, [alvo], 'remove');
+				reply(`✅ @${alvo.split('@')[0]} foi removido com sucesso.`, {mentions: [alvo]});
+			}
+			break;
+
+			case 'antilink': {
+				if (!isGroup) return reply('❌ Comando para grupos.');
+				if (!isGroupAdmins) return reply(msg.SoAdm);
+				if (q === '1' || q === 'on') {
+					dataGp[0].antilinkhard = true;
+					setGp(dataGp);
+					reply('🛡️ *Anti-Link ativado!*');
+				} else if (q === '0' || q === 'off') {
+					dataGp[0].antilinkhard = false;
+					setGp(dataGp);
+					reply('❌ *Anti-Link desativado!*');
+				} else {
+					reply(`💡 *Uso:* ${prefix}antilink on/off`);
+				}
+			}
+			break;
+
+
+
+				case 'reiniciar': {
+					if (!So_Dono) return reply(msg.SoDono);
+					await reply('🔄 *Reiniciando o sistema Black Lotus... Aguarde.*');
+					process.exit();
+				}
+				break;
+
+				case 'rankjob': {
+					if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+					let sort = MembrosGP.map(v => v.id);
+					let p1 = sort[Math.floor(Math.random() * sort.length)];
+					let p2 = sort[Math.floor(Math.random() * sort.length)];
+					let p3 = sort[Math.floor(Math.random() * sort.length)];
+					let txt = `🏆 *RANKING DOS TRABALHADORES* 🏆\n\n🥇 1º: @${p1.split('@')[0]}\n🥈 2º: @${p2.split('@')[0]}\n🥉 3º: @${p3.split('@')[0]}\n\n🌑 *Black Lotus System*`;
+					await conn.sendMessage(from, { text: txt, mentions: [p1, p2, p3] }, { quoted: selo });
+				}
+				break;
 
 		case 'rankjob': {
 			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
@@ -1054,12 +1136,12 @@ switch (command) {
 		return reply(`✅ Prefixo alterado para: ${q}`);
 		break;
 
-	case 'reiniciar':
-		if (!So_Dono) return reply(msg.SoDono);
-		reply("🔄 Reiniciando sistemas...");
-		await sleep(2000);
-		process.exit();
-		break;
+		case 'reiniciar':
+			if (!So_Dono) return reply(msg.SoDono);
+			reply("🔄 *Reiniciando sistemas Black Lotus...*");
+			await sleep(2000);
+			process.exit();
+			break;
 
 	default:
 		if (body.startsWith('™') && !isCmd) {
