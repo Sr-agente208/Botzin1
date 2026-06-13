@@ -14,6 +14,7 @@ const pino = require("pino");
 const express = require("express");
 const qrcode = require("qrcode");
 const chalk = require("chalk");
+const axios = require("axios");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -57,8 +58,18 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(chalk.purple(`[WEB] Servidor rodando na porta ${port}`));
+    console.log(chalk.magenta(`[WEB] Servidor rodando na porta ${port}`));
 });
+
+// SISTEMA DE AUTO-PING PARA EVITAR HIBERNAÇÃO NO RAILWAY
+setInterval(() => {
+    const url = process.env.RAILWAY_STATIC_URL || `http://localhost:${port}`;
+    axios.get(url).then(() => {
+        console.log(chalk.blue("[KEEP-ALIVE] Pulso enviado com sucesso."));
+    }).catch(() => {
+        console.log(chalk.red("[KEEP-ALIVE] Falha ao enviar pulso."));
+    });
+}, 120000); // A cada 2 minutos
 
 async function startBot() {
     const sessionDir = path.resolve(__dirname, "session");
@@ -133,11 +144,14 @@ async function startBot() {
             
             // EXPORTAR SESSION_DATA PARA O LOG
             setTimeout(() => {
-                const creds = fs.readFileSync(path.join(sessionDir, "creds.json"), "utf-8");
-                const sessionString = Buffer.from(creds).toString("base64");
-                console.log(chalk.yellow("\n=== [IMPORTANTE] COPIE SEU SESSION_DATA ABAIXO ==="));
-                console.log(chalk.white(sessionString));
-                console.log(chalk.yellow("==================================================\n"));
+                const credsFile = path.join(sessionDir, "creds.json");
+                if (fs.existsSync(credsFile)) {
+                    const creds = fs.readFileSync(credsFile, "utf-8");
+                    const sessionString = Buffer.from(creds).toString("base64");
+                    console.log(chalk.yellow("\n=== [IMPORTANTE] COPIE SEU SESSION_DATA ABAIXO ==="));
+                    console.log(chalk.white(sessionString));
+                    console.log(chalk.yellow("==================================================\n"));
+                }
             }, 5000);
         }
     });
@@ -158,7 +172,6 @@ async function startBot() {
 // INICIALIZAÇÃO BLINDADA
 process.on("uncaughtException", (err) => {
     console.log(chalk.red("[CRITICAL ERROR]:"), err.message);
-    // Não encerra o processo para evitar reboot do Railway
 });
 
 process.on("unhandledRejection", (reason) => {
