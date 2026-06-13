@@ -103,31 +103,31 @@ SoBot ||
 SoCriador ||
 IsCreator;
 
-// LOG DE SEGURANÇA PARA O DONO
-if (body.startsWith(prefix)) {
-    console.log(chalk.yellow(`[COMANDO] ${pushname} (${sender}) usou: ${body}`));
-    console.log(chalk.cyan(`[PERMISSÃO] So_Dono: ${So_Dono} | IsCreator: ${IsCreator} | SoCriador: ${SoCriador}`));
-}
+	const moment = require("moment-timezone");
+	
+	const date = moment().tz("America/Sao_Paulo").format("DD/MM/YYYY");
+	// hora já importado do consts.js - usando hora2 para evitar conflito
+	const _hora = moment().tz("America/Sao_Paulo").format("HH:mm:ss");
+	
+	const type = baileys.getContentType(info?.message);
+	let body =
+	  info?.message?.conversation ||
+	  info?.message?.extendedTextMessage?.text ||
+	  info?.message?.imageMessage?.caption ||
+	  info?.message?.videoMessage?.caption ||
+	  info?.message?.documentWithCaptionMessage?.message?.documentMessage?.caption ||
+	  info?.message?.buttonsResponseMessage?.selectedButtonId ||
+	  info?.message?.templateButtonReplyMessage?.selectedId ||
+	  info?.message?.listResponseMessage?.singleSelectReply?.selectedRowId ||
+	  info?.message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson ||
+	  info?.text ||
+	  "";
 
-const moment = require("moment-timezone");
-
-const date = moment().tz("America/Sao_Paulo").format("DD/MM/YYYY");
-// hora já importado do consts.js - usando hora2 para evitar conflito
-const _hora = moment().tz("America/Sao_Paulo").format("HH:mm:ss");
-
-const type = baileys.getContentType(info?.message);
-let body =
-  info?.message?.conversation ||
-  info?.message?.extendedTextMessage?.text ||
-  info?.message?.imageMessage?.caption ||
-  info?.message?.videoMessage?.caption ||
-  info?.message?.documentWithCaptionMessage?.message?.documentMessage?.caption ||
-  info?.message?.buttonsResponseMessage?.selectedButtonId ||
-  info?.message?.templateButtonReplyMessage?.selectedId ||
-  info?.message?.listResponseMessage?.singleSelectReply?.selectedRowId ||
-  info?.message?.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson ||
-  info?.text ||
-  "";
+	// LOG DE SEGURANÇA PARA O DONO
+	if (body.startsWith(prefix)) {
+	    console.log(chalk.yellow(`[COMANDO] ${pushname} (${sender}) usou: ${body}`));
+	    console.log(chalk.cyan(`[PERMISSÃO] So_Dono: ${So_Dono} | IsCreator: ${IsCreator} | SoCriador: ${SoCriador}`));
+	}
   
 if (info?.message?.listResponseMessage) {
 body = info?.message?.listResponseMessage?.singleSelectReply?.selectedRowId;
