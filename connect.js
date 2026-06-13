@@ -182,6 +182,47 @@ async function startBot() {
             console.log(chalk.red("[ERRO NO FLUXO DE MENSAGEM]:"), err);
         }
     });
+
+    conn.ev.on("group-participants.update", async (anu) => {
+        try {
+            const metadata = await conn.groupMetadata(anu.id);
+            const participants = anu.participants;
+            const groupName = metadata.subject;
+
+            // Carregar configurações do grupo
+            const groupConfigPath = `./DATABASE2/grupos/${anu.id.split("@")[0]}.json`;
+            let groupData = { antifake: false, wellcome: false, saida: false };
+            if (fs.existsSync(groupConfigPath)) {
+                groupData = JSON.parse(fs.readFileSync(groupConfigPath));
+            }
+
+            for (let num of participants) {
+                // SISTEMA ANTI-FAKE (Remove números que não são +55)
+                if (anu.action === "add" && groupData.antifake) {
+                    if (!num.startsWith("55")) {
+                        console.log(chalk.red(`[ANTI-FAKE] Removendo número estrangeiro: ${num}`));
+                        await conn.sendMessage(anu.id, { text: `⚠️ *ANTI-FAKE ATIVADO*\nO número @${num.split("@")[0]} foi removido por ser estrangeiro.`, mentions: [num] });
+                        await conn.groupParticipantsUpdate(anu.id, [num], "remove");
+                        continue;
+                    }
+                }
+
+                // BOAS-VINDAS
+                if (anu.action === "add" && groupData.wellcome) {
+                    let txt = `👋 Olá @${num.split("@")[0]}, bem-vindo(a) ao grupo *${groupName}*!`;
+                    await conn.sendMessage(anu.id, { text: txt, mentions: [num] });
+                }
+
+                // SAÍDA
+                if (anu.action === "remove" && groupData.saida) {
+                    let txt = `🚪 @${num.split("@")[0]} saiu do grupo.`;
+                    await conn.sendMessage(anu.id, { text: txt, mentions: [num] });
+                }
+            }
+        } catch (err) {
+            console.log(chalk.red("[ERRO EM PARTICIPANTS.UPDATE]:"), err);
+        }
+    });
 }
 
 process.on("uncaughtException", (err) => {

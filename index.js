@@ -734,6 +734,69 @@ switch (command) {
 		}
 		break;
 
+		case 'antifake': {
+			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+			if (!isGroupAdmins) return reply(msg.SoAdm);
+			const groupConfigPath = `./DATABASE2/grupos/${from.split("@")[0]}.json`;
+			let groupData = { antifake: false, wellcome: false, saida: false };
+			if (fs.existsSync(groupConfigPath)) {
+				groupData = JSON.parse(fs.readFileSync(groupConfigPath));
+			}
+			if (q === 'on') {
+				groupData.antifake = true;
+				fs.writeFileSync(groupConfigPath, JSON.stringify(groupData, null, 2));
+				reply('✅ *ANTI-FAKE ATIVADO!* Números estrangeiros serão removidos.');
+			} else if (q === 'off') {
+				groupData.antifake = false;
+				fs.writeFileSync(groupConfigPath, JSON.stringify(groupData, null, 2));
+				reply('❌ *ANTI-FAKE DESATIVADO!*');
+			} else {
+				reply(`💡 *Uso:* ${prefix}antifake on/off`);
+			}
+		}
+		break;
+
+		case 'bluxzinho': {
+			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+			if (!isGroupAdmins) return reply(msg.SoAdm);
+			if (!isBotGroupAdmins) return reply(msg.BotAdmin);
+			let alvo = menc_jid;
+			if (!alvo) return reply('❌ Marque o Bluxzinho para banir!');
+			reply('🚀 *DETECTADO BLUXZINHO!* Iniciando remoção imediata...');
+			await conn.groupParticipantsUpdate(from, [alvo], 'remove');
+			reply(`✅ @${alvo.split('@')[0]} foi banido com sucesso! O grupo está seguro agora. 🌑🪷`, {mentions: [alvo]});
+		}
+		break;
+
+		case 'waifu': {
+			reply('✨ *Buscando waifus aleatórias...*');
+			try {
+				const res = await axios.get('https://nekos.best/api/v2/waifu?amount=5');
+				const results = res.data.results;
+				for (let item of results) {
+					await conn.sendMessage(from, { image: { url: item.url }, caption: `✨ *Waifu:* ${item.artist_name || 'Desconhecido'}` }, { quoted: selo });
+					await sleep(1000);
+				}
+			} catch (e) {
+				reply('❌ Erro ao buscar waifus.');
+			}
+		}
+		break;
+
+		case 'pinterest': {
+			if (!q) return reply(`💡 *Exemplo:* ${prefix}pinterest anime`);
+			reply('📌 *Buscando no Pinterest...*');
+			try {
+				const res = await fetchJson(`https://api.shizuku.site/pinterest?query=${encodeURIComponent(q)}&key=${SHIZUKU_KEY}`);
+				if (!res.status) return reply('❌ Nenhuma imagem encontrada.');
+				const img = res.result[Math.floor(Math.random() * res.result.length)];
+				await conn.sendMessage(from, { image: { url: img }, caption: `📌 *Resultado para:* ${q}` }, { quoted: selo });
+			} catch (e) {
+				reply('❌ Erro ao buscar no Pinterest.');
+			}
+		}
+		break;
+
 		case 'atropelar': {
 			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
 			let alvo = menc_jid;
