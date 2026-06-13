@@ -762,6 +762,21 @@ switch (command) {
 		}
 		break;
 
+		case 'beijar':
+		case 'kiss': {
+			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+			let alvo = menc_jid;
+			if (!alvo || alvo === sender) return reply('💜 Marque alguém para dar um beijo!');
+			let frases = [
+				`💜 @${sender.split('@')[0]} deu um beijo apaixonado em @${alvo.split('@')[0]}! ✨`,
+				`💜 @${sender.split('@')[0]} beijou @${alvo.split('@')[0]}! Que fofos! 🥰`,
+				`💜 Um clima de romance surgiu entre @${sender.split('@')[0]} e @${alvo.split('@')[0]}! 💋`
+			];
+			let frase = frases[Math.floor(Math.random() * frases.length)];
+			await conn.sendMessage(from, { video: { url: 'https://files.catbox.moe/6v0z4v.mp4' }, caption: frase, gifPlayback: true, mentions: [sender, alvo] }, { quoted: selo });
+		}
+		break;
+
 		case 'rankjob': {
 			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
 			let membros = MembrosGP.sort(() => Math.random() - 0.5).slice(0, 5);
