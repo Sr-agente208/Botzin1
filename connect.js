@@ -175,8 +175,7 @@ async function startBot() {
             console.log(chalk.blue(`[SOCKET] Mensagem recebida de ${m.pushName || m.key.remoteJid}`));
             
             // Chamando o index.js para processar
-            const handler = require("./index");
-            await handler(conn, chatUpdate);
+            await require("./index")(conn, chatUpdate);
             
         } catch (err) {
             console.log(chalk.red("[ERRO NO FLUXO DE MENSAGEM]:"), err);

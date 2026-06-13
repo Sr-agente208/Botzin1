@@ -720,25 +720,51 @@ switch (command) {
 		}
 		break;
 
-		case 'clima':
-		case 'tempo': {
-			if (!q) return reply(`💡 Informe a cidade. Exemplo: *${prefix}clima São Paulo*`);
-			try {
-				const res = await fetchJson(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(q)}&appid=8af2693897782167f22502a24f0c4068&units=metric&lang=pt_br`);
-				if (!res.main) return reply('❌ Cidade não encontrada.');
-				
-				let rel = `🌤️ *PREVISÃO DO TEMPO: ${res.name}* 🌤️\n\n`;
-				rel += `🌡️ *Temperatura:* ${res.main.temp}°C\n`;
-				rel += `🔥 *Sensação:* ${res.main.feels_like}°C\n`;
-				rel += `💧 *Umidade:* ${res.main.humidity}%\n`;
-				rel += `💨 *Vento:* ${res.wind.speed} km/h\n`;
-				rel += `📝 *Condição:* ${res.weather[0].description.toUpperCase()}`;
-				reply(rel);
-			} catch (e) {
-				reply('❌ Erro ao consultar clima.');
+			case 'clima':
+			case 'tempo': {
+				if (!q) return reply(`💡 Informe a cidade. Exemplo: *${prefix}clima São Paulo*`);
+				try {
+					const res = await fetchJson(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(q)}&appid=8af2693897782167f22502a24f0c4068&units=metric&lang=pt_br`);
+					if (!res.main) return reply('❌ Cidade não encontrada.');
+					
+					let rel = `🌤️ *PREVISÃO DO TEMPO: ${res.name}* 🌤️\n\n`;
+					rel += `🌡️ *Temperatura:* ${res.main.temp}°C\n`;
+					rel += `🔥 *Sensação:* ${res.main.feels_like}°C\n`;
+					rel += `💧 *Umidade:* ${res.main.humidity}%\n`;
+					rel += `💨 *Vento:* ${res.wind.speed} km/h\n`;
+					rel += `📝 *Condição:* ${res.weather[0].description.toUpperCase()}`;
+					reply(rel);
+				} catch (e) {
+					reply('❌ Erro ao consultar clima.');
+				}
 			}
-		}
-		break;
+			break;
+
+			case 'piada': {
+				const piadas = [
+					"Por que o desenvolvedor faliu? Porque ele não tinha 'classe'.",
+					"O que o Java disse para o C? Você não tem cultura!",
+					"Por que o programador se afogou? Porque ele não sabia 'nadar' (node).",
+					"Quantos programadores são necessários para trocar uma lâmpada? Nenhum, é problema de hardware.",
+					"O que o C++ disse para o C? Você é muito primitivo!",
+					"Por que o computador foi ao médico? Porque ele estava com um vírus!"
+				];
+				reply(`🃏 *PIADA BLACK LOTUS*\n\n${piadas[Math.floor(Math.random() * piadas.length)]}`);
+			}
+			break;
+
+			case 'biblia': {
+				const versiculos = [
+					"João 3:16 - Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito...",
+					"Salmos 23:1 - O Senhor é o meu pastor, nada me faltará.",
+					"Filipenses 4:13 - Tudo posso naquele que me fortalece.",
+					"Josué 1:9 - Não fui eu que ordenei a você? Seja forte e corajoso!",
+					"Salmos 91:1 - Aquele que habita no esconderijo do Altíssimo, à sombra do Onipotente descansará.",
+					"Provérbios 3:5 - Confie no Senhor de todo o seu coração e não se apóie em seu próprio entendimento."
+				];
+				reply(`📖 *VERSÍCULO DO DIA*\n\n${versiculos[Math.floor(Math.random() * versiculos.length)]}`);
+			}
+			break;
 
 		case 'antifake': {
 			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
