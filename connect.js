@@ -22,6 +22,7 @@ const port = process.env.PORT || 3000;
 let qrCodeData = null;
 let pairingCodeData = null;
 let connectionStatus = "Iniciando...";
+let isSocketOpen = false;
 
 // SERVIDOR WEB PRIORITÁRIO PARA O RAILWAY
 app.get("/", (req, res) => {
@@ -49,7 +50,7 @@ app.get("/", (req, res) => {
             <div class="status">Status: ${connectionStatus}</div>
             ${qrCodeData ? `<h3>Escanear QR Code:</h3><img src="${qrCodeData}" alt="QR Code">` : ""}
             ${pairingCodeData ? `<h3>Código de Pareamento:</h3><div class="code">${pairingCodeData}</div>` : ""}
-            ${!qrCodeData && !pairingCodeData && connectionStatus === "Aguardando Conexão..." ? "<p>Gerando métodos de conexão... aguarde.</p>" : ""}
+            ${!qrCodeData && !pairingCodeData && (connectionStatus.includes("Aguardando") || connectionStatus.includes("Gerando")) ? "<p>Processando conexão... as sombras estão trabalhando.</p>" : ""}
         </div>
         <div class="footer">Sr.Agente208 & Black Lotus System</div>
     </body>
@@ -61,34 +62,21 @@ app.listen(port, "0.0.0.0", () => {
     console.log(chalk.magenta(`[WEB] Servidor rodando na porta ${port}`));
 });
 
-// SISTEMA DE AUTO-PING LOCAL PARA EVITAR HIBERNAÇÃO
+// SISTEMA DE AUTO-PING LOCAL
 setInterval(() => {
-    // Usando 127.0.0.1 para garantir comunicação interna sem depender de DNS/URL externa
-    axios.get(`http://127.0.0.1:${port}`).then(() => {
-        console.log(chalk.blue("[KEEP-ALIVE] Pulso local enviado com sucesso."));
-    }).catch((err) => {
-        // Se falhar o local, tenta o Railway Static URL se existir
-        if (process.env.RAILWAY_STATIC_URL) {
-            axios.get(`https://${process.env.RAILWAY_STATIC_URL}`).catch(() => {});
-        }
-        console.log(chalk.red("[KEEP-ALIVE] Pulso local falhou, tentando alternativa..."));
-    });
-}, 120000); // A cada 2 minutos
+    axios.get(`http://127.0.0.1:${port}`).catch(() => {});
+}, 120000);
 
 async function startBot() {
     const sessionDir = path.resolve(__dirname, "session");
     
-    // RESTAURAÇÃO DE SESSÃO VIA VARIÁVEL DE AMBIENTE
     if (process.env.SESSION_DATA && !fs.existsSync(sessionDir)) {
-        console.log(chalk.yellow("[SESSION] Restaurando sessão via SESSION_DATA..."));
         try {
             const creds = Buffer.from(process.env.SESSION_DATA, 'base64').toString('utf-8');
             fs.ensureDirSync(sessionDir);
             fs.writeFileSync(path.join(sessionDir, "creds.json"), creds);
-            console.log(chalk.green("[SESSION] Sessão restaurada com sucesso!"));
-        } catch (e) {
-            console.log(chalk.red("[SESSION] Erro ao restaurar SESSION_DATA:"), e.message);
-        }
+            console.log(chalk.green("[SESSION] Restaurada com sucesso!"));
+        } catch (e) {}
     }
 
     const { state, saveCreds } = await useMultiFileAuthState(sessionDir);
@@ -104,61 +92,66 @@ async function startBot() {
         },
         browser: ["Ubuntu", "Chrome", "20.0.04"],
         syncFullHistory: true,
-        generateHighQualityLinkPreview: true,
+        connectTimeoutMs: 60000,
+        defaultQueryTimeoutMs: 0,
+        keepAliveIntervalMs: 10000,
     });
-
-    // LÓGICA DE PAREAMENTO AUTOMÁTICO
-    if (!conn.authState.creds.registered && process.env.NUMERO) {
-        connectionStatus = "Gerando Código de Pareamento...";
-        setTimeout(async () => {
-            try {
-                const code = await conn.requestPairingCode(process.env.NUMERO.replace(/\D/g, ""));
-                pairingCodeData = code;
-                console.log(chalk.green(`[PAREAMENTO] Código: ${code}`));
-                connectionStatus = "Aguardando Pareamento...";
-            } catch (e) {
-                console.log(chalk.red("[PAREAMENTO] Erro:"), e.message);
-            }
-        }, 5000);
-    }
 
     conn.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
         if (qr) {
             qrCodeData = await qrcode.toDataURL(qr);
-            connectionStatus = "Aguardando Conexão...";
-            console.log(chalk.yellow("[QR] Novo QR Code gerado."));
+            connectionStatus = "Aguardando Escaneamento...";
         }
 
         if (connection === "close") {
+            isSocketOpen = false;
             const shouldReconnect = (lastDisconnect.error instanceof Boom) ? lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut : true;
-            console.log(chalk.red(`[CONEXÃO] Fechada. Motivo: ${lastDisconnect.error?.message}. Reconectando: ${shouldReconnect}`));
-            connectionStatus = "Desconectado. Reconectando...";
+            connectionStatus = "Reconectando...";
             qrCodeData = null;
             pairingCodeData = null;
-            if (shouldReconnect) startBot();
+            if (shouldReconnect) setTimeout(startBot, 5000);
         } else if (connection === "open") {
-            connectionStatus = "Conectado e Online!";
+            isSocketOpen = true;
+            connectionStatus = "Online!";
             qrCodeData = null;
             pairingCodeData = null;
-            console.log(chalk.green("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓"));
-            console.log(chalk.green("┃  🪷 BLACK LOTUS ESTÁ ONLINE  ┃"));
-            console.log(chalk.green("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"));
+            console.log(chalk.green("[CONEXÃO] Bot Black Lotus está online!"));
             
-            // EXPORTAR SESSION_DATA PARA O LOG
             setTimeout(() => {
                 const credsFile = path.join(sessionDir, "creds.json");
                 if (fs.existsSync(credsFile)) {
                     const creds = fs.readFileSync(credsFile, "utf-8");
                     const sessionString = Buffer.from(creds).toString("base64");
-                    console.log(chalk.yellow("\n=== [IMPORTANTE] COPIE SEU SESSION_DATA ABAIXO ==="));
-                    console.log(chalk.white(sessionString));
-                    console.log(chalk.yellow("==================================================\n"));
+                    console.log(chalk.yellow("\n=== [SESSION_DATA] ===\n" + sessionString + "\n======================\n"));
                 }
             }, 5000);
         }
     });
+
+    // LÓGICA DE PAREAMENTO RESILIENTE
+    if (!conn.authState.creds.registered && process.env.NUMERO) {
+        connectionStatus = "Aguardando Socket...";
+        const requestPairing = async () => {
+            // Espera até o socket estar aberto ou tenta após 10 segundos de qualquer forma
+            await new Promise(r => setTimeout(r, 15000));
+            try {
+                connectionStatus = "Gerando Código...";
+                const code = await conn.requestPairingCode(process.env.NUMERO.replace(/\D/g, ""));
+                pairingCodeData = code;
+                connectionStatus = "Aguardando Pareamento...";
+                console.log(chalk.green(`[PAREAMENTO] Código Gerado: ${code}`));
+            } catch (e) {
+                console.log(chalk.red("[PAREAMENTO] Erro ao solicitar:"), e.message);
+                if (e.message.includes("Closed")) {
+                    console.log(chalk.yellow("[PAREAMENTO] Tentando novamente em 10s..."));
+                    setTimeout(requestPairing, 10000);
+                }
+            }
+        };
+        requestPairing();
+    }
 
     conn.ev.on("creds.update", saveCreds);
 
@@ -173,13 +166,8 @@ async function startBot() {
     });
 }
 
-// INICIALIZAÇÃO BLINDADA
 process.on("uncaughtException", (err) => {
-    console.log(chalk.red("[CRITICAL ERROR]:"), err.message);
+    console.log(chalk.red("[ERRO]:"), err.message);
 });
 
-process.on("unhandledRejection", (reason) => {
-    console.log(chalk.red("[PROMISE REJECTION]:"), reason);
-});
-
-startBot().catch(err => console.log(chalk.red("[START ERROR]:"), err));
+startBot().catch(err => console.log(chalk.red("[ERRO]:"), err));
