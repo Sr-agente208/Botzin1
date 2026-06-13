@@ -57,17 +57,21 @@ app.get("/", (req, res) => {
     res.send(html);
 });
 
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
     console.log(chalk.magenta(`[WEB] Servidor rodando na porta ${port}`));
 });
 
-// SISTEMA DE AUTO-PING PARA EVITAR HIBERNAÇÃO NO RAILWAY
+// SISTEMA DE AUTO-PING LOCAL PARA EVITAR HIBERNAÇÃO
 setInterval(() => {
-    const url = process.env.RAILWAY_STATIC_URL || `http://localhost:${port}`;
-    axios.get(url).then(() => {
-        console.log(chalk.blue("[KEEP-ALIVE] Pulso enviado com sucesso."));
-    }).catch(() => {
-        console.log(chalk.red("[KEEP-ALIVE] Falha ao enviar pulso."));
+    // Usando 127.0.0.1 para garantir comunicação interna sem depender de DNS/URL externa
+    axios.get(`http://127.0.0.1:${port}`).then(() => {
+        console.log(chalk.blue("[KEEP-ALIVE] Pulso local enviado com sucesso."));
+    }).catch((err) => {
+        // Se falhar o local, tenta o Railway Static URL se existir
+        if (process.env.RAILWAY_STATIC_URL) {
+            axios.get(`https://${process.env.RAILWAY_STATIC_URL}`).catch(() => {});
+        }
+        console.log(chalk.red("[KEEP-ALIVE] Pulso local falhou, tentando alternativa..."));
     });
 }, 120000); // A cada 2 minutos
 
