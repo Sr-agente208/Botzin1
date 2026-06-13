@@ -201,24 +201,7 @@ const isCmd = body.trim().startsWith(prefix);
 	// LOG DE DEPURAÇÃO
 		console.log(chalk.cyan(`[MSG] De: ${pushname} | Cmd: ${command} | isCmd: ${isCmd} | Body: ${body.slice(0, 30)}`));
 
-		// SISTEMAS DE SEGURANÇA AUTOMÁTICOS
-		if (isGroup && isAntiBluxzinho && !isGroupAdmins && isBotGroupAdmins) {
-			const nomeUsuario = pushname?.toLowerCase() || '';
-			const numerosSuspeitos = ['5531999999999', '5531888888888']; // Adicione mais se necessário
-			if (nomeUsuario.includes('bluxzinho') || numerosSuspeitos.includes(sender.split('@')[0])) {
-				await reply(`🚨 *Usuário suspeito detectado (Bluxzinho).* \n\n❌ Removendo @${sender.split('@')[0]}`, {mentions: [sender]});
-				await conn.groupParticipantsUpdate(from, [sender], 'remove');
-			}
-		}
 
-		if (isGroup && isAntiNextshost && !isGroupAdmins && isBotGroupAdmins) {
-			const nomeUsuario = pushname?.toLowerCase() || '';
-			const mensagem = body?.toLowerCase() || '';
-			if (nomeUsuario.includes('nextshost') || mensagem.includes('nextshost.com')) {
-				await reply(`🌐 *Link da Nextshost.com detectado ou usuário suspeito.* \n\n❌ Removendo @${sender.split('@')[0]}`, {mentions: [sender]});
-				await conn.groupParticipantsUpdate(from, [sender], 'remove');
-			}
-		}
 
 	// === SISTEMA DE RPG ===
 	const rpgCommands = ['rpg', 'rpgajuda', 'criarchar', 'meuchar', 'trabalhar', 'loja', 'comprar', 'inventario', 'usar', 'batalha', 'atacar', 'fugir', 'rpgrank', 'deletarchar', 'aventura', 'ritual', 'criarsessao', 'entrar', 'narrar', 'fecharsessao'];
@@ -289,10 +272,29 @@ const SoAdmins = isGroup ? dataGp[0]?.So_Admins : undefined
 	const isAntiBluxzinho = isGroup ? dataGp[0]?.antibluxzinho : undefined
 	const isAntiNextshost = isGroup ? dataGp[0]?.antinexthost : undefined
 	
-	const BotOff = Config2.botoff 
-	const isVerificado = Config2.verificado
+		const BotOff = Config2.botoff 
+		const isVerificado = Config2.verificado
 
-//DEFINIÇÕES UTEIS
+			// SISTEMAS DE SEGURANÇA AUTOMÁTICOS
+			if (isGroup && isAntiBluxzinho && !isGroupAdmins && isBotGroupAdmins) {
+				const nomeUsuario = pushname?.toLowerCase() || '';
+				const numerosSuspeitos = ['5531999999999', '5531888888888']; // Adicione mais se necessário
+				if (nomeUsuario.includes('bluxzinho') || numerosSuspeitos.includes(sender.split('@')[0])) {
+					await reply(`🚨 *Usuário suspeito detectado (Bluxzinho).* \n\n❌ Removendo @${sender.split('@')[0]}`, {mentions: [sender]});
+					await conn.groupParticipantsUpdate(from, [sender], 'remove');
+				}
+			}
+
+			if (isGroup && isAntiNextshost && !isGroupAdmins && isBotGroupAdmins) {
+				const nomeUsuario = pushname?.toLowerCase() || '';
+				const mensagem = body?.toLowerCase() || '';
+				if (nomeUsuario.includes('nextshost') || mensagem.includes('nextshost.com')) {
+					await reply(`🌐 *Link da Nextshost.com detectado ou usuário suspeito.* \n\n❌ Removendo @${sender.split('@')[0]}`, {mentions: [sender]});
+					await conn.groupParticipantsUpdate(from, [sender], 'remove');
+				}
+			}
+
+	//DEFINIÇÕES UTEIS
 const selo = Config2.verificado ? {key: {fromMe: false, remoteJid: from, id: "META",
 participant: "13135550002@s.whatsapp.net"
 }, message: { contactMessage: { displayName: pushname,
