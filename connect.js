@@ -4,8 +4,7 @@ const {
     useMultiFileAuthState, 
     DisconnectReason, 
     fetchLatestBaileysVersion, 
-    makeCacheableSignalKeyStore, 
-    jidNormalizedUser 
+    makeCacheableSignalKeyStore 
 } = baileys;
 const { Boom } = require("@hapi/boom");
 const fs = require("fs-extra");
@@ -22,7 +21,7 @@ const port = process.env.PORT || 3000;
 let qrCodeData = null;
 let pairingCodeData = null;
 let connectionStatus = "Iniciando...";
-let isSocketOpen = false;
+let socketStatus = "closed";
 
 // SERVIDOR WEB PRIORITÁRIO PARA O RAILWAY
 app.get("/", (req, res) => {
@@ -42,7 +41,7 @@ app.get("/", (req, res) => {
             .code { background: #2d2d2d; padding: 1rem; border-radius: 5px; font-family: monospace; font-size: 1.5rem; color: #00e676; margin-top: 1rem; letter-spacing: 3px; }
             .footer { margin-top: 2rem; font-size: 0.8rem; color: #666; }
         </style>
-        <script>setTimeout(() => { location.reload(); }, 20000);</script>
+        <script>setTimeout(() => { location.reload(); }, 15000);</script>
     </head>
     <body>
         <div class="card">
@@ -50,7 +49,7 @@ app.get("/", (req, res) => {
             <div class="status">Status: ${connectionStatus}</div>
             ${qrCodeData ? `<h3>Escanear QR Code:</h3><img src="${qrCodeData}" alt="QR Code">` : ""}
             ${pairingCodeData ? `<h3>Código de Pareamento:</h3><div class="code">${pairingCodeData}</div>` : ""}
-            ${!qrCodeData && !pairingCodeData && (connectionStatus.includes("Aguardando") || connectionStatus.includes("Gerando")) ? "<p>Processando conexão... as sombras estão trabalhando.</p>" : ""}
+            ${!qrCodeData && !pairingCodeData ? "<p>Aguardando resposta do servidor WhatsApp...</p>" : ""}
         </div>
         <div class="footer">Sr.Agente208 & Black Lotus System</div>
     </body>
@@ -70,12 +69,19 @@ setInterval(() => {
 async function startBot() {
     const sessionDir = path.resolve(__dirname, "session");
     
+    // Se a sessão estiver corrompida (muitos arquivos pequenos ou erros de reconexão), limpa
+    if (socketStatus === "reconnecting_loop") {
+        console.log(chalk.red("[SESSION] Detectado loop de reconexão. Limpando sessão..."));
+        await fs.remove(sessionDir);
+        socketStatus = "closed";
+    }
+
     if (process.env.SESSION_DATA && !fs.existsSync(sessionDir)) {
         try {
             const creds = Buffer.from(process.env.SESSION_DATA, 'base64').toString('utf-8');
-            fs.ensureDirSync(sessionDir);
-            fs.writeFileSync(path.join(sessionDir, "creds.json"), creds);
-            console.log(chalk.green("[SESSION] Restaurada com sucesso!"));
+            await fs.ensureDir(sessionDir);
+            await fs.writeFile(path.join(sessionDir, "creds.json"), creds);
+            console.log(chalk.green("[SESSION] Restaurada via SESSION_DATA!"));
         } catch (e) {}
     }
 
@@ -93,8 +99,7 @@ async function startBot() {
         browser: ["Ubuntu", "Chrome", "20.0.04"],
         syncFullHistory: true,
         connectTimeoutMs: 60000,
-        defaultQueryTimeoutMs: 0,
-        keepAliveIntervalMs: 10000,
+        keepAliveIntervalMs: 15000,
     });
 
     conn.ev.on("connection.update", async (update) => {
@@ -106,23 +111,33 @@ async function startBot() {
         }
 
         if (connection === "close") {
-            isSocketOpen = false;
-            const shouldReconnect = (lastDisconnect.error instanceof Boom) ? lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut : true;
-            connectionStatus = "Reconectando...";
+            socketStatus = "closed";
+            const code = (lastDisconnect.error instanceof Boom) ? lastDisconnect.error.output.statusCode : 0;
+            const shouldReconnect = code !== DisconnectReason.loggedOut;
+            
+            console.log(chalk.red(`[CONEXÃO] Fechada (Código: ${code}). Reconectando: ${shouldReconnect}`));
+            
+            if (code === 401 || code === 440) {
+                socketStatus = "reconnecting_loop";
+                connectionStatus = "Sessão Expirada. Limpando...";
+            } else {
+                connectionStatus = "Reconectando...";
+            }
+
             qrCodeData = null;
             pairingCodeData = null;
             if (shouldReconnect) setTimeout(startBot, 5000);
         } else if (connection === "open") {
-            isSocketOpen = true;
+            socketStatus = "open";
             connectionStatus = "Online!";
             qrCodeData = null;
             pairingCodeData = null;
             console.log(chalk.green("[CONEXÃO] Bot Black Lotus está online!"));
             
-            setTimeout(() => {
+            setTimeout(async () => {
                 const credsFile = path.join(sessionDir, "creds.json");
-                if (fs.existsSync(credsFile)) {
-                    const creds = fs.readFileSync(credsFile, "utf-8");
+                if (await fs.pathExists(credsFile)) {
+                    const creds = await fs.readFile(credsFile, "utf-8");
                     const sessionString = Buffer.from(creds).toString("base64");
                     console.log(chalk.yellow("\n=== [SESSION_DATA] ===\n" + sessionString + "\n======================\n"));
                 }
@@ -130,27 +145,23 @@ async function startBot() {
         }
     });
 
-    // LÓGICA DE PAREAMENTO RESILIENTE
+    // PAREAMENTO MAIS SEGURO
     if (!conn.authState.creds.registered && process.env.NUMERO) {
-        connectionStatus = "Aguardando Socket...";
-        const requestPairing = async () => {
-            // Espera até o socket estar aberto ou tenta após 10 segundos de qualquer forma
-            await new Promise(r => setTimeout(r, 15000));
+        setTimeout(async () => {
+            if (socketStatus === "open" || connectionStatus === "Online!") return;
             try {
                 connectionStatus = "Gerando Código...";
                 const code = await conn.requestPairingCode(process.env.NUMERO.replace(/\D/g, ""));
                 pairingCodeData = code;
                 connectionStatus = "Aguardando Pareamento...";
-                console.log(chalk.green(`[PAREAMENTO] Código Gerado: ${code}`));
+                console.log(chalk.green(`[PAREAMENTO] Código: ${code}`));
             } catch (e) {
-                console.log(chalk.red("[PAREAMENTO] Erro ao solicitar:"), e.message);
+                console.log(chalk.red("[PAREAMENTO] Falha:"), e.message);
                 if (e.message.includes("Closed")) {
-                    console.log(chalk.yellow("[PAREAMENTO] Tentando novamente em 10s..."));
-                    setTimeout(requestPairing, 10000);
+                    setTimeout(startBot, 10000);
                 }
             }
-        };
-        requestPairing();
+        }, 10000);
     }
 
     conn.ev.on("creds.update", saveCreds);
@@ -167,7 +178,7 @@ async function startBot() {
 }
 
 process.on("uncaughtException", (err) => {
-    console.log(chalk.red("[ERRO]:"), err.message);
+    console.log(chalk.red("[ERRO CRÍTICO]:"), err.message);
 });
 
-startBot().catch(err => console.log(chalk.red("[ERRO]:"), err));
+startBot().catch(err => console.log(chalk.red("[ERRO START]:"), err));
