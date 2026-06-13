@@ -15,6 +15,7 @@ const figlet = require("figlet");
 const path = require("path");
 const express = require("express");
 const QRCode = require("qrcode");
+const axios = require("axios");
 
 // ─── CONFIGURAÇÕES ────────────────────────────────────────────────────────────
 const app = express();
@@ -50,48 +51,29 @@ function gerarSessionData() {
     } catch (e) {}
 }
 
-// ─── SERVIDOR WEB (INTERFACE) ─────────────────────────────────────────────────
+// ─── AUTO-KEEP-ALIVE (Impede Hibernação) ──────────────────────────────────────
+function keepAlive() {
+    const url = process.env.RAILWAY_STATIC_URL || `http://localhost:${PORT}`;
+    setInterval(async () => {
+        try {
+            await axios.get(`https://${url}`).catch(() => axios.get(`http://${url}`));
+            console.log(chalk.dim("[SYSTEM] Auto-Ping realizado com sucesso."));
+        } catch (e) {}
+    }, 5 * 60 * 1000); // A cada 5 minutos
+}
+
+// ─── SERVIDOR WEB ─────────────────────────────────────────────────────────────
 app.get("/", async (req, res) => {
     if (botStatus === "conectado") {
-        return res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Black Lotus</title><style>body{background:#000;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}h1{color:#7c3aed;}</style></head><body><h1>🪷 Black Lotus Online</h1><p>O bot está conectado com sucesso.</p></body></html>`);
+        return res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Black Lotus</title><style>body{background:#000;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}h1{color:#7c3aed;}</style></head><body><h1>🪷 Black Lotus Online</h1><p>O bot está conectado e ativo.</p></body></html>`);
     }
-
-    let qrImage = null;
-    if (currentQR) {
-        try {
-            qrImage = await QRCode.toDataURL(currentQR, { width: 300, margin: 2 });
-        } catch (e) {}
-    }
-
-    res.send(`<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Conectar Black Lotus</title>
-<meta http-equiv="refresh" content="15">
-<style>
-  body{background:#0a0a0a;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;flex-direction:column;gap:20px;}
-  h1{color:#7c3aed;margin:0;}
-  .container{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;padding:20px;}
-  .box{background:#111;border:2px solid #7c3aed;border-radius:16px;padding:30px;text-align:center;min-width:300px;box-shadow:0 0 20px rgba(124,58,237,0.2);}
-  .code{background:#1a0a2e;border:2px solid #7c3aed;border-radius:12px;padding:20px;font-size:32px;font-weight:bold;color:#a78bfa;margin:15px 0;letter-spacing:5px;}
-  img{border-radius:8px;background:#fff;padding:10px;}
-  .badge{background:#7c3aed;color:#fff;padding:5px 15px;border-radius:20px;font-size:12px;font-weight:bold;margin-bottom:15px;display:inline-block;}
-  p{color:#888;font-size:14px;}
-</style></head>
-<body>
-  <h1>🪷 Black Lotus Bot</h1>
-  <div class="container">
-    <div class="box">
-      <span class="badge">MÉTODO 1: CÓDIGO</span>
-      ${pairingCode ? `<div class="code">${pairingCode}</div><p>Digite este código no seu WhatsApp</p>` : `<p>Aguardando número...</p><p style="font-size:11px">Defina a variável <b>NUMERO</b> no Railway</p>`}
-    </div>
-    <div class="box">
-      <span class="badge">MÉTODO 2: QR CODE</span>
-      ${qrImage ? `<img src="${qrImage}"/><p style="margin-top:15px">Escaneie com a câmera do WhatsApp</p>` : `<p>Gerando QR Code...</p>`}
-    </div>
-  </div>
-  <p>Página atualiza automaticamente a cada 15 segundos.</p>
-</body></html>`);
+    let qrImage = currentQR ? await QRCode.toDataURL(currentQR, { width: 300, margin: 2 }) : null;
+    res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Conectar Black Lotus</title><meta http-equiv="refresh" content="15"><style>body{background:#0a0a0a;color:#fff;font-family:Arial;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;flex-direction:column;gap:20px;}h1{color:#7c3aed;}.container{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;}.box{background:#111;border:2px solid #7c3aed;border-radius:16px;padding:30px;text-align:center;min-width:300px;}.code{background:#1a0a2e;border:2px solid #7c3aed;border-radius:12px;padding:20px;font-size:32px;font-weight:bold;color:#a78bfa;margin:15px 0;letter-spacing:5px;}img{border-radius:8px;background:#fff;padding:10px;}.badge{background:#7c3aed;color:#fff;padding:5px 15px;border-radius:20px;font-size:12px;font-weight:bold;margin-bottom:15px;display:inline-block;}</style></head><body><h1>🪷 Black Lotus Bot</h1><div class="container"><div class="box"><span class="badge">CÓDIGO</span>${pairingCode ? `<div class="code">${pairingCode}</div>` : `<p>Aguardando número...</p>`}</div><div class="box"><span class="badge">QR CODE</span>${qrImage ? `<img src="${qrImage}"/>` : `<p>Gerando QR...</p>`}</div></div></body></html>`);
 });
-app.listen(PORT, () => console.log(chalk.green(`[WEB] Servidor na porta ${PORT}`)));
+app.listen(PORT, () => {
+    console.log(chalk.green(`[WEB] Servidor na porta ${PORT}`));
+    keepAlive();
+});
 
 // ─── NÚCLEO ───────────────────────────────────────────────────────────────────
 let isReconnecting = false;
@@ -118,16 +100,17 @@ async function startSystemZR() {
         browser: Browsers.ubuntu("Chrome"),
         printQRInTerminal: false,
         markOnlineOnConnect: true,
+        connectTimeoutMs: 60000,
+        defaultQueryTimeoutMs: 60000,
+        keepAliveIntervalMs: 10000, // Ping agressivo
         getMessage: async () => ({ conversation: "Olá!" })
     });
 
-    // Gerar Código de Pareamento
     if (!state.creds.registered && process.env.NUMERO) {
         setTimeout(async () => {
             try {
                 pairingCode = await systemZR.requestPairingCode(process.env.NUMERO.replace(/[^0-9]/g, ""));
-                console.log(chalk.green(`[WA] Código de Pareamento: ${pairingCode}`));
-            } catch (e) { console.log(chalk.red("[WA] Erro ao gerar código")); }
+            } catch (e) {}
         }, 5000);
     }
 
@@ -144,7 +127,8 @@ async function startSystemZR() {
                 process.exit(1);
             } else {
                 isReconnecting = false;
-                setTimeout(startSystemZR, 5000);
+                console.log(chalk.yellow("[SYSTEM] Reconectando em 3 segundos..."));
+                setTimeout(startSystemZR, 3000);
             }
         } else if (connection === "open") {
             botStatus = "conectado";
@@ -168,5 +152,5 @@ async function startSystemZR() {
 }
 
 startSystemZR();
-process.on("uncaughtException", () => {});
-process.on("unhandledRejection", () => {});
+process.on("uncaughtException", (e) => console.log(chalk.red("[ERROR] " + e.message)));
+process.on("unhandledRejection", (e) => console.log(chalk.red("[REJECTION] " + e.message)));
