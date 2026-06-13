@@ -16,7 +16,7 @@ const path = require("path");
 const express = require("express");
 const QRCode = require("qrcode");
 
-// ─── SERVIDOR WEB PARA CONEXÃO ────────────────────────────────────────────────
+// ─── SERVIDOR WEB ─────────────────────────────────────────────────────────────
 const app = express();
 const PORT = process.env.PORT || 3000;
 let currentQR = null;
@@ -69,11 +69,13 @@ h1{color:#7c3aed;font-size:28px;text-align:center;}
     <h2>📱 Código de Vinculação</h2>
     ${pairingCode ? `
     <div class="code">${pairingCode}</div>
-    <div class="step"><span>1.</span> Aparelhos conectados > Conectar com número</div>
-    <div class="step"><span>2.</span> Digite o código acima</div>
+    <div class="step"><span>1.</span> Abra o WhatsApp no celular</div>
+    <div class="step"><span>2.</span> Aparelhos conectados → Conectar aparelho</div>
+    <div class="step"><span>3.</span> Usar código de telefone → Digite o código acima</div>
     ` : `
     <div class="spin"></div>
-    <p>Aguardando número...</p>
+    <p>Gerando código de vinculação...</p>
+    <p style="font-size:11px;margin-top:8px">Certifique que a variável <b>NUMERO</b> está configurada no Railway</p>
     `}
   </div>
   <div class="box">
@@ -81,7 +83,9 @@ h1{color:#7c3aed;font-size:28px;text-align:center;}
     <h2>📷 QR Code</h2>
     ${qrImage ? `
     <img src="${qrImage}" alt="QR Code" width="240" height="240" style="border-radius:8px;"/>
-    <p>Escaneie com o WhatsApp</p>
+    <div class="step"><span>1.</span> Abra o WhatsApp no celular</div>
+    <div class="step"><span>2.</span> Aparelhos conectados → Conectar aparelho</div>
+    <div class="step"><span>3.</span> Escaneie o QR Code acima</div>
     ` : `
     <div class="spin"></div>
     <p>Gerando QR Code...</p>
@@ -93,6 +97,7 @@ h1{color:#7c3aed;font-size:28px;text-align:center;}
 
 app.listen(PORT, () => {
     console.log(chalk.green(`[WEB] Servidor rodando na porta ${PORT}`));
+    console.log(chalk.cyan(`[WEB] Acesse a URL do Railway para conectar`));
 });
 
 // ─── SESSION DATA ─────────────────────────────────────────────────────────────
@@ -157,25 +162,54 @@ async function startSystemZR() {
         getMessage: async (key) => ({ conversation: "Ola!" })
     });
 
-    // Lógica para Código de Pareamento via Terminal
+    // ─── CONEXÃO AUTOMÁTICA ───────────────────────────────────────────────────
     if (!state.creds.registered) {
-        const readline = require('readline');
-        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-        const question = (text) => new Promise((resolve) => rl.question(text, resolve));
+        const numero = (process.env.NUMERO || "").replace(/\D/g, "");
 
-        console.log(chalk.cyan("\n[WA] Escolha o método de conexão:"));
-        console.log(chalk.white("1. QR Code"));
-        console.log(chalk.white("2. Código de Pareamento"));
-        
-        const opcao = await question(chalk.yellow("\nDigite a opção (1 ou 2): "));
-        
-        if (opcao === '2') {
-            const numero = await question(chalk.yellow("\nDigite o número do WhatsApp (ex: 5511999999999): "));
-            pairingCode = await systemZR.requestPairingCode(numero.trim());
-            console.log(chalk.green(`\n✅ SEU CÓDIGO DE PAREAMENTO: `) + chalk.white.bold(pairingCode));
+        if (numero) {
+            // ✅ Tem NUMERO no Railway → usa código de vinculação automaticamente
+            console.log(chalk.cyan(`\n[PAIRING] Número detectado: ${numero}`));
+            console.log(chalk.cyan(`[PAIRING] Gerando código de vinculação automaticamente...\n`));
+            try {
+                await new Promise(r => setTimeout(r, 3000));
+                const code = await systemZR.requestPairingCode(numero);
+                pairingCode = code?.match(/.{1,4}/g)?.join("-") || code;
+                console.log(chalk.bgMagenta.white(`\n🔑 CÓDIGO DE VINCULAÇÃO: ${pairingCode}\n`));
+                console.log(chalk.cyan(`[WEB] Acesse a URL do Railway para ver o código\n`));
+            } catch (e) {
+                console.log(chalk.red("[PAIRING] Erro ao gerar código: " + e.message));
+                console.log(chalk.yellow("[PAIRING] Usando QR Code como alternativa...\n"));
+            }
+        } else if (!process.stdin.isTTY) {
+            // ✅ Sem terminal (Railway sem NUMERO) → só QR Code
+            console.log(chalk.yellow(`[WA] Sem variável NUMERO — usando QR Code`));
+            console.log(chalk.cyan(`[WEB] Acesse a URL do Railway para escanear o QR Code\n`));
+        } else {
+            // ✅ Terminal local → pergunta ao usuário
+            const readline = require('readline');
+            const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+            const question = (text) => new Promise((resolve) => rl.question(text, resolve));
+
+            console.log(chalk.cyan("\n[WA] Escolha o método de conexão:"));
+            console.log(chalk.white("1. QR Code"));
+            console.log(chalk.white("2. Código de Pareamento"));
+
+            const opcao = await question(chalk.yellow("\nDigite a opção (1 ou 2): "));
+
+            if (opcao.trim() === '2') {
+                const num = await question(chalk.yellow("\nDigite o número (ex: 5511999999999): "));
+                try {
+                    const code = await systemZR.requestPairingCode(num.trim().replace(/\D/g, ""));
+                    pairingCode = code?.match(/.{1,4}/g)?.join("-") || code;
+                    console.log(chalk.green(`\n✅ CÓDIGO DE PAREAMENTO: `) + chalk.white.bold(pairingCode) + "\n");
+                } catch (e) {
+                    console.log(chalk.red("Erro ao gerar código: " + e.message));
+                }
+            }
+            rl.close();
         }
-        rl.close();
     }
+    // ─────────────────────────────────────────────────────────────────────────
 
     currentSocket = systemZR;
 
@@ -190,15 +224,29 @@ async function startSystemZR() {
 
     systemZR.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
-        if (qr) currentQR = qr;
+        if (qr) {
+            currentQR = qr;
+            console.log(chalk.yellow("[QR] Novo QR gerado — acesse a URL do Railway"));
+        }
         if (connection === "connecting") console.log(chalk.yellow("[WA] Conectando..."));
         if (connection === "close") {
+            currentQR = null;
+            pairingCode = null;
+            botStatus = "desconectado";
             const statusCode = new Boom(lastDisconnect?.error)?.output.statusCode;
-            if (statusCode === DisconnectReason.loggedOut) process.exit(1);
-            else { isReconnecting = false; setTimeout(startSystemZR, 5000); }
+            console.log(chalk.red(`[WA] Conexão fechada (código: ${statusCode})`));
+            if (statusCode === DisconnectReason.loggedOut) {
+                console.log(chalk.red("Sessão encerrada. Limpe SESSION_DATA e reinicie."));
+                process.exit(1);
+            } else {
+                isReconnecting = false;
+                setTimeout(startSystemZR, 5000);
+            }
         } else if (connection === "open") {
+            currentQR = null;
+            pairingCode = null;
             botStatus = "conectado";
-            console.log(chalk.green("\n✅ Black Lotus conectado!\n"));
+            console.log(chalk.green("\n✅ Black Lotus Bot conectado!\n"));
             isReconnecting = false;
             gerarSessionData();
         }
