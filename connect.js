@@ -16,7 +16,7 @@ const path = require("path");
 const express = require("express");
 const QRCode = require("qrcode");
 
-// ─── CONFIGURAÇÕES E CAMINHOS ─────────────────────────────────────────────────
+// ─── CONFIGURAÇÕES ────────────────────────────────────────────────────────────
 const app = express();
 const PORT = process.env.PORT || 3000;
 const SESSION_PATH = path.resolve(__dirname, "session");
@@ -24,7 +24,7 @@ let currentQR = null;
 let pairingCode = null;
 let botStatus = "aguardando";
 
-// ─── PERSISTÊNCIA DE SESSÃO (RAILWAY) ──────────────────────────────────────────
+// ─── PERSISTÊNCIA ─────────────────────────────────────────────────────────────
 function restaurarSessao() {
     const sessionData = process.env.SESSION_DATA;
     if (!sessionData) return false;
@@ -32,41 +32,68 @@ function restaurarSessao() {
         fs.ensureDirSync(SESSION_PATH);
         const decoded = Buffer.from(sessionData, "base64").toString("utf-8");
         const creds = JSON.parse(decoded);
-        const credsPath = path.join(SESSION_PATH, "creds.json");
-        fs.writeFileSync(credsPath, JSON.stringify(creds, null, 2));
+        fs.writeFileSync(path.join(SESSION_PATH, "creds.json"), JSON.stringify(creds, null, 2));
         console.log(chalk.green("[RAILWAY] Sessão restaurada via SESSION_DATA!"));
         return true;
-    } catch (e) {
-        console.log(chalk.red("[RAILWAY] Erro ao restaurar SESSION_DATA: " + e.message));
-        return false;
-    }
+    } catch (e) { return false; }
 }
 
 function gerarSessionData() {
     try {
         const credsPath = path.join(SESSION_PATH, "creds.json");
         if (!fs.existsSync(credsPath)) return;
-        const creds = fs.readFileSync(credsPath, "utf-8");
-        const encoded = Buffer.from(creds).toString("base64");
-        console.log(chalk.cyan("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-        console.log(chalk.yellow("  SALVE ESTE VALOR COMO SESSION_DATA NO RAILWAY:"));
-        console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-        console.log(chalk.white(encoded));
-        console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
+        const encoded = Buffer.from(fs.readFileSync(credsPath, "utf-8")).toString("base64");
+        console.log(chalk.yellow("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+        console.log(chalk.white("SALVE COMO SESSION_DATA NO RAILWAY:"));
+        console.log(chalk.cyan(encoded));
+        console.log(chalk.yellow("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
     } catch (e) {}
 }
 
-// ─── SERVIDOR WEB ─────────────────────────────────────────────────────────────
+// ─── SERVIDOR WEB (INTERFACE) ─────────────────────────────────────────────────
 app.get("/", async (req, res) => {
     if (botStatus === "conectado") {
-        return res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Black Lotus</title><style>body{background:#0a0a0a;color:#fff;font-family:Arial;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}h1{color:#7c3aed;}</style></head><body><h1>🪷 Black Lotus Online</h1><p>Sessão ativa e protegida.</p></body></html>`);
+        return res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Black Lotus</title><style>body{background:#000;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}h1{color:#7c3aed;}</style></head><body><h1>🪷 Black Lotus Online</h1><p>O bot está conectado com sucesso.</p></body></html>`);
     }
-    let qrImage = currentQR ? await QRCode.toDataURL(currentQR, { width: 280 }) : null;
-    res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Conectar Black Lotus</title><meta http-equiv="refresh" content="20"><style>body{background:#0a0a0a;color:#fff;font-family:Arial;display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:20px;}h1{color:#7c3aed;}.box{background:#111;border:2px solid #7c3aed;border-radius:16px;padding:24px;text-align:center;max-width:400px;}.code{background:#1a0a2e;border:2px solid #7c3aed;border-radius:12px;padding:20px;font-size:32px;font-weight:bold;color:#a78bfa;margin:10px 0;letter-spacing:5px;}</style></head><body><h1>🪷 Black Lotus Bot</h1><div class="box"><h2>Pareamento</h2>${pairingCode ? `<div class="code">${pairingCode}</div><p>Digite no WhatsApp</p>` : currentQR ? `<img src="${qrImage}"/><p>Escaneie o QR Code</p>` : `<p>Gerando conexão...</p>`}</div></body></html>`);
-});
-app.listen(PORT, () => console.log(chalk.green(`[WEB] Porta ${PORT}`)));
 
-// ─── NÚCLEO DO BOT ────────────────────────────────────────────────────────────
+    let qrImage = null;
+    if (currentQR) {
+        try {
+            qrImage = await QRCode.toDataURL(currentQR, { width: 300, margin: 2 });
+        } catch (e) {}
+    }
+
+    res.send(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Conectar Black Lotus</title>
+<meta http-equiv="refresh" content="15">
+<style>
+  body{background:#0a0a0a;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;flex-direction:column;gap:20px;}
+  h1{color:#7c3aed;margin:0;}
+  .container{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;padding:20px;}
+  .box{background:#111;border:2px solid #7c3aed;border-radius:16px;padding:30px;text-align:center;min-width:300px;box-shadow:0 0 20px rgba(124,58,237,0.2);}
+  .code{background:#1a0a2e;border:2px solid #7c3aed;border-radius:12px;padding:20px;font-size:32px;font-weight:bold;color:#a78bfa;margin:15px 0;letter-spacing:5px;}
+  img{border-radius:8px;background:#fff;padding:10px;}
+  .badge{background:#7c3aed;color:#fff;padding:5px 15px;border-radius:20px;font-size:12px;font-weight:bold;margin-bottom:15px;display:inline-block;}
+  p{color:#888;font-size:14px;}
+</style></head>
+<body>
+  <h1>🪷 Black Lotus Bot</h1>
+  <div class="container">
+    <div class="box">
+      <span class="badge">MÉTODO 1: CÓDIGO</span>
+      ${pairingCode ? `<div class="code">${pairingCode}</div><p>Digite este código no seu WhatsApp</p>` : `<p>Aguardando número...</p><p style="font-size:11px">Defina a variável <b>NUMERO</b> no Railway</p>`}
+    </div>
+    <div class="box">
+      <span class="badge">MÉTODO 2: QR CODE</span>
+      ${qrImage ? `<img src="${qrImage}"/><p style="margin-top:15px">Escaneie com a câmera do WhatsApp</p>` : `<p>Gerando QR Code...</p>`}
+    </div>
+  </div>
+  <p>Página atualiza automaticamente a cada 15 segundos.</p>
+</body></html>`);
+});
+app.listen(PORT, () => console.log(chalk.green(`[WEB] Servidor na porta ${PORT}`)));
+
+// ─── NÚCLEO ───────────────────────────────────────────────────────────────────
 let isReconnecting = false;
 
 async function startSystemZR() {
@@ -90,18 +117,17 @@ async function startSystemZR() {
         },
         browser: Browsers.ubuntu("Chrome"),
         printQRInTerminal: false,
-        syncFullHistory: false,
         markOnlineOnConnect: true,
-        getMessage: async (key) => ({ conversation: "Olá!" })
+        getMessage: async () => ({ conversation: "Olá!" })
     });
 
-    // Código de Pareamento Automático
+    // Gerar Código de Pareamento
     if (!state.creds.registered && process.env.NUMERO) {
         setTimeout(async () => {
             try {
                 pairingCode = await systemZR.requestPairingCode(process.env.NUMERO.replace(/[^0-9]/g, ""));
-                console.log(chalk.green(`[WA] Código: ${pairingCode}`));
-            } catch (e) {}
+                console.log(chalk.green(`[WA] Código de Pareamento: ${pairingCode}`));
+            } catch (e) { console.log(chalk.red("[WA] Erro ao gerar código")); }
         }, 5000);
     }
 
@@ -110,6 +136,7 @@ async function startSystemZR() {
     systemZR.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
         if (qr) currentQR = qr;
+        
         if (connection === "close") {
             const statusCode = new Boom(lastDisconnect?.error)?.output.statusCode;
             if (statusCode === DisconnectReason.loggedOut) {
@@ -121,6 +148,8 @@ async function startSystemZR() {
             }
         } else if (connection === "open") {
             botStatus = "conectado";
+            currentQR = null;
+            pairingCode = null;
             console.log(chalk.green("\n✅ Black Lotus Conectado!\n"));
             gerarSessionData();
             isReconnecting = false;
