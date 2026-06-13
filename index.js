@@ -27,6 +27,11 @@ kyun,
 infoSystem,
 os,
 menu,
+menuadm,
+menuStickers,
+menu18,
+menuDono,
+menuDown,
 menus, 
 FotoMenu,
 Config,
@@ -927,12 +932,38 @@ switch (command) {
 	    }
 	    break;
 
-	case 'menu':
-	case 'help':
-	case 'ajuda':
-	case '™menu':
-		return reply(menu(prefix, sender, NickDono, NomeBot, date, _hora, NumberDono, version));
-		break;
+		case 'menu':
+		case 'help':
+		case 'ajuda':
+		case '™menu':
+			return reply(menu(prefix, sender, NickDono, NomeBot, date, _hora, NumberDono, version));
+			break;
+
+		case 'menuadm':
+		case 'menugrupo':
+			return reply(menuadm(prefix, sender));
+			break;
+
+		case 'menudown':
+		case 'menudownload':
+			return reply(menuDown(prefix, sender));
+			break;
+
+		case 'menufig':
+		case 'menusticker':
+			return reply(menuStickers(prefix, sender));
+			break;
+
+		case 'menudono':
+		case 'menuowner':
+			if (!So_Dono) return reply(msg.SoDono);
+			return reply(menuDono(prefix, sender));
+			break;
+
+		case 'menu18':
+		case 'menusecret':
+			return reply(menu18(prefix, sender));
+			break;
 
 	case 'deepsearch':
 	case 'ia':
