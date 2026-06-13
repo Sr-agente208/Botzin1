@@ -171,7 +171,7 @@ async function startSystemZR() {
             console.log(chalk.cyan(`\n[PAIRING] Número detectado: ${numero}`));
             console.log(chalk.cyan(`[PAIRING] Gerando código de vinculação automaticamente...\n`));
             try {
-                await new Promise(r => setTimeout(r, 3000));
+                await new Promise(r => setTimeout(r, 8000));
                 const code = await systemZR.requestPairingCode(numero);
                 pairingCode = code?.match(/.{1,4}/g)?.join("-") || code;
                 console.log(chalk.bgMagenta.white(`\n🔑 CÓDIGO DE VINCULAÇÃO: ${pairingCode}\n`));
