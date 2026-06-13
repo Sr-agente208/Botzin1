@@ -518,3 +518,5 @@ switch (command) {
 console.log(chalk.red("[ERRO FATAL]: "), e);
 }
 }
+
+
