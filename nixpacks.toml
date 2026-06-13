@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "ffmpeg", "imagemagick", "libwebp"]
+
+[phases.install]
+cmds = ["npm install --legacy-peer-deps"]
+
+[phases.build]
+cmds = ["echo 'Build finalizado com sucesso'"]
+
+[start]
+cmd = "node connect.js"
