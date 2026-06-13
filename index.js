@@ -193,7 +193,26 @@ const isCmd = body.trim().startsWith(prefix);
 	const command = isCmd ? budy2.trim().slice(1).split(/ +/).shift().toLocaleLowerCase(): null;
 
 	// LOG DE DEPURAÇÃO
-	console.log(chalk.cyan(`[MSG] De: ${pushname} | Cmd: ${command} | isCmd: ${isCmd} | Body: ${body.slice(0, 30)}`));
+		console.log(chalk.cyan(`[MSG] De: ${pushname} | Cmd: ${command} | isCmd: ${isCmd} | Body: ${body.slice(0, 30)}`));
+
+		// SISTEMAS DE SEGURANÇA AUTOMÁTICOS
+		if (isGroup && isAntiBluxzinho && !isGroupAdmins && isBotGroupAdmins) {
+			const nomeUsuario = pushname?.toLowerCase() || '';
+			const numerosSuspeitos = ['5531999999999', '5531888888888']; // Adicione mais se necessário
+			if (nomeUsuario.includes('bluxzinho') || numerosSuspeitos.includes(sender.split('@')[0])) {
+				await reply(`🚨 *Usuário suspeito detectado (Bluxzinho).* \n\n❌ Removendo @${sender.split('@')[0]}`, {mentions: [sender]});
+				await conn.groupParticipantsUpdate(from, [sender], 'remove');
+			}
+		}
+
+		if (isGroup && isAntiNextshost && !isGroupAdmins && isBotGroupAdmins) {
+			const nomeUsuario = pushname?.toLowerCase() || '';
+			const mensagem = body?.toLowerCase() || '';
+			if (nomeUsuario.includes('nextshost') || mensagem.includes('nextshost.com')) {
+				await reply(`🌐 *Link da Nextshost.com detectado ou usuário suspeito.* \n\n❌ Removendo @${sender.split('@')[0]}`, {mentions: [sender]});
+				await conn.groupParticipantsUpdate(from, [sender], 'remove');
+			}
+		}
 
 	// === SISTEMA DE RPG ===
 	const rpgCommands = ['rpg', 'rpgajuda', 'criarchar', 'meuchar', 'trabalhar', 'loja', 'comprar', 'inventario', 'usar', 'batalha', 'atacar', 'fugir', 'rpgrank', 'deletarchar', 'aventura', 'ritual', 'criarsessao', 'entrar', 'narrar', 'fecharsessao'];
@@ -228,26 +247,28 @@ const somembros = isGroup ? getMembros(MembrosGP) : ''
 
 const dirGroup = `./DATABASE2/GRUPOS/ATIVACOES/${from}.json`
 
-if(isGroup && !fs.existsSync(dirGroup)){
-var dataGp2 = [{
-name: NomeGrupo,
-groupId: from, 
-antilinkhard: false, 
-So_Admins: false,
-bangp: false,
-wellcome: [{
-bemvindo1: false,
-legendabv: "Olá #numerodele#, seja bem vindo(a) ao Grupo: *#nomedogp#*, Kay lhe deseja as boas vindas 🕸️",
-legendasaiu: "Adeus, #numerodele#, espero que não se arrependa pela sua decisão. "
-},
-{
-bemvindo2: false,
-legendabv: "Olá #numerodele#, seja bem vindo(a) ao Grupo: *#nomedogp#*, kay lhe deseja as boas vindas 🕸️",
-legendasaiu: "Adeus, #numerodele#, espero que não se arrependa pela sua decisão. "
-}],
-}]
-fs.writeFileSync(dirGroup, JSON.stringify(dataGp2, null, 2) + '\n')
-}
+	if(isGroup && !fs.existsSync(dirGroup)){
+	var dataGp2 = [{
+	name: NomeGrupo,
+	groupId: from, 
+	antilinkhard: false, 
+	So_Admins: false,
+	bangp: false,
+	antibluxzinho: false,
+	antinexthost: false,
+	wellcome: [{
+	bemvindo1: false,
+	legendabv: "Olá #numerodele#, seja bem vindo(a) ao Grupo: *#nomedogp#*, Kay lhe deseja as boas vindas 🕸️",
+	legendasaiu: "Adeus, #numerodele#, espero que não se arrependa pela sua decisão. "
+	},
+	{
+	bemvindo2: false,
+	legendabv: "Olá #numerodele#, seja bem vindo(a) ao Grupo: *#nomedogp#*, kay lhe deseja as boas vindas 🕸️",
+	legendasaiu: "Adeus, #numerodele#, espero que não se arrependa pela sua decisão. "
+	}],
+	}]
+	fs.writeFileSync(dirGroup, JSON.stringify(dataGp2, null, 2) + '\n')
+	}
 
 const dataGp = isGroup ? JSON.parse(fs.readFileSync(dirGroup)) : undefined 
 
@@ -258,10 +279,12 @@ const isBemvindo = isGroup ? dataGp[0]?.wellcome[0]?.bemvindo1 : undefined
 const isBemvindo2 = isGroup ? dataGp[0]?.wellcome[1]?.bemvindo2 : undefined
 const isAntiLinkHard = isGroup ? dataGp[0]?.antilinkhard : undefined
 const SoAdmins = isGroup ? dataGp[0]?.So_Admins : undefined 
-const isBanGrupo = isGroup ? dataGp[0]?.bangp : undefined 
-
-const BotOff = Config2.botoff 
-const isVerificado = Config2.verificado
+	const isBanGrupo = isGroup ? dataGp[0]?.bangp : undefined 
+	const isAntiBluxzinho = isGroup ? dataGp[0]?.antibluxzinho : undefined
+	const isAntiNextshost = isGroup ? dataGp[0]?.antinexthost : undefined
+	
+	const BotOff = Config2.botoff 
+	const isVerificado = Config2.verificado
 
 //DEFINIÇÕES UTEIS
 const selo = Config2.verificado ? {key: {fromMe: false, remoteJid: from, id: "META",
@@ -392,10 +415,66 @@ console.log(chalk.magenta(logMsg));
 
 switch (command) {
 	
-	case 'getsession':
-	case 'session':
-	case 'token':
-	    if (!So_Dono) return reply(msg.SoDono);
+		case 'ladrao':
+		case 'roubo': {
+			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+			let alvo = menc_jid;
+			if (!q.includes('@') && !info.message?.extendedTextMessage?.contextInfo?.quotedMessage) return reply(`Marque alguém.\nExemplo: ${prefix}ladrao @usuario`);
+			
+			let foto;
+			try {
+				foto = await conn.profilePictureUrl(alvo, 'image');
+			} catch {
+				foto = 'https://i.imgur.com/0Z8FQwN.jpeg';
+			}
+			
+			const buffer = await getBuffer(foto);
+			await conn.sendMessage(from, {
+				image: buffer,
+				caption: `🚨⚠️ *𝗟𝗔𝗗𝗥𝗔𝗢 𝗗𝗘𝗧𝗘𝗖𝗧𝗔𝗗𝗢* ⚠️🚨\n\n💀 *𝗣𝗥𝗢𝗖𝗨𝗥𝗔𝗗𝗢* 💀\n📛 Usuário: @${alvo.split('@')[0]}\n\n❌ Acusado de roubo\n❌ Em fuga constante\n❌ Especialista em sumir\n\n🚔 STATUS: *ALERTA MÁXIMO*\n\n⚠️ Cuidado com esse usuário no grupo`,
+				mentions: [alvo]
+			}, { quoted: selo });
+		}
+		break;
+
+		case 'antibluxzinho': {
+			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+			if (!isGroupAdmins) return reply(msg.SoAdm);
+			if (q === '1' || q === 'on') {
+				dataGp[0].antibluxzinho = true;
+				setGp(dataGp);
+				reply(`🛡️ *Anti Bluxzinho ativado com sucesso.* \n\n✅ Qualquer usuário com "bluxzinho" no nome ou número suspeito será removido automaticamente.`);
+			} else if (q === '0' || q === 'off') {
+				dataGp[0].antibluxzinho = false;
+				setGp(dataGp);
+				reply(`❌ *Anti Bluxzinho desativado com sucesso.*`);
+			} else {
+				reply(`⚙️ *CONFIGURAÇÃO ANTI BLUXZINHO*\n\n${prefix}antibluxzinho 1 → Ativar\n${prefix}antibluxzinho 0 → Desativar`);
+			}
+		}
+		break;
+
+		case 'antinexthost': {
+			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+			if (!isGroupAdmins) return reply(msg.SoAdm);
+			if (q === '1' || q === 'on') {
+				dataGp[0].antinexthost = true;
+				setGp(dataGp);
+				reply(`🛡️ *Anti Nextshost.com ativado com sucesso.* \n\n✅ Qualquer usuário com "nextshost" no nome ou enviando link será removido automaticamente.`);
+			} else if (q === '0' || q === 'off') {
+				dataGp[0].antinexthost = false;
+				setGp(dataGp);
+				reply(`❌ *Anti Nextshost.com desativado com sucesso.*`);
+			} else {
+				reply(`⚙️ *CONFIGURAÇÃO ANTI NEXTHOST*\n\n${prefix}antinexthost 1 → Ativar\n${prefix}antinexthost 0 → Desativar`);
+			}
+		}
+		break;
+
+		case 'getsession':
+		case 'session':
+		case 'token':
+		    if (!So_Dono) return reply(msg.SoDono);
 	    try {
 	        const path = require('path');
 	        const credsPath = path.resolve(__dirname, 'session', 'creds.json');
