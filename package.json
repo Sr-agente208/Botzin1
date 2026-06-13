@@ -4,6 +4,7 @@
   "description": "Bot WhatsApp criado por Lopes'",
   "main": "connect.js",
   "scripts": {
+    "build": "npm install --legacy-peer-deps",
     "start": "node connect.js"
   },
   "engines": {
