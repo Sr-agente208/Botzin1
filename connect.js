@@ -4,7 +4,8 @@ const {
     DisconnectReason,
     fetchLatestWaWebVersion,
     jidDecode,
-    Browsers
+    Browsers,
+    makeCacheableSignalKeyStore
 } = require("@systemzero/baileys");
 const pino = require("pino");
 const { Boom } = require("@hapi/boom");
@@ -15,89 +16,15 @@ const path = require("path");
 const express = require("express");
 const QRCode = require("qrcode");
 
-// ─── SERVIDOR WEB ─────────────────────────────────────────────────────────────
+// ─── CONFIGURAÇÕES E CAMINHOS ─────────────────────────────────────────────────
 const app = express();
 const PORT = process.env.PORT || 3000;
+const SESSION_PATH = path.resolve(__dirname, "session");
 let currentQR = null;
 let pairingCode = null;
 let botStatus = "aguardando";
 
-app.get("/", async (req, res) => {
-    if (botStatus === "conectado") {
-        return res.send(`<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Black Lotus Bot</title>
-<style>body{background:#0a0a0a;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}
-h1{color:#7c3aed;} p{color:#aaa;}</style></head>
-<body><h1>🪷 Black Lotus Conectado!</h1><p>O domínio absoluto começou.</p></body></html>`);
-    }
-
-    let qrImage = null;
-    if (currentQR) {
-        try {
-            qrImage = await QRCode.toDataURL(currentQR, {
-                width: 280, margin: 2,
-                color: { dark: "#000000", light: "#ffffff" }
-            });
-        } catch (e) {}
-    }
-
-    res.send(`<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Black Lotus Bot - Conectar</title>
-<meta http-equiv="refresh" content="20">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:#0a0a0a;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;flex-direction:column;gap:20px;}
-h1{color:#7c3aed;font-size:28px;text-align:center;}
-.container{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;width:100%;max-width:800px;}
-.box{background:#111;border:2px solid #7c3aed;border-radius:16px;padding:24px;text-align:center;flex:1;min-width:260px;}
-.box h2{color:#a78bfa;margin-bottom:16px;font-size:18px;}
-.box p{color:#888;font-size:13px;margin-top:10px;}
-.code{background:#1a0a2e;border:2px solid #7c3aed;border-radius:12px;padding:20px;font-size:32px;font-weight:bold;letter-spacing:8px;color:#a78bfa;margin:10px 0;}
-.step{background:#1a1a1a;border-radius:8px;padding:10px 14px;margin:6px 0;font-size:13px;color:#ccc;text-align:left;}
-.step span{color:#7c3aed;font-weight:bold;}
-.spin{border:4px solid #333;border-top:4px solid #7c3aed;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:20px auto;}
-@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-.badge{background:#7c3aed;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:12px;}
-</style></head>
-<body>
-<h1>🪷 Black Lotus Bot</h1>
-<p style="color:#888;font-size:13px">Página atualiza automaticamente a cada 20s</p>
-<div class="container">
-  <div class="box">
-    <span class="badge">📱 OPÇÃO 1</span>
-    <h2>Código de Pareamento</h2>
-    ${pairingCode ? `
-    <div class="code">${pairingCode}</div>
-    <div class="step"><span>1.</span> Aparelhos conectados > Conectar com número</div>
-    <div class="step"><span>2.</span> Digite o código acima</div>
-    ` : `
-    <div class="spin"></div>
-    <p>Aguardando número...</p>
-    <p style="font-size:11px">Configure a variável <b>NUMERO</b> no Railway</p>
-    `}
-  </div>
-  <div class="box">
-    <span class="badge">📷 OPÇÃO 2</span>
-    <h2>QR Code</h2>
-    ${qrImage ? `
-    <img src="${qrImage}" alt="QR Code" width="240" height="240" style="border-radius:8px;margin:0 auto;"/>
-    <p>Escaneie com o WhatsApp</p>
-    ` : `
-    <div class="spin"></div>
-    <p>Gerando QR Code...</p>
-    `}
-  </div>
-</div>
-</body></html>`);
-});
-
-app.listen(PORT, () => {
-    console.log(chalk.green(`[WEB] Servidor rodando na porta ${PORT}`));
-});
-
-// ─── SESSION DATA ─────────────────────────────────────────────────────────────
-const SESSION_PATH = path.resolve(__dirname, "session");
-
+// ─── PERSISTÊNCIA DE SESSÃO (RAILWAY) ──────────────────────────────────────────
 function restaurarSessao() {
     const sessionData = process.env.SESSION_DATA;
     if (!sessionData) return false;
@@ -106,12 +33,13 @@ function restaurarSessao() {
         const decoded = Buffer.from(sessionData, "base64").toString("utf-8");
         const creds = JSON.parse(decoded);
         const credsPath = path.join(SESSION_PATH, "creds.json");
-        if (!fs.existsSync(credsPath)) {
-            fs.writeFileSync(credsPath, JSON.stringify(creds, null, 2));
-            console.log(chalk.green("[RAILWAY] Sessao restaurada!"));
-        }
+        fs.writeFileSync(credsPath, JSON.stringify(creds, null, 2));
+        console.log(chalk.green("[RAILWAY] Sessão restaurada via SESSION_DATA!"));
         return true;
-    } catch (e) { return false; }
+    } catch (e) {
+        console.log(chalk.red("[RAILWAY] Erro ao restaurar SESSION_DATA: " + e.message));
+        return false;
+    }
 }
 
 function gerarSessionData() {
@@ -120,79 +48,72 @@ function gerarSessionData() {
         if (!fs.existsSync(credsPath)) return;
         const creds = fs.readFileSync(credsPath, "utf-8");
         const encoded = Buffer.from(creds).toString("base64");
-        console.log(chalk.yellow("\nSALVE ESTE VALOR COMO SESSION_DATA NO RAILWAY:\n") + chalk.white(encoded) + "\n");
+        console.log(chalk.cyan("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+        console.log(chalk.yellow("  SALVE ESTE VALOR COMO SESSION_DATA NO RAILWAY:"));
+        console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+        console.log(chalk.white(encoded));
+        console.log(chalk.cyan("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"));
     } catch (e) {}
 }
 
-const _NOISE = /Closing open session|closing session|closed session|SessionEntry|chainKey|registrationId|currentRatchet|ephemeralKeyPair|lastRemoteEphemeralKey|rootKey|indexInfo|baseKey|remoteIdentityKey|pendingPreKey|Bad MAC|Retry count|retrying/i;
-const _w = process.stdout.write.bind(process.stdout);
-process.stdout.write = (c, enc, cb) => { if (_NOISE.test(c)) { if (typeof cb === "function") cb(); return true; } return _w(c, enc, cb); };
+// ─── SERVIDOR WEB ─────────────────────────────────────────────────────────────
+app.get("/", async (req, res) => {
+    if (botStatus === "conectado") {
+        return res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Black Lotus</title><style>body{background:#0a0a0a;color:#fff;font-family:Arial;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;}h1{color:#7c3aed;}</style></head><body><h1>🪷 Black Lotus Online</h1><p>Sessão ativa e protegida.</p></body></html>`);
+    }
+    let qrImage = currentQR ? await QRCode.toDataURL(currentQR, { width: 280 }) : null;
+    res.send(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Conectar Black Lotus</title><meta http-equiv="refresh" content="20"><style>body{background:#0a0a0a;color:#fff;font-family:Arial;display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:20px;}h1{color:#7c3aed;}.box{background:#111;border:2px solid #7c3aed;border-radius:16px;padding:24px;text-align:center;max-width:400px;}.code{background:#1a0a2e;border:2px solid #7c3aed;border-radius:12px;padding:20px;font-size:32px;font-weight:bold;color:#a78bfa;margin:10px 0;letter-spacing:5px;}</style></head><body><h1>🪷 Black Lotus Bot</h1><div class="box"><h2>Pareamento</h2>${pairingCode ? `<div class="code">${pairingCode}</div><p>Digite no WhatsApp</p>` : currentQR ? `<img src="${qrImage}"/><p>Escaneie o QR Code</p>` : `<p>Gerando conexão...</p>`}</div></body></html>`);
+});
+app.listen(PORT, () => console.log(chalk.green(`[WEB] Porta ${PORT}`)));
 
+// ─── NÚCLEO DO BOT ────────────────────────────────────────────────────────────
 let isReconnecting = false;
 
 async function startSystemZR() {
     if (isReconnecting) return;
     isReconnecting = true;
-    currentQR = null;
-    pairingCode = null;
-    botStatus = "aguardando";
-
+    
     restaurarSessao();
     fs.ensureDirSync(SESSION_PATH);
-
+    
     const { state, saveCreds } = await useMultiFileAuthState(SESSION_PATH);
     const { version } = await fetchLatestWaWebVersion().catch(() => ({ version: [2, 3000, 1015901307] }));
 
     console.log(chalk.magenta(figlet.textSync("Black Lotus", { font: "Small" })));
-    console.log(chalk.magenta(`\nIniciando Black Lotus Bot v2.5.2...\n`));
 
     const systemZR = makeWASocket({
         version,
         logger: pino({ level: "silent" }),
-        auth: state,
-        browser: Browsers.ubuntu("Chrome"), // Browser padrão para melhor compatibilidade
+        auth: {
+            creds: state.creds,
+            keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" }))
+        },
+        browser: Browsers.ubuntu("Chrome"),
         printQRInTerminal: false,
-        syncFullHistory: true, // Sincronização completa
-        shouldSyncHistoryMessage: () => true,
-        getMessage: async (key) => ({ conversation: "Ola!" })
+        syncFullHistory: false,
+        markOnlineOnConnect: true,
+        getMessage: async (key) => ({ conversation: "Olá!" })
     });
 
-    // PAREAMENTO AUTOMÁTICO
-    const NUMERO = process.env.NUMERO;
-    if (!state.creds.registered && NUMERO) {
+    // Código de Pareamento Automático
+    if (!state.creds.registered && process.env.NUMERO) {
         setTimeout(async () => {
             try {
-                pairingCode = await systemZR.requestPairingCode(NUMERO.replace(/[^0-9]/g, "").trim());
-                console.log(chalk.green(`\n✅ CÓDIGO DE PAREAMENTO GERADO: `) + chalk.white.bold(pairingCode));
-            } catch (e) {
-                console.log(chalk.red("\n❌ Erro ao gerar código de pareamento: " + e.message));
-            }
+                pairingCode = await systemZR.requestPairingCode(process.env.NUMERO.replace(/[^0-9]/g, ""));
+                console.log(chalk.green(`[WA] Código: ${pairingCode}`));
+            } catch (e) {}
         }, 5000);
     }
 
-    systemZR.ev.on("messages.upsert", async (chatUpdate) => {
-        try {
-            const mek = chatUpdate.messages[0];
-            if (!mek || !mek.message) return;
-            if (mek.key.remoteJid === "status@broadcast") return;
-            
-            // Log de recebimento para depuração no Railway
-            console.log(chalk.cyan(`[MSG] Recebida de: ${mek.key.remoteJid}`));
-            
-            await require("./index")(systemZR, chatUpdate);
-        } catch (err) {
-            console.error(chalk.red("[ERRO INDEX]:"), err);
-        }
-    });
+    systemZR.ev.on("creds.update", saveCreds);
 
     systemZR.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
         if (qr) currentQR = qr;
-        if (connection === "connecting") console.log(chalk.yellow("[WA] Conectando..."));
         if (connection === "close") {
             const statusCode = new Boom(lastDisconnect?.error)?.output.statusCode;
             if (statusCode === DisconnectReason.loggedOut) {
-                console.log(chalk.red("Sessao encerrada."));
+                fs.removeSync(SESSION_PATH);
                 process.exit(1);
             } else {
                 isReconnecting = false;
@@ -200,20 +121,23 @@ async function startSystemZR() {
             }
         } else if (connection === "open") {
             botStatus = "conectado";
-            currentQR = null;
-            pairingCode = null;
-            console.log(chalk.green("\n✅ Black Lotus conectado e sincronizado!\n"));
-            isReconnecting = false;
+            console.log(chalk.green("\n✅ Black Lotus Conectado!\n"));
             gerarSessionData();
+            isReconnecting = false;
         }
     });
 
-    systemZR.ev.on("creds.update", saveCreds);
-    
-    process.on("uncaughtException", (err) => { console.error("Uncaught Exception:", err); });
-    process.on("unhandledRejection", (reason, promise) => { console.error("Unhandled Rejection:", reason); });
+    systemZR.ev.on("messages.upsert", async (chatUpdate) => {
+        try {
+            const mek = chatUpdate.messages[0];
+            if (!mek || !mek.message || mek.key.remoteJid === "status@broadcast") return;
+            await require("./index")(systemZR, chatUpdate);
+        } catch (err) {}
+    });
 
     return systemZR;
 }
 
 startSystemZR();
+process.on("uncaughtException", () => {});
+process.on("unhandledRejection", () => {});
