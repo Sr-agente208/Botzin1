@@ -1,5 +1,6 @@
 [build]
-buildCommand = "npm install"
+builder = "NIXPACKS"
+buildCommand = "npm install --legacy-peer-deps"
 
 [deploy]
 startCommand = "node connect.js"
