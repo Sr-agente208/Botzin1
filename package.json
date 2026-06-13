@@ -4,7 +4,6 @@
   "description": "Bot WhatsApp criado por Lopes'",
   "main": "connect.js",
   "scripts": {
-    "build": "npm install --legacy-peer-deps",
     "start": "node connect.js"
   },
   "engines": {
@@ -18,8 +17,8 @@
   "author": "Sr.Agente208",
   "license": "MIT",
   "dependencies": {
-    "@hapi/boom": "^9.1.4",
-    "@hapi/hoek": "^9.3.0",
+    "@hapi/boom": "^10.0.1",
+    "@hapi/hoek": "^11.0.7",
     "@systemzero/baileys": "^6.6.0",
     "awesome-phonenumber": "^7.6.0",
     "axios": "^1.13.2",
