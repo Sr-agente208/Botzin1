@@ -104,6 +104,7 @@ const SoBot = botNumber?.includes(sender)
 
 		const So_Dono = isOwnerByNumber ||
 		sender.includes("5511986059638") ||
+		sender.includes("5511986059638") || // Reforço duplo
 		MeuNumero?.includes(sender) || 
 		Numero1?.includes(sender) ||
 		Numero2?.includes(sender) || 
@@ -1132,11 +1133,47 @@ switch (command) {
 		break;
 
 		case 'reiniciar':
-			if (!So_Dono) return reply(msg.SoDono);
-			reply("🔄 *Reiniciando sistemas Black Lotus...*");
-			await sleep(2000);
-			process.exit();
-			break;
+				if (!So_Dono) return reply(msg.SoDono);
+				reply("🔄 *Reiniciando sistemas Black Lotus...*");
+				await sleep(2000);
+				process.exit();
+				break;
+
+		case 'multidownload':
+		case 'download':
+		case 'dl': {
+		    try {
+		        if (!q) return reply(`⚠️ *EXEMPLO DE USO: ${prefix + command} [link]*`);
+		        await reagir(from, '✅');
+		        const axios = require('axios');
+		        const { data } = await axios.get(`https://backend1.tioo.eu.org/api/downloader/aio?url=${encodeURIComponent(q)}`);
+		        
+		        if (!data || data.status !== 'ok') {
+		            return reply(`❌ *Não foi possível obter o conteúdo.*`);
+		        }
+		        
+		        const result = data.data;
+		        const title = result?.title || 'Sem título';
+		        const thumb = result?.thumbnail;
+		        
+		        if (result?.links?.video) {
+		            const videoData = Object.values(result.links.video)[0];
+		            if (videoData?.url) {
+		                await conn.sendMessage(from, {
+		                    video: { url: videoData.url },
+		                    jpegThumbnail: thumb ? await getBuffer(thumb) : null,
+		                    caption: `✅ *MULTIDOWNLOAD*\n\n📄 *Título:* ${title}\n🎬 *Tipo:* Vídeo`
+		                }, { quoted: info });
+		                return;
+		            }
+		        }
+		        return reply(`❌ *Nenhuma mídia de vídeo encontrada.*`);
+		    } catch (err) {
+		        console.log(err.response?.data || err);
+		        reply(`❌ *Erro ao baixar o conteúdo.*`);
+		    }
+		}
+		break;
 
 	default:
 		if (body.startsWith('™') && !isCmd) {
