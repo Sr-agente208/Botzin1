@@ -135,11 +135,16 @@ const SoBot = botNumber?.includes(sender)
 	  info?.text ||
 	  "";
 
-	// LOG DE SEGURANÇA PARA O DONO
-	if (body.startsWith(prefix)) {
-	    console.log(chalk.yellow(`[COMANDO] ${pushname} (${sender}) usou: ${body}`));
-	    console.log(chalk.cyan(`[PERMISSÃO] So_Dono: ${So_Dono} | IsCreator: ${IsCreator} | SoCriador: ${SoCriador}`));
-	}
+		// LOG DE SEGURANÇA PARA O DONO
+		if (body.startsWith(prefix)) {
+		    console.log(chalk.yellow(`[COMANDO] ${pushname} (${sender}) usou: ${body}`));
+		    console.log(chalk.cyan(`[DEBUG] Seu ID: ${sender} | Número Alvo: 5511986059638`));
+		    console.log(chalk.cyan(`[PERMISSÃO] So_Dono: ${So_Dono} | IsCreator: ${IsCreator} | SoCriador: ${SoCriador}`));
+		}
+		
+		if (body === prefix + 'debug') {
+		    return reply(`🛠️ *BLACK LOTUS DEBUG*\n\n👤 *Seu ID:* ${sender}\n👑 *Dono Configurado:* ${NumberDono}\n🛡️ *So_Dono:* ${So_Dono}\n🤖 *Bot:* ${botNumber}`);
+		}
   
 if (info?.message?.listResponseMessage) {
 body = info?.message?.listResponseMessage?.singleSelectReply?.selectedRowId;
@@ -227,13 +232,13 @@ const isCmd = body.trim().startsWith(prefix);
 	    return await handleJogos(conn, from, info, command, args, sender, pushname, isGroup, prefix);
 	}
 
-		// === BLACK LOTUS AI ===
-		if (command === 'lotus' || command === 'ia' || command === 'gpt') {
-		    if (!q) return reply(`🌑 *Diga algo para as sombras...*\nEx: ${prefix}lotus Quem é você?`);
-		    await reagir(from, "🌑");
-		    const aiRes = await BlackLotusAI(q, SHIZUKU_SITE, SHIZUKU_KEY);
-		    return reply(aiRes);
-		}
+			// === BLACK LOTUS AI ===
+			if (command === 'lotus' || command === 'ia' || command === 'gpt') {
+			    if (!q) return reply(`🌑 *Diga algo para as sombras...*\nEx: ${prefix}lotus Quem é você?`);
+			    await reagir(from, "🌑");
+			    const aiRes = await BlackLotusAI(q);
+			    return reply(aiRes);
+			}
 
 //INFO DE GRUPOS!!
 const Infos_Do_Grupo = isGroup ? await conn.groupMetadata(from) : {} || '';
