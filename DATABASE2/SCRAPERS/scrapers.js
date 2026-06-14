@@ -81,11 +81,17 @@ return conn.sendMessage(from, {text: "Erro no comando"}, {quoted: info});
 }
 }
 async function BlackLotusAI(query) {
-    const prompt = `Você é o Black Lotus AI, a inteligência oficial do bot Black Lotus. Sua personalidade é misteriosa, elegante, levemente sarcástica e muito inteligente. Use emojis como 🪷, 🌑, 💜. Responda de forma concisa. Pergunta: ${query}`;
+    const prompt = `Você é o Black Lotus AI, a inteligência oficial do bot Black Lotus. Personalidade: misteriosa, inteligente e sarcástica. Use emojis 🪷, 🌑, 💜. Pergunta: ${query}`;
     try {
-        const res = await fetch(`https://shizuku-apis.shop/api/ias/gpt-2?query=${encodeURIComponent(prompt)}&apitoken=key-free`);
+        // Tentando a rota primária estável
+        const res = await fetch(`https://shizuku-apis.shop/api/ias/gpt-4?query=${encodeURIComponent(prompt)}&apitoken=key-free`);
         const api = await res.json();
-        return api?.resposta?.trim() || "🌑 *As sombras estão silenciosas agora...*";
+        if (api.status && api.resultado) return api.resultado.trim();
+        
+        // Backup caso a primária falhe
+        const res2 = await fetch(`https://shizuku-apis.shop/api/ias/gpt-2?query=${encodeURIComponent(prompt)}&apitoken=key-free`);
+        const api2 = await res2.json();
+        return api2?.resposta?.trim() || "🌑 *As sombras estão silenciosas agora...*";
     } catch (e) {
         return "🌑 *Erro na conexão com as sombras.*";
     }

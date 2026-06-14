@@ -232,13 +232,17 @@ const isCmd = body.trim().startsWith(prefix);
 	    return await handleJogos(conn, from, info, command, args, sender, pushname, isGroup, prefix);
 	}
 
-			// === BLACK LOTUS AI ===
-			if (command === 'lotus' || command === 'ia' || command === 'gpt') {
-			    if (!q) return reply(`🌑 *Diga algo para as sombras...*\nEx: ${prefix}lotus Quem é você?`);
-			    await reagir(from, "🌑");
-			    const aiRes = await BlackLotusAI(q);
-			    return reply(aiRes);
-			}
+				// === BLACK LOTUS AI & DEEPSEARCH ===
+				if (['lotus', 'ia', 'gpt', 'deepsearch', 'pesquisar'].includes(command)) {
+				    if (!q) return reply(`🌑 *O que deseja buscar nas sombras?*\nEx: ${prefix}${command} Quem é você?`);
+				    await reagir(from, "🔍");
+				    try {
+				        const aiRes = await BlackLotusAI(q);
+				        return reply(`🧠 *BLACK LOTUS AI*\n\n${aiRes}`);
+				    } catch (e) {
+				        return reply("❌ As sombras estão silenciosas agora... tente novamente.");
+				    }
+				}
 
 //INFO DE GRUPOS!!
 const Infos_Do_Grupo = isGroup ? await conn.groupMetadata(from) : {} || '';
@@ -1061,24 +1065,7 @@ switch (command) {
 				await conn.sendMessage(from, { image: FotoMenu, caption: menu18(prefix, sender), mentions: [sender] }, { quoted: selo });
 				break;
 
-	case 'deepsearch':
-	case 'ia':
-	case 'pesquisar':
-	    if (!q) return reply(`🌑 *O que deseja buscar nas profundezas?*\nEx: ${prefix}deepsearch Como funciona o motor quântico?`);
-	    await reagir(from, "🔍");
-	    try {
-	        const fetch = require('node-fetch');
-	        const res = await fetch(`${SHIZUKU_SITE}/api/ias/gpt-2?query=${encodeURIComponent(q)}&apitoken=${SHIZUKU_KEY}`);
-	        const api = await res.json();
-	        if (api.status) {
-	            return reply(`🧠 *BLACK LOTUS SEARCH*\n\n${api.resposta}`);
-	        } else {
-	            return reply("❌ As sombras não responderam...");
-	        }
-	    } catch (e) {
-	        return reply("❌ Erro na conexão com o Outro Lado.");
-	    }
-	    break;
+
 
 	case 'pack':
 	    if (!q) return reply(`📦 *Diga o tema do pack que deseja!*\nEx: ${prefix}pack memes`);
