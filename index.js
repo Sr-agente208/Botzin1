@@ -216,10 +216,22 @@ const q = args.join(' ');
 const isCmd = body.trim().startsWith(prefix);
 	const command = isCmd ? budy2.trim().slice(1).split(/ +/).shift().toLocaleLowerCase(): null;
 
+	const reply = (texto, options = {}) => {
+	    return conn.sendMessage(from, { text: texto, ...options }, { quoted: info });
+	};
+
+	const reagir = async (idgp, emj) => {
+	    var reactionMessage = {
+	        react: {
+	            text: emj, 
+	            key: info.key
+	        }
+	    } 
+	    conn.sendMessage(idgp, reactionMessage)
+	}
+
 	// LOG DE DEPURAÇÃO
-		console.log(chalk.cyan(`[MSG] De: ${pushname} | Cmd: ${command} | isCmd: ${isCmd} | Body: ${body.slice(0, 30)}`));
-
-
+	console.log(chalk.cyan(`[MSG] De: ${pushname} | Cmd: ${command} | isCmd: ${isCmd} | Body: ${body.slice(0, 30)}`));
 
 	// === SISTEMA DE RPG ===
 	const rpgCommands = ['rpg', 'rpgajuda', 'criarchar', 'meuchar', 'trabalhar', 'loja', 'comprar', 'inventario', 'usar', 'batalha', 'atacar', 'fugir', 'rpgrank', 'deletarchar', 'aventura', 'ritual', 'criarsessao', 'entrar', 'narrar', 'fecharsessao'];
@@ -233,17 +245,17 @@ const isCmd = body.trim().startsWith(prefix);
 	    return await handleJogos(conn, from, info, command, args, sender, pushname, isGroup, prefix);
 	}
 
-				// === BLACK LOTUS AI & DEEPSEARCH ===
-				if (['lotus', 'ia', 'gpt', 'deepsearch', 'pesquisar'].includes(command)) {
-				    if (!q) return reply(`🌑 *O que deseja buscar nas sombras?*\nEx: ${prefix}${command} Quem é você?`);
-				    await reagir(from, "🔍");
-				    try {
-				        const aiRes = await BlackLotusAI(q);
-				        return reply(`🧠 *BLACK LOTUS AI*\n\n${aiRes}`);
-				    } catch (e) {
-				        return reply("❌ As sombras estão silenciosas agora... tente novamente.");
-				    }
-				}
+	// === BLACK LOTUS AI & DEEPSEARCH ===
+	if (['lotus', 'ia', 'gpt', 'deepsearch', 'pesquisar'].includes(command)) {
+	    if (!q) return reply(`🌑 *O que deseja buscar nas sombras?*\nEx: ${prefix}${command} Quem é você?`);
+	    await reagir(from, "🔍");
+	    try {
+	        const aiRes = await BlackLotusAI(q);
+	        return reply(`🧠 *BLACK LOTUS AI*\n\n${aiRes}`);
+	    } catch (e) {
+	        return reply("❌ As sombras estão silenciosas agora... tente novamente.");
+	    }
+	}
 
 //INFO DE GRUPOS!!
 const Infos_Do_Grupo = isGroup ? await conn.groupMetadata(from) : {} || '';
@@ -332,23 +344,7 @@ END:VCARD`
 } : info
 
 
-async function reply(texto){
-try {
-return conn.sendMessage(from, {text: texto, contextInfo: ShizukuStile}, {quoted: selo})
-} catch (E) {
-return reply("Erro ao enviar msg");
-};
-};
 
-const reagir = async (idgp, emj) => {
-var reactionMessage = {
-react: {
-text: emj, 
-key: info.key
-}
-} 
-conn.sendMessage(idgp, reactionMessage)
-}
 
 var isUrl = (url) => {
 if(linkfy.find(url)[0]) return true
