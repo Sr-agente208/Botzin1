@@ -497,23 +497,24 @@ switch (command) {
 		}
 		break;
 
-		case 'play1':
-		case 'play': {
-			if (!q) return reply(`⚠️ Digite o nome da música.\nExemplo: *${prefix}play1 Nome da Música*`);
-			reply('⏳ *Buscando áudio nas sombras, aguarde...*');
-			try {
-				const downloadUrl = await BaixarNoYt(q, 'mp3');
-				if (!downloadUrl) return reply('❌ Não foi possível encontrar o áudio.');
-				await conn.sendMessage(from, { 
-					audio: { url: downloadUrl }, 
-					mimetype: 'audio/mp4' 
-				}, { quoted: info });
-			} catch (err) {
-				console.error(err);
-				reply('❌ Ocorreu um erro ao processar o download.');
+			case 'play1':
+			case 'play': {
+				if (!q) return reply(`⚠️ Digite o nome da música.\nExemplo: *${prefix}play1 Nome da Música*`);
+				reply('⏳ *Buscando áudio nas sombras, aguarde...*');
+				try {
+					const downloadUrl = await BaixarNoYt(q, 'mp3');
+					if (!downloadUrl) return reply('❌ Não foi possível encontrar o áudio.');
+					await conn.sendMessage(from, { 
+						audio: { url: downloadUrl }, 
+						mimetype: 'audio/mp4',
+						ptt: false
+					}, { quoted: info });
+				} catch (err) {
+					console.error(err);
+					reply('❌ Ocorreu um erro ao processar o download.');
+				}
 			}
-		}
-		break;
+			break;
 
 		case 'play2':
 		case 'video': {

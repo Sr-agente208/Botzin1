@@ -37,11 +37,11 @@ const CLASSES = {
   mago: { nome: 'Mago Arcano 🧙', hp_base: 10, san_base: 18, pe_base: 5, atributos: { forca: 1, agilidade: 2, vigor: 1, intelecto: 4, presenca: 2 } }
 };
 
-async function BlackLotusMestre(prompt, SHIZUKU_SITE, SHIZUKU_KEY) {
-    const fullPrompt = `Você é o Mestre de RPG do Black Lotus Bot. Narre uma sessão de RPG para um grupo de jogadores. Seja imersivo, use elementos de Ordem Paranormal e D&D. Responda em Português. Contexto: ${prompt}`;
+async function BlackLotusMestre(prompt) {
+    const fullPrompt = `Você é o Mestre de RPG do Black Lotus Bot. Narre uma sessão de RPG. Contexto: ${prompt}`;
     try {
         const fetch = require('node-fetch');
-        const res = await fetch(`${SHIZUKU_SITE}/api/ias/gpt-2?query=${encodeURIComponent(fullPrompt)}&apitoken=${SHIZUKU_KEY}`);
+        const res = await fetch(`https://shizuku-apis.shop/api/ias/gpt-2?query=${encodeURIComponent(fullPrompt)}&apitoken=key-free`);
         const api = await res.json();
         return api?.resposta || "As sombras observam em silêncio...";
     } catch { return "O mestre perdeu a conexão com o Outro Lado..."; }
@@ -112,7 +112,7 @@ async function handleRPG(sock, from, info, command, args, sender, pushname, isGr
       };
       saveData(SESSIONS_PATH, sessoes);
       await reagir("🌑");
-      const intro = await BlackLotusMestre(`Inicie uma sessão de RPG para um grupo de jogadores. O tema é: ${tema}. Descreva o cenário inicial onde os jogadores se encontram.`, SHIZUKU_SITE, SHIZUKU_KEY);
+	      const intro = await BlackLotusMestre(`Inicie uma sessão de RPG para um grupo de jogadores. O tema é: ${tema}. Descreva o cenário inicial onde os jogadores se encontram.`);
       return enviar(`🌑 *SESSÃO INICIADA: ${tema.toUpperCase()}*\n\n🔮 *MESTRE:* ${intro}\n\n_Jogadores podem entrar com ${prefix}entrar_`);
     }
 
@@ -132,8 +132,8 @@ async function handleRPG(sock, from, info, command, args, sender, pushname, isGr
       if (!acao) return enviar(`Ex: ${prefix}narrar Eu entro na casa abandonada.`);
       await reagir("✍️");
       const p = personagens[sender] || { nome: pushname };
-      const contexto = `O jogador ${p.nome} realizou a seguinte ação: "${acao}". Continue a história considerando os outros jogadores na mesa.`;
-      const resposta = await BlackLotusMestre(contexto, SHIZUKU_SITE, SHIZUKU_KEY);
+	      const contexto = `O jogador ${p.nome} realizou a seguinte ação: "${acao}". Continue a história considerando os outros jogadores na mesa.`;
+	      const resposta = await BlackLotusMestre(contexto);
       sessoes[from].historia.push(`Ação: ${acao} | Mestre: ${resposta}`);
       saveData(SESSIONS_PATH, sessoes);
       return enviar(`📖 *HISTÓRIA:*\n\n${resposta}`);
@@ -150,7 +150,7 @@ async function handleRPG(sock, from, info, command, args, sender, pushname, isGr
       sessoes[from].monstro = { ...m, hp_atual: m.hp };
       saveData(SESSIONS_PATH, sessoes);
       await reagir("⚔️");
-      const desc = await BlackLotusMestre(`Um ${m.nome} aparece para atacar o grupo! Descreva a ameaça.`, SHIZUKU_SITE, SHIZUKU_KEY);
+	      const desc = await BlackLotusMestre(`Um ${m.nome} aparece para atacar o grupo! Descreva a ameaça.`);
       return enviar(`⚔️ *COMBATE DE GRUPO*\n\n${desc}\n\n❤️ HP Inimigo: ${m.hp}\n\n_Todos os jogadores na sessão podem ${prefix}atacar!_`);
     }
 
