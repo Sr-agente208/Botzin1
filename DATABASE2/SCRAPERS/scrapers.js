@@ -11,14 +11,15 @@ return "Erro em :" +e;
 }
 
 async function BaixarNoYt(query, tipo) {
-try {const res = await fetch(`https://shizuku-ia.0.obrh.uno/api/download/youtube?query=${encodeURIComponent(query.trim())}&tipo=${tipo}`)
-const api = await res.json()
-const result = api?.resultado?.download;
-return result;
-} catch (e) {
-return "Erro ao buscar resultados";
+    try {
+        const res = await fetch(`https://shizuku-apis.shop/download/ytdl?query=${encodeURIComponent(query.trim())}&tipo=${tipo}&apitoken=key-free`);
+        const api = await res.json();
+        return api?.resultado?.url || api?.resultado?.download;
+    } catch (e) {
+        console.error("Erro no BaixarNoYt:", e);
+        return null;
+    }
 }
-};
 
 async function ttkdl(url, conn, from, info, quoted, ShizukuStile, SHIZUKU_SITE, SHIZUKU_KEY) {
 if(!url?.includes("tiktok")) return conn.sendMessage(from, {text: "Apenas links do tiktok"}, {quoted: info})

