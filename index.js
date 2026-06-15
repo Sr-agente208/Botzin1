@@ -233,11 +233,12 @@ const isCmd = body.trim().startsWith(prefix);
 	// LOG DE DEPURAÇÃO
 	console.log(chalk.cyan(`[MSG] De: ${pushname} | Cmd: ${command} | isCmd: ${isCmd} | Body: ${body.slice(0, 30)}`));
 
-	// === SISTEMA DE RPG ===
-	const rpgCommands = ['rpg', 'rpgajuda', 'criarchar', 'meuchar', 'trabalhar', 'loja', 'comprar', 'inventario', 'usar', 'batalha', 'atacar', 'fugir', 'rpgrank', 'deletarchar', 'aventura', 'ritual', 'criarsessao', 'entrar', 'narrar', 'fecharsessao'];
-	if (isCmd && rpgCommands.includes(command)) {
-	    return await handleRPG(conn, from, info, command, args, sender, pushname, isGroup, prefix, SHIZUKU_SITE, SHIZUKU_KEY);
-	}
+			// === SISTEMA DE RPG ===
+			const rpgCommands = ['rpg', 'rpgajuda', 'criarchar', 'meuchar', 'trabalhar', 'loja', 'comprar', 'inventario', 'usar', 'batalha', 'atacar', 'fugir', 'rpgrank', 'deletarchar', 'aventura', 'ritual', 'criarsessao', 'entrar', 'narrar', 'fecharsessao'];
+			if (isCmd && rpgCommands.includes(command)) {
+			    // Permitir RPG em privado (Modo Solo)
+			    return await handleRPG(conn, from, info, command, args, sender, pushname, isGroup, prefix, SHIZUKU_SITE, SHIZUKU_KEY);
+			}
 
 	// === JOGOS DE GRUPO ===
 	const jogoCommands = ['roletarussa', 'apostar', 'caraoucoroa'];
@@ -481,22 +482,126 @@ switch (command) {
 		}
 		break;
 
-		case 'antinexthost': {
-			if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
-			if (!isGroupAdmins) return reply(msg.SoAdm);
-			if (q === '1' || q === 'on') {
-				dataGp[0].antinexthost = true;
-				setGp(dataGp);
-				reply(`🛡️ *Anti Nextshost.com ativado com sucesso.* \n\n✅ Qualquer usuário com "nextshost" no nome ou enviando link será removido automaticamente.`);
-			} else if (q === '0' || q === 'off') {
-				dataGp[0].antinexthost = false;
-				setGp(dataGp);
-				reply(`❌ *Anti Nextshost.com desativado com sucesso.*`);
-			} else {
-				reply(`⚙️ *CONFIGURAÇÃO ANTI NEXTHOST*\n\n${prefix}antinexthost 1 → Ativar\n${prefix}antinexthost 0 → Desativar`);
+			case 'antinexthost': {
+				if (!isGroup) return reply('❌ Esse comando só funciona em grupo.');
+				if (!isGroupAdmins) return reply(msg.SoAdm);
+				if (q === '1' || q === 'on') {
+					dataGp[0].antinexthost = true;
+					setGp(dataGp);
+					reply(`🛡️ *Anti Nextshost.com ativado com sucesso.* \n\n✅ Qualquer usuário com "nextshost" no nome ou enviando link será removido automaticamente.`);
+				} else if (q === '0' || q === 'off') {
+					dataGp[0].antinexthost = false;
+					setGp(dataGp);
+					reply(`❌ *Anti Nextshost.com desativado com sucesso.*`);
+				} else {
+					reply(`⚙️ *CONFIGURAÇÃO ANTI NEXTHOST*\n\n${prefix}antinexthost 1 → Ativar\n${prefix}antinexthost 0 → Desativar`);
+				}
 			}
-		}
-		break;
+			break;
+
+			case 'ban':
+			case 'kick': {
+			    if (!isGroup) return reply('❌ Apenas em grupos.');
+			    if (!isGroupAdmins && !So_Dono) return reply(msg.SoAdm);
+			    if (!IsBotAdmin) return reply(msg.BotAdmin);
+			    let users = menc_jid;
+			    if (!users) return reply('⚠️ Marque alguém ou responda a mensagem do alvo.');
+			    await conn.groupParticipantsUpdate(from, [users], 'remove');
+			    reply('✅ Usuário removido com sucesso.');
+			}
+			break;
+
+			case 'promover': {
+			    if (!isGroup) return reply('❌ Apenas em grupos.');
+			    if (!isGroupAdmins && !So_Dono) return reply(msg.SoAdm);
+			    if (!IsBotAdmin) return reply(msg.BotAdmin);
+			    let users = menc_jid;
+			    if (!users) return reply('⚠️ Marque alguém.');
+			    await conn.groupParticipantsUpdate(from, [users], 'promote');
+			    reply('✅ Usuário promovido a administrador.');
+			}
+			break;
+
+			case 'rebaixar': {
+			    if (!isGroup) return reply('❌ Apenas em grupos.');
+			    if (!isGroupAdmins && !So_Dono) return reply(msg.SoAdm);
+			    if (!IsBotAdmin) return reply(msg.BotAdmin);
+			    let users = menc_jid;
+			    if (!users) return reply('⚠️ Marque alguém.');
+			    await conn.groupParticipantsUpdate(from, [users], 'demote');
+			    reply('✅ Usuário rebaixado a membro comum.');
+			}
+			break;
+
+			case 'abrir': {
+			    if (!isGroup) return reply('❌ Apenas em grupos.');
+			    if (!isGroupAdmins && !So_Dono) return reply(msg.SoAdm);
+			    if (!IsBotAdmin) return reply(msg.BotAdmin);
+			    await conn.groupSettingUpdate(from, 'not_announcement');
+			    reply('✅ Grupo aberto para todos os membros.');
+			}
+			break;
+
+			case 'fechar': {
+			    if (!isGroup) return reply('❌ Apenas em grupos.');
+			    if (!isGroupAdmins && !So_Dono) return reply(msg.SoAdm);
+			    if (!IsBotAdmin) return reply(msg.BotAdmin);
+			    await conn.groupSettingUpdate(from, 'announcement');
+			    reply('🔒 Grupo fechado apenas para administradores.');
+			}
+			break;
+
+			case 'antilink': {
+			    if (!isGroup) return reply('❌ Apenas em grupos.');
+			    if (!isGroupAdmins && !So_Dono) return reply(msg.SoAdm);
+			    if (q === '1' || q === 'on') {
+			        dataGp[0].antilink = true;
+			        setGp(dataGp);
+			        reply('🛡️ Anti-Link ativado com sucesso.');
+			    } else if (q === '0' || q === 'off') {
+			        dataGp[0].antilink = false;
+			        setGp(dataGp);
+			        reply('❌ Anti-Link desativado.');
+			    } else {
+			        reply(`⚙️ Uso: ${prefix}antilink 1/0`);
+			    }
+			}
+			break;
+
+			case 'antifake': {
+			    if (!isGroup) return reply('❌ Apenas em grupos.');
+			    if (!isGroupAdmins && !So_Dono) return reply(msg.SoAdm);
+			    if (q === '1' || q === 'on') {
+			        dataGp[0].antifake = true;
+			        setGp(dataGp);
+			        reply('🛡️ Anti-Fake ativado. Números estrangeiros serão removidos.');
+			    } else if (q === '0' || q === 'off') {
+			        dataGp[0].antifake = false;
+			        setGp(dataGp);
+			        reply('❌ Anti-Fake desativado.');
+			    } else {
+			        reply(`⚙️ Uso: ${prefix}antifake 1/0`);
+			    }
+			}
+			break;
+
+			case 'wellcome':
+			case 'boasvindas': {
+			    if (!isGroup) return reply('❌ Apenas em grupos.');
+			    if (!isGroupAdmins && !So_Dono) return reply(msg.SoAdm);
+			    if (q === '1' || q === 'on') {
+			        dataGp[0].wellcome = true;
+			        setGp(dataGp);
+			        reply('👋 Boas-vindas ativadas.');
+			    } else if (q === '0' || q === 'off') {
+			        dataGp[0].wellcome = false;
+			        setGp(dataGp);
+			        reply('❌ Boas-vindas desativadas.');
+			    } else {
+			        reply(`⚙️ Uso: ${prefix}wellcome 1/0`);
+			    }
+			}
+			break;
 
 			case 'play1':
 			case 'play': {
@@ -594,10 +699,49 @@ switch (command) {
 		}
 		break;
 
-		case 'fotogrupo':
-		case 'setppg': {
-			if (!isGroup) return reply('❌ Este comando só funciona em grupo.');
-			if (!isGroupAdmins) return reply(msg.SoAdm);
+			case 'sticker':
+			case 's':
+			case 'f':
+			case 'fig': {
+			    if (!isImage && !isVideo && !isQuotedImage && !isQuotedVideo) return reply(`⚠️ Envie uma imagem ou vídeo com a legenda *${prefix}sticker* ou responda a uma mídia.`);
+			    await reagir(from, '🔖');
+			    try {
+			        const stream = await downloadContentFromMessage(quoted.message[type] || quoted.message.extendedTextMessage.contextInfo.quotedMessage[type], type === 'imageMessage' ? 'image' : 'video');
+			        let buffer = Buffer.from([]);
+			        for await(const chunk of stream) {
+			            buffer = Buffer.concat([buffer, chunk]);
+			        }
+			        if (isImage || isQuotedImage) {
+			            await sendImageAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
+			        } else {
+			            await sendVideoAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
+			        }
+			    } catch (e) {
+			        reply('❌ Erro ao criar figurinha.');
+			    }
+			}
+			break;
+
+			case 'toimg': {
+			    if (!isQuotedSticker) return reply('⚠️ Responda a uma figurinha.');
+			    await reagir(from, '📸');
+			    try {
+			        const stream = await downloadContentFromMessage(quoted.message.stickerMessage, 'sticker');
+			        let buffer = Buffer.from([]);
+			        for await(const chunk of stream) {
+			            buffer = Buffer.concat([buffer, chunk]);
+			        }
+			        await conn.sendMessage(from, { image: buffer, caption: '✅ Figurinha convertida!' }, { quoted: info });
+			    } catch (e) {
+			        reply('❌ Erro ao converter figurinha.');
+			    }
+			}
+			break;
+
+			case 'fotogrupo':
+			case 'setppg': {
+				if (!isGroup) return reply('❌ Este comando só funciona em grupo.');
+				if (!isGroupAdmins) return reply(msg.SoAdm);
 			if (!isBotGroupAdmins) return reply(msg.BotAdmin);
 			
 			if (!isImage && !isQuotedImage) return reply(`💡 *Como usar:* Envie uma imagem com a legenda *${prefix}fotogrupo* ou responda a uma imagem usando o comando.`);
@@ -1135,41 +1279,92 @@ switch (command) {
 				process.exit();
 				break;
 
-		case 'multidownload':
-		case 'download':
-		case 'dl': {
-		    try {
-		        if (!q) return reply(`⚠️ *EXEMPLO DE USO: ${prefix + command} [link]*`);
-		        await reagir(from, '✅');
-		        const axios = require('axios');
-		        const { data } = await axios.get(`https://backend1.tioo.eu.org/api/downloader/aio?url=${encodeURIComponent(q)}`);
-		        
-		        if (!data || data.status !== 'ok') {
-		            return reply(`❌ *Não foi possível obter o conteúdo.*`);
-		        }
-		        
-		        const result = data.data;
-		        const title = result?.title || 'Sem título';
-		        const thumb = result?.thumbnail;
-		        
-		        if (result?.links?.video) {
-		            const videoData = Object.values(result.links.video)[0];
-		            if (videoData?.url) {
-		                await conn.sendMessage(from, {
-		                    video: { url: videoData.url },
-		                    jpegThumbnail: thumb ? await getBuffer(thumb) : null,
-		                    caption: `✅ *MULTIDOWNLOAD*\n\n📄 *Título:* ${title}\n🎬 *Tipo:* Vídeo`
-		                }, { quoted: info });
-		                return;
-		            }
-		        }
-		        return reply(`❌ *Nenhuma mídia de vídeo encontrada.*`);
-		    } catch (err) {
-		        console.log(err.response?.data || err);
-		        reply(`❌ *Erro ao baixar o conteúdo.*`);
-		    }
-		}
-		break;
+			case 'multidownload':
+			case 'download':
+			case 'dl': {
+			    try {
+			        if (!q) return reply(`⚠️ *EXEMPLO DE USO: ${prefix + command} [link]*`);
+			        await reagir(from, '✅');
+			        const axios = require('axios');
+			        const { data } = await axios.get(`https://backend1.tioo.eu.org/api/downloader/aio?url=${encodeURIComponent(q)}`);
+			        
+			        if (!data || data.status !== 'ok') {
+			            return reply(`❌ *Não foi possível obter o conteúdo.*`);
+			        }
+			        
+			        const result = data.data;
+			        const title = result?.title || 'Sem título';
+			        const thumb = result?.thumbnail;
+			        
+			        if (result?.links?.video) {
+			            const videoData = Object.values(result.links.video)[0];
+			            if (videoData?.url) {
+			                await conn.sendMessage(from, {
+			                    video: { url: videoData.url },
+			                    jpegThumbnail: thumb ? await getBuffer(thumb) : null,
+			                    caption: `✅ *MULTIDOWNLOAD*\n\n📄 *Título:* ${title}\n🎬 *Tipo:* Vídeo`
+			                }, { quoted: info });
+			                return;
+			            }
+			        }
+			        return reply(`❌ *Nenhuma mídia de vídeo encontrada.*`);
+			    } catch (err) {
+			        console.log(err.response?.data || err);
+			        reply(`❌ *Erro ao baixar o conteúdo.*`);
+			    }
+			}
+			break;
+
+			case 'multidownload2': {
+			    try {
+			        if (!q) return reply(`⚠️ *EXEMPLO DE USO: ${prefix + command} [link]*`);
+			        await reagir(from, '⏳');
+			        const axios = require('axios');
+			        const { data } = await axios.get(`https://devlabapi.freesrv.com/api/multidownload?url=${encodeURIComponent(q)}&apitoken=povo`);
+			        if (!data || data.Status !== true || !data.Link) {
+			            await reagir(from, '❌');
+			            return reply('❌ Nenhuma mídia de vídeo encontrada.');
+			        }
+			        const legenda = `👤 *Autor:* ${data.Autor || 'Desconhecido'}\n✅ *Download via DevLab*`;
+			        await conn.sendMessage(from, { video: { url: data.Link }, caption: legenda }, { quoted: info });
+			        await reagir(from, '👍');
+			    } catch (err) {
+			        await reagir(from, '❌');
+			        reply('❌ *Erro ao baixar o conteúdo.*');
+			    }
+			}
+			break;
+
+			case 'gpt5':
+			case 'ia5':
+			case 'chatgpt5': {
+			    try {
+			        if (!q) return reply(`❌ *Escreva sua pergunta*`);
+			        await reagir(from, '⏳');
+			        const axios = require('axios');
+			        const { data } = await axios.get(`https://devlabapi.freesrv.com/api/gpt?q=${encodeURIComponent(q)}&apitoken=povo`);
+			        if (!data?.status) return reply('❌ *Não foi possível obter resposta da IA no momento.*');
+			        await reply(`🧠 *GPT-5 (DevLab)*\n\n${data.result}`);
+			        await reagir(from, '✅');
+			    } catch (e) {
+			        await reagir(from, '❌');
+			        reply(`❌ *Erro inesperado na IA.*`);
+			    }
+			}
+			break;
+
+			case 'addai': {
+			    try {
+			        if (!So_Dono) return reply(msg.SoDono);
+			        if (!isGroup) return reply('❌ Apenas em grupos.');
+			        if (!IsBotAdmin) return reply('❌ O bot precisa ser admin.');
+			        await conn.groupParticipantsUpdate(from, ['867051314767696@bot'], 'add');
+			        reply('✅ Meta AI foi adicionada ao grupo com sucesso.');
+			    } catch (e) {
+			        reply('❌ Não foi possível adicionar a Meta AI.');
+			    }
+			}
+			break;
 
 	default:
 		if (body.startsWith('™') && !isCmd) {
