@@ -1469,49 +1469,35 @@ case 'menu':
 				case 'help':
 				case 'ajuda':
 				case '™menu': {
-					// Preparando a mensagem interativa com botões nativos
-					const interactiveMessage = {
-						interactiveMessage: {
-							header: {
-								title: `🌑💜 ⟡ 𝐁𝐋𝐀𝐂𝐊 𝐋𝐎𝐓𝐔𝐒 ⟡ 💜🌑`,
-								hasMediaAttachment: true,
-								imageMessage: (await conn.prepareWAMessageMedia({ image: FotoMenu }, { upload: conn.waUploadToServer })).imageMessage
-							},
-							body: {
-								text: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version)
-							},
-							footer: {
-								text: "🌑 Escolha uma categoria abaixo 🌑"
-							},
-							nativeFlowMessage: {
-								buttons: [
-									{
-										"name": "quick_reply",
-										"buttonParamsJson": `{"display_text":"👮‍♂️ ADM","id":"${prefix}menuadm"}`
-									},
-									{
-										"name": "quick_reply",
-										"buttonParamsJson": `{"display_text":"🎮 DIVERSÃO","id":"${prefix}menudiversao"}`
-									},
-									{
-										"name": "quick_reply",
-										"buttonParamsJson": `{"display_text":"📥 DOWNLOADS","id":"${prefix}menudown"}`
-									},
-									{
-										"name": "quick_reply",
-										"buttonParamsJson": `{"display_text":"🔖 STICKERS","id":"${prefix}menufig"}`
-									},
-									{
-										"name": "quick_reply",
-										"buttonParamsJson": `{"display_text":"🧠 IA","id":"${prefix}menuia"}`
-									}
+					try {
+						const sections = [
+							{
+								title: "🌑 CATEGORIAS BLACK LOTUS 🌑",
+								rows: [
+									{ title: "👮‍♂️ ADMINISTRAÇÃO", rowId: `${prefix}menuadm`, description: "Comandos de gestão de grupos" },
+									{ title: "🎮 DIVERSÃO", rowId: `${prefix}menudiversao`, description: "Brincadeiras e interações" },
+									{ title: "📥 DOWNLOADS", rowId: `${prefix}menudown`, description: "Baixar vídeos, músicas e fotos" },
+									{ title: "🔖 FIGURINHAS", rowId: `${prefix}menufig`, description: "Criar e converter stickers" },
+									{ title: "🧠 INTELIGÊNCIA", rowId: `${prefix}menuia`, description: "GPT-5, DeepSearch e mais" },
+									{ title: "👑 DONO", rowId: `${prefix}menudono`, description: "Painel exclusivo do proprietário" }
 								]
 							}
-						}
-					};
-					
-					// Envia a mensagem interativa
-					await conn.relayMessage(from, { viewOnceMessage: { message: interactiveMessage } }, { quoted: selo });
+						];
+						
+						const listMessage = {
+							text: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version),
+							footer: "🌑 Toque no botão abaixo para ver as opções 🌑",
+							title: "🌑💜 ⟡ 𝐁𝐋𝐀𝐂𝐊 𝐋𝐎𝐓𝐔𝐒 𝐒𝐘𝐒𝐓𝐄𝐌 ⟡ 💜🌑",
+							buttonText: "📂 VER CATEGORIAS",
+							sections
+						};
+						
+						await conn.sendMessage(from, listMessage, { quoted: selo });
+					} catch (e) {
+						console.error("Erro ao enviar menu de lista:", e);
+						// Plano B: Envia o menu em texto com imagem se a lista falhar
+						await conn.sendMessage(from, { image: FotoMenu, caption: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version), mentions: [sender] }, { quoted: selo });
+					}
 				}
 				break;
 
