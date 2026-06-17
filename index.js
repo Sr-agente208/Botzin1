@@ -1,3 +1,4 @@
+const { downloadContentFromMessage } = require("@systemzero/baileys");
 const baileys = require("@systemzero/baileys");
 const { NumberDono, prefix, NickDono, NomeBot, SHIZUKU_KEY, SHIZUKU_SITE, sysite, syskey } = require("./dono/dono");
 
@@ -613,29 +614,44 @@ case 'play1':
 						const axios = require('axios');
 						const apiUrl = `https://systemzone.store/api/play?text=${encodeURIComponent(q)}`;
 						const { data: json } = await axios.get(apiUrl);
-						if (json.status && json.download_url) {
-							await conn.sendMessage(from, { 
-								audio: { url: json.download_url }, 
-								mimetype: 'audio/mp4',
-								ptt: false,
-								contextInfo: {
-									externalAdReply: {
-										title: json.title || 'Black Lotus Music',
-										body: 'Tocando agora...',
-										thumbnailUrl: json.thumbnail || FotoMenu,
-										sourceUrl: json.youtube_url || '',
-										mediaType: 1,
-										showAdAttribution: true,
-										renderLargerThumbnail: true
-									}
+if (json.status && json.download_url) {
+								const stream = await downloadContentFromMessage({ url: json.download_url }, 'audio');
+								let chunks = [];
+								for await (const chunk of stream) {
+									chunks.push(chunk);
 								}
-							}, { quoted: info });
+								const audioBuffer = Buffer.concat(chunks);
+								const audioTitle = json.title || 'Black Lotus Music';
+								const audioThumbnail = json.thumbnail || FotoMenu;
+								const audioSourceUrl = json.youtube_url || '';
+								await conn.sendMessage(from, {
+									audio: audioBuffer,
+									mimetype: 'audio/mp4',
+									ptt: false,
+									contextInfo: {
+										externalAdReply: {
+											title: audioTitle,
+											body: 'Tocando agora...',
+											thumbnailUrl: audioThumbnail,
+											sourceUrl: audioSourceUrl,
+											mediaType: 1,
+											showAdAttribution: true,
+											renderLargerThumbnail: true
+										}
+									}
+								}, { quoted: info });
 						} else {
-							// Fallback para o método antigo se a API falhar
-							const downloadUrl = await BaixarNoYt(q, 'mp3');
-							if (!downloadUrl) return reply('❌ Não foi possível encontrar o áudio.');
-							await conn.sendMessage(from, { audio: { url: downloadUrl }, mimetype: 'audio/mp4' }, { quoted: info });
-						}
+									// Fallback para o método antigo se a API falhar
+									const downloadUrl = await BaixarNoYt(q, 'mp3');
+									if (!downloadUrl) return reply('❌ Não foi possível encontrar o áudio.');
+									const stream = await downloadContentFromMessage({ url: downloadUrl }, 'audio');
+									let chunks = [];
+									for await (const chunk of stream) {
+										chunks.push(chunk);
+									}
+									const audioBuffer = Buffer.concat(chunks);
+									await conn.sendMessage(from, { audio: audioBuffer, mimetype: 'audio/mp4' }, { quoted: info });
+								}
 					} catch (err) {
 						console.error(err);
 						reply('❌ Erro ao processar música. Tentando método alternativo...');
@@ -1015,7 +1031,7 @@ case 's':
 					            await sendVideoAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
 					        }
 					    } catch (e) {
-							console.error("ERRO STICKER:", e);
+							console.error("ERRO STICKER:", e); reply(`❌ Erro ao criar figurinha: ${e.message}. Tente novamente.`);
 					        reply('❌ Erro ao criar figurinha. Tente novamente.');
 					    }
 					}
@@ -1474,7 +1490,7 @@ case 'menu':
 				case 'ajuda':
 				case '™menu': {
 					if (isGroup) {
-						return await conn.sendMessage(from, { image: FotoMenu, caption: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version), mentions: [sender] }, { quoted: selo });
+						await conn.sendMessage(from, { image: FotoMenu, caption: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version), mentions: [sender] }, { quoted: selo });
 					}
 					try {
 						const sections = [
