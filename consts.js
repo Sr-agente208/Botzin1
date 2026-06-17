@@ -24,7 +24,7 @@ const { sendVideoAsSticker2, sendImageAsSticker2 } = require('./DATABASE2/sticke
 
 const { BuscarNogpt, BaixarNoYt, ttkdl, instadl, METADINHAS, BlackLotusAI } = require("./DATABASE2/SCRAPERS/scrapers");
 //EXPORTAÇÃO 
-const { menu, menuadm, menuStickers, menu18, menuDono, menuDown } = require("./dono/menus/menu")
+const { menu, menuadm, menuStickers, menu18, menuDono, menuDown, menudiversao, menuia } = require("./dono/menus/menu")
 const { menus } = require("./dono/menus/Shizuku")
 const { dono1, dono2, dono3, dono4, dono5, dono6 } = require("./dono/dados-donos");
 const Config2 = JSON.parse(fs.readFileSync("./dono/dados-donos.json"));
@@ -113,8 +113,10 @@ os,
 	menuStickers,
 	menu18,
 	menuDono,
-	menuDown,
-	menus,
+menuDown,
+		menudiversao,
+		menuia,
+		menus,
 ytSearch,
 FotoMenu,
 Config,
