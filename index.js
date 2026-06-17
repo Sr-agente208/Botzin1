@@ -995,44 +995,40 @@ case 'abraço':
 		}
 		break;
 
-			case 'sticker':
-			case 's':
-			case 'f':
-			case 'fig': {
-			    if (!isImage && !isVideo && !isQuotedImage && !isQuotedVideo) return reply(`⚠️ Envie uma imagem ou vídeo com a legenda *${prefix}sticker* ou responda a uma mídia.`);
-			    await reagir(from, '🔖');
-			    try {
-			        const stream = await downloadContentFromMessage(quoted.message[type] || quoted.message.extendedTextMessage.contextInfo.quotedMessage[type], type === 'imageMessage' ? 'image' : 'video');
-			        let buffer = Buffer.from([]);
-			        for await(const chunk of stream) {
-			            buffer = Buffer.concat([buffer, chunk]);
-			        }
-			        if (isImage || isQuotedImage) {
-			            await sendImageAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
-			        } else {
-			            await sendVideoAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
-			        }
-			    } catch (e) {
-			        reply('❌ Erro ao criar figurinha.');
-			    }
-			}
-			break;
+case 's':
+				case 'sticker':
+				case 'fig': {
+				    if (!isImage && !isVideo && !isQuotedImage && !isQuotedVideo) return reply(`⚠️ Envie uma imagem ou vídeo com a legenda *${prefix}sticker* ou responda a uma mídia.`);
+				    await reagir(from, '🔖');
+				    try {
+						const mediaData = isQuotedImage ? quoted.message.imageMessage : isQuotedVideo ? quoted.message.videoMessage : isImage ? info.message.imageMessage : info.message.videoMessage;
+						const mediaType = (isImage || isQuotedImage) ? 'image' : 'video';
+						const buffer = await getFileBuffer(mediaData, mediaType);
+						
+				        if (isImage || isQuotedImage) {
+				            await sendImageAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
+				        } else {
+				            await sendVideoAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
+				        }
+				    } catch (e) {
+						console.error(e);
+				        reply('❌ Erro ao criar figurinha.');
+				    }
+				}
+				break;
 
-			case 'toimg': {
-			    if (!isQuotedSticker) return reply('⚠️ Responda a uma figurinha.');
-			    await reagir(from, '📸');
-			    try {
-			        const stream = await downloadContentFromMessage(quoted.message.stickerMessage, 'sticker');
-			        let buffer = Buffer.from([]);
-			        for await(const chunk of stream) {
-			            buffer = Buffer.concat([buffer, chunk]);
-			        }
-			        await conn.sendMessage(from, { image: buffer, caption: '✅ Figurinha convertida!' }, { quoted: info });
-			    } catch (e) {
-			        reply('❌ Erro ao converter figurinha.');
-			    }
-			}
-			break;
+				case 'toimg': {
+				    if (!isQuotedSticker) return reply('⚠️ Responda a uma figurinha.');
+				    await reagir(from, '📸');
+				    try {
+						const buffer = await getFileBuffer(quoted.message.stickerMessage, 'sticker');
+				        await conn.sendMessage(from, { image: buffer, caption: '✅ Figurinha convertida!' }, { quoted: info });
+				    } catch (e) {
+						console.error(e);
+				        reply('❌ Erro ao converter figurinha.');
+				    }
+				}
+				break;
 
 			case 'fotogrupo':
 			case 'setppg': {
