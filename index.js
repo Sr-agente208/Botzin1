@@ -1469,22 +1469,49 @@ case 'menu':
 				case 'help':
 				case 'ajuda':
 				case '™menu': {
-					const buttons = [
-						{ buttonId: `${prefix}menuadm`, buttonText: { displayText: '👮‍♂️ ADM' }, type: 1 },
-						{ buttonId: `${prefix}menudiversao`, buttonText: { displayText: '🎮 DIVERSÃO' }, type: 1 },
-						{ buttonId: `${prefix}menudown`, buttonText: { displayText: '📥 DOWNLOADS' }, type: 1 },
-						{ buttonId: `${prefix}menufig`, buttonText: { displayText: '🔖 STICKERS' }, type: 1 },
-						{ buttonId: `${prefix}menuia`, buttonText: { displayText: '🧠 IA' }, type: 1 }
-					];
-					const buttonMessage = {
-						image: FotoMenu,
-						caption: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version),
-						footer: '🌑 BLACK LOTUS SYSTEM 🌑',
-						buttons: buttons,
-						headerType: 4,
-						mentions: [sender]
+					// Preparando a mensagem interativa com botões nativos
+					const interactiveMessage = {
+						interactiveMessage: {
+							header: {
+								title: `🌑💜 ⟡ 𝐁𝐋𝐀𝐂𝐊 𝐋𝐎𝐓𝐔𝐒 ⟡ 💜🌑`,
+								hasMediaAttachment: true,
+								imageMessage: (await conn.prepareWAMessageMedia({ image: FotoMenu }, { upload: conn.waUploadToServer })).imageMessage
+							},
+							body: {
+								text: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version)
+							},
+							footer: {
+								text: "🌑 Escolha uma categoria abaixo 🌑"
+							},
+							nativeFlowMessage: {
+								buttons: [
+									{
+										"name": "quick_reply",
+										"buttonParamsJson": `{"display_text":"👮‍♂️ ADM","id":"${prefix}menuadm"}`
+									},
+									{
+										"name": "quick_reply",
+										"buttonParamsJson": `{"display_text":"🎮 DIVERSÃO","id":"${prefix}menudiversao"}`
+									},
+									{
+										"name": "quick_reply",
+										"buttonParamsJson": `{"display_text":"📥 DOWNLOADS","id":"${prefix}menudown"}`
+									},
+									{
+										"name": "quick_reply",
+										"buttonParamsJson": `{"display_text":"🔖 STICKERS","id":"${prefix}menufig"}`
+									},
+									{
+										"name": "quick_reply",
+										"buttonParamsJson": `{"display_text":"🧠 IA","id":"${prefix}menuia"}`
+									}
+								]
+							}
+						}
 					};
-					await conn.sendMessage(from, buttonMessage, { quoted: selo });
+					
+					// Envia a mensagem interativa
+					await conn.relayMessage(from, { viewOnceMessage: { message: interactiveMessage } }, { quoted: selo });
 				}
 				break;
 
