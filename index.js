@@ -603,24 +603,45 @@ switch (command) {
 			}
 			break;
 
-			case 'play1':
-			case 'play': {
-				if (!q) return reply(`⚠️ Digite o nome da música.\nExemplo: *${prefix}play1 Nome da Música*`);
-				reply('⏳ *Buscando áudio nas sombras, aguarde...*');
-				try {
-					const downloadUrl = await BaixarNoYt(q, 'mp3');
-					if (!downloadUrl) return reply('❌ Não foi possível encontrar o áudio.');
-					await conn.sendMessage(from, { 
-						audio: { url: downloadUrl }, 
-						mimetype: 'audio/mp4',
-						ptt: false
-					}, { quoted: info });
-				} catch (err) {
-					console.error(err);
-					reply('❌ Ocorreu um erro ao processar o download.');
+case 'play1':
+				case 'play': {
+					if (!q) return reply(`⚠️ Digite o nome da música.\nExemplo: *${prefix}play1 Nome da Música*`);
+					reply('⏳ *Buscando áudio nas sombras, aguarde...*');
+					try {
+						const axios = require('axios');
+						const apiUrl = `https://systemzone.store/api/play?text=${encodeURIComponent(q)}`;
+						const { data: json } = await axios.get(apiUrl);
+						if (json.status && json.download_url) {
+							await conn.sendMessage(from, { 
+								audio: { url: json.download_url }, 
+								mimetype: 'audio/mp4',
+								ptt: false,
+								contextInfo: {
+									externalAdReply: {
+										title: json.title || 'Black Lotus Music',
+										body: 'Tocando agora...',
+										thumbnailUrl: json.thumbnail || FotoMenu,
+										sourceUrl: json.youtube_url || '',
+										mediaType: 1,
+										showAdAttribution: true,
+										renderLargerThumbnail: true
+									}
+								}
+							}, { quoted: info });
+						} else {
+							// Fallback para o método antigo se a API falhar
+							const downloadUrl = await BaixarNoYt(q, 'mp3');
+							if (!downloadUrl) return reply('❌ Não foi possível encontrar o áudio.');
+							await conn.sendMessage(from, { audio: { url: downloadUrl }, mimetype: 'audio/mp4' }, { quoted: info });
+						}
+					} catch (err) {
+						console.error(err);
+						reply('❌ Erro ao processar música. Tentando método alternativo...');
+						const downloadUrl = await BaixarNoYt(q, 'mp3');
+						if (downloadUrl) await conn.sendMessage(from, { audio: { url: downloadUrl }, mimetype: 'audio/mp4' }, { quoted: info });
+					}
 				}
-			}
-			break;
+				break;
 
 		case 'play2':
 		case 'video': {
