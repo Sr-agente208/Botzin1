@@ -74,9 +74,11 @@ return `╭━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖
 ┃ 📜 𝐌𝐄𝐍𝐔𝐒 𝐄𝐗𝐓𝐑𝐀𝐒
 ┃⟡⃟🌑 ${prefix}menuadm
 ┃⟡⃟🌑 ${prefix}menudown
-┃⟡⃟🌑 ${prefix}menufig
-┃⟡⃟🌑 ${prefix}menudono
-╰━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╯
+	┃⟡⃟🌑 ${prefix}menufig
+	┃⟡⃟🌑 ${prefix}menudiversao
+	┃⟡⃟🌑 ${prefix}menuia
+	┃⟡⃟🌑 ${prefix}menudono
+	╰━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╯
 
 🌑💜 ⟡ 𝙋𝙤𝙙𝙚𝙧 𝙣𝙖𝙨 𝙎𝙤𝙢𝙗𝙧𝙖𝙨 ⟡ 💜🌑`;
 
@@ -210,10 +212,56 @@ return `╭━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖
 
 ╭━╾❖╼━ 🌑💜 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃 💜🌑 ━╾❖╼━╮
 ┃⟡⃟🌑 ${prefix}tiktokdl
-┃⟡⃟🌑 ${prefix}instadl
-┃⟡⃟🌑 ${prefix}Spotify
-╰━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╯
+	┃⟡⃟🌑 ${prefix}instadl
+	┃⟡⃟🌑 ${prefix}Spotify
+	┃⟡⃟🌑 ${prefix}dl
+	┃⟡⃟🌑 ${prefix}multidownload2
+	┃⟡⃟🌑 ${prefix}tiktok
+	┃⟡⃟🌑 ${prefix}spotify
+	╰━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╯
 
 🌑💜 ⟡ 𝙈𝙚𝙙𝙞𝙖 𝙎𝙮𝙨𝙩𝙚𝙢 ⟡ 💜🌑`;
 };
 exports.menuDown = menuDown;
+
+const menuia = (prefix, sender) => {
+return `╭━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╮
+┃ 🌑💜 ⟡ 𝐈𝐍𝐓𝐄𝐋𝐈𝐆𝐄̂𝐍𝐂𝐈𝐀 𝐀𝐑𝐓𝐈𝐅𝐈𝐂𝐈𝐀𝐋 ⟡ 💜🌑
+┃╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖
+
+╭━╾❖╼━ 🌑💜 𝐂𝐄𝐑𝐄𝐁𝐑𝐎 💜🌑 ━╾❖╼━╮
+┃⟡⃟🌑 ${prefix}ia
+┃⟡⃟🌑 ${prefix}gpt
+┃⟡⃟🌑 ${prefix}lotus
+┃⟡⃟🌑 ${prefix}gpt5
+┃⟡⃟🌑 ${prefix}deepsearch
+┃⟡⃟🌑 ${prefix}addai (Meta AI)
+╰━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╯
+
+🌑💜 ⟡ 𝘼𝙄 𝙎𝙮𝙨𝙩𝙚𝙢 ⟡ 💜🌑`;
+};
+exports.menuia = menuia;
+
+const menudiversao = (prefix, sender) => {
+return `╭━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╮
+┃ 🌑💜 ⟡ 𝐃𝐈𝐕𝐄𝐑𝐒𝐀̃𝐎 & 𝐈𝐍𝐓𝐄𝐑𝐀𝐂̧𝐀̃𝐎 ⟡ 💜🌑
+┃╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖
+
+╭━╾❖╼━ 🌑💜 𝐁𝐑𝐈𝐍𝐂𝐀𝐃𝐄𝐈𝐑𝐀𝐒 💜🌑 ━╾❖╼━╮
+┃⟡⃟🌑 ${prefix}atropelar
+┃⟡⃟🌑 ${prefix}afogar
+┃⟡⃟🌑 ${prefix}beijar
+┃⟡⃟🌑 ${prefix}chute
+┃⟡⃟🌑 ${prefix}morder
+┃⟡⃟🌑 ${prefix}abraço
+╰━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╯
+
+╭━╾❖╼━ 🌑💜 𝐒𝐎𝐂𝐈𝐀𝐋 💜🌑 ━╾❖╼━╮
+┃⟡⃟🌑 ${prefix}rankjob
+┃⟡⃟🌑 ${prefix}ship
+┃⟡⃟🌑 ${prefix}enquete
+╰━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╯
+
+🌑💜 ⟡ 𝙁𝙪𝙣 𝙎𝙮𝙨𝙩𝙚𝙢 ⟡ 💜🌑`;
+};
+exports.menudiversao = menudiversao;

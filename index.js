@@ -640,13 +640,126 @@ switch (command) {
 		}
 		break;
 
-		case 'ig1':
-		case 'igvideo': {
-			if (!q.includes('instagram.com')) return reply('⚠️ Envie un link válido do Instagram.');
-			reply('⏳ *Baixando mídia do Instagram...*');
-			await instadl(q, conn, from, info, quoted, ShizukuStile, SHIZUKU_SITE, SHIZUKU_KEY);
-		}
-		break;
+case 'ig1':
+			case 'igvideo': {
+				if (!q.includes('instagram.com')) return reply('⚠️ Envie un link válido do Instagram.');
+				reply('⏳ *Baixando mídia do Instagram...*');
+				await instadl(q, conn, from, info, quoted, ShizukuStile, SHIZUKU_SITE, SHIZUKU_KEY);
+			}
+			break;
+
+			case 'gpt5':
+			case 'ia5':
+			case 'chatgpt5': {
+				try {
+					if (!q) return reply(`❌ *ᴇsᴄʀᴇᴠᴀ sᴜᴀ ᴘᴇʀɢᴜɴᴛᴀ*`);
+					await reagir(from, '⏳');
+					const axios = require('axios');
+					const apiURL = `https://devlabapi.freesrv.com/api/gpt?q=${encodeURIComponent(q)}&apitoken=povo`;
+					const { data } = await axios.get(apiURL);
+					if (!data?.status) return reply('❌ *ɴᴀ̃ᴏ ꜰᴏɪ ᴘᴏssíᴠᴇʟ ᴏʙᴛᴇʀ ʀᴇsᴘᴏsᴛᴀ ᴅᴀ ɪᴀ ɴᴏ ᴍᴏᴍᴇɴᴛᴏ.*');
+					const responseText = `🧠 *GPT-5 (DevLab)*\n\n${data.result}`.trim();
+					await conn.sendMessage(from, { text: responseText }, { quoted: info });
+					await reagir(from, '✅');
+				} catch (e) {
+					console.error(e);
+					await reagir(from, '❌');
+					reply(`❌ *ᴇʀʀᴏ ɪɴᴇsᴘᴇʀᴀᴅᴏ:*`);
+				}
+			}
+			break;
+
+			case 'multidownload2': {
+				try {
+					if (!q) return reply(`⚠️ *ᴇxᴇᴍᴘʟᴏ ᴅᴇ ᴜsᴏ: ${prefix + comando} [ʟɪɴᴋ]*`);
+					await reagir(from, '⏳');
+					const axios = require('axios');
+					const api = `https://devlabapi.freesrv.com/api/multidownload?url=${encodeURIComponent(q)}&apitoken=povo`;
+					const { data } = await axios.get(api);
+					if (!data?.status) return reply('❌ *ɴᴀ̃ᴏ ꜰᴏɪ ᴘᴏssíᴠᴇʟ ᴏʙᴛᴇʀ ʀᴇsᴘᴏsᴛᴀ ᴅᴏ sᴇʀᴠɪᴅᴏʀ.*');
+					const result = data.result;
+					await conn.sendMessage(from, {
+						video: { url: result.url },
+						caption: `✅ *ᴍᴜʟᴛɪᴅᴏᴡɴʟᴏᴀᴅ v2*\n\n📄 *título:* ${result.title || 'Sem título'}`
+					}, { quoted: info });
+					await reagir(from, '✅');
+				} catch (err) {
+					console.error(err);
+					await reagir(from, '❌');
+					reply('❌ *ᴇʀʀᴏ ᴀᴏ ʙᴀɪxᴀʀ ᴏ ᴄᴏɴᴛᴇúᴅᴏ.*');
+				}
+			}
+			break;
+
+			case 'tiktok': {
+				if (!q) return reply(`⚠️ Envie um link do TikTok. Ex: ${prefix}tiktok link`);
+				await reagir(from, '⏳');
+				try {
+					const axios = require('axios');
+					const { data } = await axios.get(`https://api.vreden.my.id/api/tiktok?url=${encodeURIComponent(q)}`);
+					if (!data.status) return reply('❌ Erro ao baixar TikTok.');
+					await conn.sendMessage(from, { video: { url: data.result.video }, caption: `✅ *TikTok Download*\n\n📄 *Título:* ${data.result.title}` }, { quoted: info });
+					await reagir(from, '✅');
+				} catch (e) {
+					reply('❌ Erro na API de TikTok.');
+				}
+			}
+			break;
+
+			case 'spotify': {
+				if (!q) return reply(`⚠️ Digite o nome da música. Ex: ${prefix}spotify Alok`);
+				await reagir(from, '🎧');
+				try {
+					const axios = require('axios');
+					const { data } = await axios.get(`https://api.vreden.my.id/api/spotify?query=${encodeURIComponent(q)}`);
+					if (!data.status) return reply('❌ Música não encontrada no Spotify.');
+					await conn.sendMessage(from, { audio: { url: data.result[0].download }, mimetype: 'audio/mp4' }, { quoted: info });
+				} catch (e) {
+					reply('❌ Erro na API de Spotify.');
+				}
+			}
+			break;
+
+			case 'addai': {
+				if (!isDono) return reply(mess.only.dono);
+				if (!isGroup) return reply(mess.only.group);
+				if (!isBotGroupAdmins) return reply(mess.only.botadm);
+				try {
+					await conn.groupParticipantsUpdate(from, ['867051314767696@bot'], 'add');
+					reply('✅ Meta AI foi adicionada ao grupo com sucesso.');
+				} catch (e) {
+					reply('❌ Não foi possível adicionar a Meta AI ao grupo.');
+				}
+			}
+			break;
+
+			case 'chute': {
+				if (!isGroup) return reply(mess.only.group);
+				if (!q && !info.message.extendedTextMessage) return reply('❌ Marque alguém para chutar.');
+				const user = info.message.extendedTextMessage ? info.message.extendedTextMessage.contextInfo.participant : q.replace('@', '') + '@s.whatsapp.net';
+				const gif = 'https://media.tenor.com/493EnE_66mEAAAAC/anime-kick.gif';
+				await conn.sendMessage(from, { video: { url: gif }, gifPlayback: true, caption: `⚡ @${sender.split('@')[0]} deu um chute em @${user.split('@')[0]}!`, mentions: [sender, user] }, { quoted: info });
+			}
+			break;
+
+			case 'morder': {
+				if (!isGroup) return reply(mess.only.group);
+				if (!q && !info.message.extendedTextMessage) return reply('❌ Marque alguém para morder.');
+				const user = info.message.extendedTextMessage ? info.message.extendedTextMessage.contextInfo.participant : q.replace('@', '') + '@s.whatsapp.net';
+				const gif = 'https://media.tenor.com/3v966N0H38AAAAAC/anime-bite.gif';
+				await conn.sendMessage(from, { video: { url: gif }, gifPlayback: true, caption: `🦷 @${sender.split('@')[0]} deu uma mordida em @${user.split('@')[0]}!`, mentions: [sender, user] }, { quoted: info });
+			}
+			break;
+
+			case 'abraço':
+			case 'abraco': {
+				if (!isGroup) return reply(mess.only.group);
+				if (!q && !info.message.extendedTextMessage) return reply('❌ Marque alguém para abraçar.');
+				const user = info.message.extendedTextMessage ? info.message.extendedTextMessage.contextInfo.participant : q.replace('@', '') + '@s.whatsapp.net';
+				const gif = 'https://media.tenor.com/J7f_bc9_V_MAAAAC/anime-hug.gif';
+				await conn.sendMessage(from, { video: { url: gif }, gifPlayback: true, caption: `🫂 @${sender.split('@')[0]} deu um abraço caloroso em @${user.split('@')[0]}!`, mentions: [sender, user] }, { quoted: info });
+			}
+			break;
 
 		case 'bemvindo1': {
 			if (!isGroup) return reply('❌ Este comando só pode ser usado em grupos.');
@@ -1204,6 +1317,15 @@ switch (command) {
 			case 'menu18':
 			case 'menusecret':
 				await conn.sendMessage(from, { image: FotoMenu, caption: menu18(prefix, sender), mentions: [sender] }, { quoted: selo });
+				break;
+
+			case 'menudiversao':
+			case 'menubrincadeira':
+				await conn.sendMessage(from, { image: FotoMenu, caption: menudiversao(prefix, sender), mentions: [sender] }, { quoted: selo });
+				break;
+
+			case 'menuia':
+				await conn.sendMessage(from, { image: FotoMenu, caption: menuia(prefix, sender), mentions: [sender] }, { quoted: selo });
 				break;
 
 
