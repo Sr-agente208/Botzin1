@@ -1468,9 +1468,25 @@ case 's':
 case 'menu':
 				case 'help':
 				case 'ajuda':
-				case '™menu':
-					await conn.sendMessage(from, { image: FotoMenu, caption: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version), mentions: [sender] }, { quoted: selo });
-					break;
+				case '™menu': {
+					const buttons = [
+						{ buttonId: `${prefix}menuadm`, buttonText: { displayText: '👮‍♂️ ADM' }, type: 1 },
+						{ buttonId: `${prefix}menudiversao`, buttonText: { displayText: '🎮 DIVERSÃO' }, type: 1 },
+						{ buttonId: `${prefix}menudown`, buttonText: { displayText: '📥 DOWNLOADS' }, type: 1 },
+						{ buttonId: `${prefix}menufig`, buttonText: { displayText: '🔖 STICKERS' }, type: 1 },
+						{ buttonId: `${prefix}menuia`, buttonText: { displayText: '🧠 IA' }, type: 1 }
+					];
+					const buttonMessage = {
+						image: FotoMenu,
+						caption: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version),
+						footer: '🌑 BLACK LOTUS SYSTEM 🌑',
+						buttons: buttons,
+						headerType: 4,
+						mentions: [sender]
+					};
+					await conn.sendMessage(from, buttonMessage, { quoted: selo });
+				}
+				break;
 
 			case 'menuadm':
 			case 'menugrupo':
