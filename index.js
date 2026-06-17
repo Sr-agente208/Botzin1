@@ -772,15 +772,56 @@ case 'ig1':
 			}
 			break;
 
-			case 'abraço':
-			case 'abraco': {
-				if (!isGroup) return reply(mess.only.group);
-				if (!q && !info.message.extendedTextMessage) return reply('❌ Marque alguém para abraçar.');
-				const user = info.message.extendedTextMessage ? info.message.extendedTextMessage.contextInfo.participant : q.replace('@', '') + '@s.whatsapp.net';
-				const gif = 'https://media.tenor.com/J7f_bc9_V_MAAAAC/anime-hug.gif';
-				await conn.sendMessage(from, { video: { url: gif }, gifPlayback: true, caption: `🫂 @${sender.split('@')[0]} deu um abraço caloroso em @${user.split('@')[0]}!`, mentions: [sender, user] }, { quoted: info });
-			}
-			break;
+case 'abraço':
+				case 'abraco': {
+					if (!isGroup) return reply(mess.only.group);
+					if (!q && !info.message.extendedTextMessage) return reply('❌ Marque alguém para abraçar.');
+					const user = info.message.extendedTextMessage ? info.message.extendedTextMessage.contextInfo.participant : q.replace('@', '') + '@s.whatsapp.net';
+					const gif = 'https://media.tenor.com/J7f_bc9_V_MAAAAC/anime-hug.gif';
+					await conn.sendMessage(from, { video: { url: gif }, gifPlayback: true, caption: `🫂 @${sender.split('@')[0]} deu um abraço caloroso em @${user.split('@')[0]}!`, mentions: [sender, user] }, { quoted: info });
+				}
+				break;
+
+				case 'mamar': {
+					if (!isGroup) return reply(mess.only.group);
+					if (!q && !info.message.extendedTextMessage) return reply('❌ Marque alguém para botar pra mamar.');
+					const user = info.message.extendedTextMessage ? info.message.extendedTextMessage.contextInfo.participant : q.replace('@', '') + '@s.whatsapp.net';
+					await conn.sendMessage(from, { video: { url: "https://files.catbox.moe/yc3ds5.mp4" }, gifPlayback: true, caption: `🍼 @${sender.split('@')[0]} botou @${user.split('@')[0]} para mamar!`, mentions: [sender, user] }, { quoted: info });
+				}
+				break;
+
+				case 'gozar': {
+					if (!isGroup) return reply(mess.only.group);
+					if (!q && !info.message.extendedTextMessage) return reply('❌ Marque alguém para gozar.');
+					const user = info.message.extendedTextMessage ? info.message.extendedTextMessage.contextInfo.participant : q.replace('@', '') + '@s.whatsapp.net';
+					const gozars = ['na boca', 'no cuzinho', 'na bucetinha', 'no pé', 'na cara', 'na barriga'];
+					const local = gozars[Math.floor(Math.random() * gozars.length)];
+					await conn.sendMessage(from, { video: { url: "https://telegra.ph/file/8a82de1e9da332773f52c.mp4" }, gifPlayback: true, caption: `🥵 @${sender.split('@')[0]} acabou de gozar ${local} de @${user.split('@')[0]}!`, mentions: [sender, user] }, { quoted: info });
+				}
+				break;
+
+				case 'bruxo': {
+					if (!isGroup) return reply(mess.only.group);
+					if (!q && !info.message.extendedTextMessage) return reply('❌ Marque alguém para amaldiçoar.');
+					const user = info.message.extendedTextMessage ? info.message.extendedTextMessage.contextInfo.participant : q.replace('@', '') + '@s.whatsapp.net';
+					const maldicoes = [
+						`🕯️ @${sender.split('@')[0]} sussurrou palavras proibidas... @${user.split('@')[0]} foi marcado pelo selo da perdição!`,
+						`🌑 As sombras atenderam o chamado... @${user.split('@')[0]} agora carrega uma presença maligna!`,
+						`🔮 Um pacto antigo foi selado... @${user.split('@')[0]} teve sua sorte drenada!`,
+						`⚰️ O destino de @${user.split('@')[0]} foi corrompido... apenas desgraça o aguarda!`
+					];
+					const msg = maldicoes[Math.floor(Math.random() * maldicoes.length)];
+					await conn.sendMessage(from, { image: { url: "https://i.ibb.co/Y4HYxHTp/6a5c9604edbe.jpg" }, caption: `🧙‍♂️ ${msg}`, mentions: [sender, user] }, { quoted: info });
+				}
+				break;
+
+				case 'comer': {
+					if (!isGroup) return reply(mess.only.group);
+					if (!q && !info.message.extendedTextMessage) return reply('❌ Marque alguém para fuder.');
+					const user = info.message.extendedTextMessage ? info.message.extendedTextMessage.contextInfo.participant : q.replace('@', '') + '@s.whatsapp.net';
+					await conn.sendMessage(from, { video: { url: "https://telegra.ph/file/8a82de1e9da332773f52c.mp4" }, gifPlayback: true, caption: `😈 @${sender.split('@')[0]} acabou de fuder gostosinho com @${user.split('@')[0]}!`, mentions: [sender, user] }, { quoted: info });
+				}
+				break;
 
 			case 'revelar':
 			case 'view':
