@@ -1624,12 +1624,12 @@ case 'menu':
 				process.exit();
 				break;
 
-			case 'multidownload':
-			case 'download':
-			case 'dl': {
-			    try {
-			        if (!q) return reply(`⚠️ *EXEMPLO DE USO: ${prefix + command} [link]*`);
-			        await reagir(from, '✅');
+case 'multidownload':
+				case 'download':
+				case 'dl': {
+				    try {
+				        if (!q) return reply(`⚠️ *EXEMPLO DE USO: ${prefix + comando} [link]*`);
+				        await reagir(from, '✅');
 			        const axios = require('axios');
 			        const { data } = await axios.get(`https://backend1.tioo.eu.org/api/downloader/aio?url=${encodeURIComponent(q)}`);
 			        
@@ -1660,10 +1660,10 @@ case 'menu':
 			}
 			break;
 
-			case 'multidownload2': {
-			    try {
-			        if (!q) return reply(`⚠️ *EXEMPLO DE USO: ${prefix + command} [link]*`);
-			        await reagir(from, '⏳');
+case 'multidownload2': {
+				    try {
+				        if (!q) return reply(`⚠️ *EXEMPLO DE USO: ${prefix + comando} [link]*`);
+				        await reagir(from, '⏳');
 			        const axios = require('axios');
 			        const { data } = await axios.get(`https://devlabapi.freesrv.com/api/multidownload?url=${encodeURIComponent(q)}&apitoken=povo`);
 			        if (!data || data.Status !== true || !data.Link) {
