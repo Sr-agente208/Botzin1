@@ -1509,6 +1509,21 @@ case 'abraço':
 				await conn.sendMessage(from, { image: FotoMenu, caption: menuia(prefix, sender), mentions: [sender] }, { quoted: selo });
 				break;
 
+			case 'menudiversao':
+			case 'menubrincadeira':
+				await conn.sendMessage(from, { image: FotoMenu, caption: menudiversao(prefix, sender), mentions: [sender] }, { quoted: selo });
+				break;
+
+			case 'menudown':
+			case 'menudownload':
+				await conn.sendMessage(from, { image: FotoMenu, caption: menuDown(prefix, sender), mentions: [sender] }, { quoted: selo });
+				break;
+
+			case 'menufig':
+			case 'menusticker':
+				await conn.sendMessage(from, { image: FotoMenu, caption: menuStickers(prefix, sender), mentions: [sender] }, { quoted: selo });
+				break;
+
 
 
 	case 'pack':
