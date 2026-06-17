@@ -32,8 +32,10 @@ menuStickers,
 menu18,
 menuDono,
 menuDown,
-menus, 
-FotoMenu,
+	menudiversao,
+	menuia,
+	menus, 
+	FotoMenu,
 Config,
 Config2,
 linkfy,
@@ -1467,12 +1469,12 @@ case 'abraço':
 	    }
 	    break;
 
-			case 'menu':
-			case 'help':
-			case 'ajuda':
-			case '™menu':
-				await conn.sendMessage(from, { image: FotoMenu, caption: menu(prefix, sender, NickDono, NomeBot, date, _hora, NumberDono, version), mentions: [sender] }, { quoted: selo });
-				break;
+case 'menu':
+				case 'help':
+				case 'ajuda':
+				case '™menu':
+					await conn.sendMessage(from, { image: FotoMenu, caption: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version), mentions: [sender] }, { quoted: selo });
+					break;
 
 			case 'menuadm':
 			case 'menugrupo':
