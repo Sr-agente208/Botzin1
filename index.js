@@ -1707,18 +1707,57 @@ case 'multidownload2': {
 			}
 			break;
 
-			case 'addai': {
-			    try {
-			        if (!So_Dono) return reply(msg.SoDono);
-			        if (!isGroup) return reply('❌ Apenas em grupos.');
-			        if (!IsBotAdmin) return reply('❌ O bot precisa ser admin.');
-			        await conn.groupParticipantsUpdate(from, ['867051314767696@bot'], 'add');
-			        reply('✅ Meta AI foi adicionada ao grupo com sucesso.');
-			    } catch (e) {
-			        reply('❌ Não foi possível adicionar a Meta AI.');
-			    }
-			}
-			break;
+case 'addai': {
+				    try {
+				        if (!So_Dono) return reply(msg.SoDono);
+				        if (!isGroup) return reply('❌ Apenas em grupos.');
+				        if (!IsBotAdmin) return reply('❌ O bot precisa ser admin.');
+				        await conn.groupParticipantsUpdate(from, ['867051314767696@bot'], 'add');
+				        reply('✅ Meta AI foi adicionada ao grupo com sucesso.');
+				    } catch (e) {
+				        reply('❌ Não foi possível adicionar a Meta AI.');
+				    }
+				}
+				break;
+
+				case 'gay':
+				case 'gado':
+				case 'fofo':
+				case 'lindo': {
+					const taxa = Math.floor(Math.random() * 101);
+					const user = info.message.extendedTextMessage?.contextInfo?.participant || (isGroup ? sender : from);
+					const mencao = `@${user.split('@')[0]}`;
+					const msgBrincadeira = {
+						gay: `🌈 *TESTE DE GAY* 🌈\n\nO nível de gay de ${mencao} é de: *${taxa}%*`,
+						gado: `🐂 *TESTE DE GADO* 🐂\n\nO nível de gado de ${mencao} é de: *${taxa}%*`,
+						fofo: `✨ *TESTE DE FOFURA* ✨\n\nO nível de fofura de ${mencao} é de: *${taxa}%*`,
+						lindo: `💖 *TESTE DE BELEZA* 💖\n\nO nível de beleza de ${mencao} é de: *${taxa}%*`
+					};
+					reply(msgBrincadeira[comando], { mentions: [user] });
+				}
+				break;
+
+				case 'ship': {
+					if (!isGroup) return reply("❌ Apenas em grupos.");
+					if (args.length < 2 && !info.message.extendedTextMessage?.contextInfo?.mentionedJid) return reply(`⚠️ Marque duas pessoas ou use: ${prefix}ship @user1 @user2`);
+					const mencoes = info.message.extendedTextMessage?.contextInfo?.mentionedJid || [];
+					const user1 = mencoes[0] || sender;
+					const user2 = mencoes[1] || sender;
+					const taxa = Math.floor(Math.random() * 101);
+					const shipMsg = `💞 *TESTE DE SHIP* 💞\n\n👤 ${mencoes[0] ? `@${mencoes[0].split('@')[0]}` : 'Você'}\n👤 ${mencoes[1] ? `@${mencoes[1].split('@')[0]}` : 'Alguém'}\n\n💘 *Compatibilidade:* ${taxa}%\n\n${taxa > 70 ? "🔥 Um casal perfeito!" : taxa > 40 ? "👀 Talvez role algo..." : "❄️ Melhor serem apenas amigos."}`;
+					reply(shipMsg, { mentions: mencoes });
+				}
+				break;
+
+				case 'casal': {
+					if (!isGroup) return reply("❌ Apenas em grupos.");
+					const membros = MembrosGP.map(v => v.id);
+					const pessoa1 = membros[Math.floor(Math.random() * membros.length)];
+					const pessoa2 = membros[Math.floor(Math.random() * membros.length)];
+					const casalMsg = `💖 *CASAL DO DIA* 💖\n\nAs estrelas dizem que o casal de hoje é:\n\n👤 @${pessoa1.split('@')[0]}\n➕\n👤 @${pessoa2.split('@')[0]}\n\n_Desejamos felicidades ao novo casal!_ 💍`;
+					reply(casalMsg, { mentions: [pessoa1, pessoa2] });
+				}
+				break;
 
 	default:
 		if (body.startsWith('™') && !isCmd) {
