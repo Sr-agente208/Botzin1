@@ -998,24 +998,28 @@ case 'abraço':
 case 's':
 				case 'sticker':
 				case 'fig': {
-				    if (!isImage && !isVideo && !isQuotedImage && !isQuotedVideo) return reply(`⚠️ Envie uma imagem ou vídeo com a legenda *${prefix}sticker* ou responda a uma mídia.`);
-				    await reagir(from, '🔖');
-				    try {
-						const mediaData = isQuotedImage ? quoted.message.imageMessage : isQuotedVideo ? quoted.message.videoMessage : isImage ? info.message.imageMessage : info.message.videoMessage;
-						const mediaType = (isImage || isQuotedImage) ? 'image' : 'video';
-						const buffer = await getFileBuffer(mediaData, mediaType);
-						
-				        if (isImage || isQuotedImage) {
-				            await sendImageAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
-				        } else {
-				            await sendVideoAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
-				        }
-				    } catch (e) {
-						console.error(e);
-				        reply('❌ Erro ao criar figurinha.');
-				    }
-				}
-				break;
+					    if (!isImage && !isVideo && !isQuotedImage && !isQuotedVideo) return reply(`⚠️ Envie uma imagem ou vídeo com a legenda *${prefix}sticker* ou responda a uma mídia.`);
+					    await reagir(from, '🔖');
+					    try {
+							const { downloadContentFromMessage } = require('@systemzero/baileys');
+							const mediaData = isQuotedImage ? quoted.message.imageMessage : isQuotedVideo ? quoted.message.videoMessage : isImage ? info.message.imageMessage : info.message.videoMessage;
+							const mediaType = (isImage || isQuotedImage) ? 'image' : 'video';
+							const stream = await downloadContentFromMessage(mediaData, mediaType);
+							let buffer = Buffer.from([]);
+							for await(const chunk of stream) {
+								buffer = Buffer.concat([buffer, chunk]);
+							}
+					        if (isImage || isQuotedImage) {
+					            await sendImageAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
+					        } else {
+					            await sendVideoAsSticker2(conn, from, buffer, info, { packname: NomeBot, author: NickDono });
+					        }
+					    } catch (e) {
+							console.error("ERRO STICKER:", e);
+					        reply('❌ Erro ao criar figurinha. Tente novamente.');
+					    }
+					}
+					break;
 
 				case 'toimg': {
 				    if (!isQuotedSticker) return reply('⚠️ Responda a uma figurinha.');
@@ -1469,6 +1473,9 @@ case 'menu':
 				case 'help':
 				case 'ajuda':
 				case '™menu': {
+					if (isGroup) {
+						return await conn.sendMessage(from, { image: FotoMenu, caption: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version), mentions: [sender] }, { quoted: selo });
+					}
 					try {
 						const sections = [
 							{
@@ -1479,11 +1486,11 @@ case 'menu':
 									{ title: "📥 DOWNLOADS", rowId: `${prefix}menudown`, description: "Baixar vídeos, músicas e fotos" },
 									{ title: "🔖 FIGURINHAS", rowId: `${prefix}menufig`, description: "Criar e converter stickers" },
 									{ title: "🧠 INTELIGÊNCIA", rowId: `${prefix}menuia`, description: "GPT-5, DeepSearch e mais" },
-									{ title: "👑 DONO", rowId: `${prefix}menudono`, description: "Painel exclusivo do proprietário" }
+									{ title: "👑 DONO", rowId: `${prefix}menudono`, description: "Painel exclusivo do proprietário" },
+									{ title: "🎲 RPG SOLO", rowId: `${prefix}menurpg`, description: "Aventuras e narrativas épicas" }
 								]
 							}
 						];
-						
 						const listMessage = {
 							text: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version),
 							footer: "🌑 Toque no botão abaixo para ver as opções 🌑",
@@ -1491,11 +1498,8 @@ case 'menu':
 							buttonText: "📂 VER CATEGORIAS",
 							sections
 						};
-						
 						await conn.sendMessage(from, listMessage, { quoted: selo });
 					} catch (e) {
-						console.error("Erro ao enviar menu de lista:", e);
-						// Plano B: Envia o menu em texto com imagem se a lista falhar
 						await conn.sendMessage(from, { image: FotoMenu, caption: menu(prefix, sender, NickDono, NomeBot, data, hora, NumberDono, version), mentions: [sender] }, { quoted: selo });
 					}
 				}
@@ -1532,9 +1536,14 @@ case 'menu':
 				await conn.sendMessage(from, { image: FotoMenu, caption: menudiversao(prefix, sender), mentions: [sender] }, { quoted: selo });
 				break;
 
-			case 'menuia':
-				await conn.sendMessage(from, { image: FotoMenu, caption: menuia(prefix, sender), mentions: [sender] }, { quoted: selo });
-				break;
+case 'menuia':
+					await conn.sendMessage(from, { image: FotoMenu, caption: menuia(prefix, sender), mentions: [sender] }, { quoted: selo });
+					break;
+
+				case 'menurpg':
+				case 'rpgmenu':
+					await conn.sendMessage(from, { image: FotoMenu, caption: `🎲 *MENU RPG BLACK LOTUS* 🎲\n\n⟡⃟🌑 ${prefix}rpg (Inicia aventura)\n⟡⃟🌑 ${prefix}criarsessao\n⟡⃟🌑 ${prefix}narrar\n⟡⃟🌑 ${prefix}status\n⟡⃟🌑 ${prefix}trabalhar\n\n_Explore o mundo sombrio sozinho ou com amigos!_ 🌑`, mentions: [sender] }, { quoted: selo });
+					break;
 
 			case 'menudiversao':
 			case 'menubrincadeira':
