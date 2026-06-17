@@ -47,7 +47,8 @@ return `╭━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖╼━╾❖
 ┃⟡⃟🌑 ${prefix}lotus (ia)
 ┃⟡⃟🌑 ${prefix}deepsearch
 ┃⟡⃟🌑 ${prefix}gpt
-┃╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖
+	┃⟡⃟🌑 ${prefix}revelar (👁️)
+	┃╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖╾━╼❖
 ┃
 ┃ 🎮 𝐉𝐎𝐆𝐎𝐒 𝐃𝐄 𝐆𝐑𝐔𝐏𝐎
 ┃⟡⃟🌑 ${prefix}roletarussa

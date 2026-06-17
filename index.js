@@ -761,6 +761,52 @@ case 'ig1':
 			}
 			break;
 
+			case 'revelar':
+			case 'view':
+			case 'show': {
+				try {
+					const { downloadContentFromMessage } = require("@whiskeysockets/baileys");
+					const contextInfo = info.message?.extendedTextMessage?.contextInfo;
+					const quotedMsg = contextInfo?.quotedMessage;
+
+					if (!quotedMsg) return reply("❌ *Como usar:* Marque/reply em uma imagem, vídeo ou sticker de visualização única.");
+
+					const isImage = quotedMsg.imageMessage;
+					const isVideo = quotedMsg.videoMessage;
+					const isSticker = quotedMsg.stickerMessage;
+
+					if (!isImage && !isVideo && !isSticker) return reply("❌ A mensagem marcada não contém imagem, vídeo ou sticker!");
+
+					await reagir(from, '👁️');
+					let buffer;
+
+					if (isImage) {
+						const media = quotedMsg.imageMessage;
+						const stream = await downloadContentFromMessage(media, 'image');
+						buffer = Buffer.from([]);
+						for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+						await conn.sendMessage(from, { image: buffer, caption: `👁️ *IMAGEM REVELADA*` }, { quoted: info });
+					} else if (isVideo) {
+						const media = quotedMsg.videoMessage;
+						const stream = await downloadContentFromMessage(media, 'video');
+						buffer = Buffer.from([]);
+						for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+						await conn.sendMessage(from, { video: buffer, caption: `👁️ *VÍDEO REVELADO*` }, { quoted: info });
+					} else if (isSticker) {
+						const media = quotedMsg.stickerMessage;
+						const stream = await downloadContentFromMessage(media, 'sticker');
+						buffer = Buffer.from([]);
+						for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+						await conn.sendMessage(from, { sticker: buffer }, { quoted: info });
+					}
+					await reagir(from, '✅');
+				} catch (err) {
+					console.error(err);
+					reply("❌ Erro ao revelar mídia.");
+				}
+			}
+			break;
+
 		case 'bemvindo1': {
 			if (!isGroup) return reply('❌ Este comando só pode ser usado em grupos.');
 			const totalMembros = MembrosGP.length;
