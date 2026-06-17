@@ -669,7 +669,7 @@ case 'ig1':
 			}
 			break;
 
-			case 'gpt5':
+case 'gpt5':
 			case 'ia5':
 			case 'chatgpt5': {
 				try {
@@ -679,13 +679,86 @@ case 'ig1':
 					const apiURL = `https://devlabapi.freesrv.com/api/gpt?q=${encodeURIComponent(q)}&apitoken=povo`;
 					const { data } = await axios.get(apiURL);
 					if (!data?.status) return reply('❌ *ɴᴀ̃ᴏ ꜰᴏɪ ᴘᴏssíᴠᴇʟ ᴏʙᴛᴇʀ ʀᴇsᴘᴏsᴛᴀ ᴅᴀ ɪᴀ ɴᴏ ᴍᴏᴍᴇɴᴛᴏ.*');
-					const responseText = `🧠 *GPT-5 (DevLab)*\n\n${data.result}`.trim();
+					const responseText = `🧠 ${data.result}`.trim();
 					await conn.sendMessage(from, { text: responseText }, { quoted: info });
 					await reagir(from, '✅');
 				} catch (e) {
 					console.error(e);
 					await reagir(from, '❌');
-					reply(`❌ *ᴇʀʀᴏ ɪɴᴇsᴘᴇʀᴀᴅᴏ:*`);
+					reply(`❌ *ᴇʀʀᴏ ɪɴᴇsᴘᴇʀᴀᴅᴏ*`);
+				}
+			}
+			break;
+
+			case 'addcase2': {
+				if (!So_Dono) return reply("❌ Apenas o dono pode usar este comando.");
+				const quotedMsg = info.message?.extendedTextMessage?.contextInfo?.quotedMessage || null;
+				const arquivo = info.message?.documentMessage || quotedMsg?.documentMessage;
+				let novoCodigo = "";
+
+				try {
+					if (arquivo) {
+						if (!arquivo.fileName?.endsWith('.js')) return reply("❌ O arquivo precisa ser .js");
+						const mediaBufferPath = await conn.downloadAndSaveMediaMessage(arquivo);
+						novoCodigo = fs.readFileSync(mediaBufferPath, 'utf8');
+						fs.unlinkSync(mediaBufferPath);
+					} else if (quotedMsg) {
+						novoCodigo = quotedMsg.conversation || quotedMsg.extendedTextMessage?.text || quotedMsg.imageMessage?.caption || quotedMsg.videoMessage?.caption || "";
+					} else {
+						novoCodigo = q;
+					}
+
+					novoCodigo = novoCodigo.trim();
+					if (!novoCodigo) return reply("❌ Cadê o código?");
+
+					const chavesAbertas = (novoCodigo.match(/{/g) || []).length;
+					const chavesFechadas = (novoCodigo.match(/}/g) || []).length;
+					if (chavesAbertas !== chavesFechadas) return reply(`❌ Erro de chaves! {${chavesAbertas} / }${chavesFechadas}`);
+
+					const pathIndex = './index.js';
+					let conteudo = fs.readFileSync(pathIndex, 'utf8');
+
+					const caseMatch = novoCodigo.match(/case\s+['"]([^'"]+)['"]/);
+					if (caseMatch && conteudo.includes(caseMatch[0])) return reply(`⚠️ A case ${caseMatch[0]} já existe!`);
+
+					const switchTermo = "switch (comando) {";
+					const switchPos = conteudo.indexOf(switchTermo);
+					if (switchPos === -1) return reply("❌ Não encontrei o switch de comandos.");
+
+					const marcaTexto = "TODOS OS CASES ADAPTADOS";
+					let pontoInsercao = -1;
+					const marcaPos = conteudo.indexOf(marcaTexto, switchPos);
+
+					if (marcaPos !== -1) {
+						const posIgual = conteudo.indexOf("==========", marcaPos);
+						if (posIgual !== -1) {
+							const fimLinha = conteudo.indexOf("\n", posIgual);
+							if (fimLinha !== -1) pontoInsercao = fimLinha + 1;
+						}
+					}
+
+					if (pontoInsercao === -1) {
+						const cabecalho = `\n\n// =======================================================\n// ${marcaTexto}\n// ========================================================\n`;
+						const posAposSwitch = switchPos + switchTermo.length;
+						conteudo = conteudo.slice(0, posAposSwitch) + cabecalho + conteudo.slice(posAposSwitch);
+						const novaMarcaPos = conteudo.indexOf(marcaTexto, switchPos);
+						const posIgualNovo = conteudo.indexOf("==========", novaMarcaPos);
+						const novoFimLinha = conteudo.indexOf("\n", posIgualNovo);
+						pontoInsercao = novoFimLinha + 1;
+					}
+
+					const indent = conteudo.includes('\t') ? '\t' : ' ';
+					const dataHora = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+					const codigoFormatado = novoCodigo.split('\n').map(l => indent + l).join('\n');
+					const snippet = `\n${indent}// [Adicionado em ${dataHora}]\n${codigoFormatado}\n`;
+
+					fs.writeFileSync(pathIndex + '.bak', fs.readFileSync(pathIndex));
+					const conteudoFinal = conteudo.slice(0, pontoInsercao) + snippet + conteudo.slice(pontoInsercao);
+					fs.writeFileSync(pathIndex, conteudoFinal);
+					reply(`✅ Caso adicionado com sucesso! O bot será reiniciado no próximo deploy.`);
+				} catch (e) {
+					console.error(e);
+					reply("❌ Erro: " + e.message);
 				}
 			}
 			break;
